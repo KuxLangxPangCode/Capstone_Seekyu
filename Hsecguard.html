@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeekYu Head Security Guard Dashboard</title>
+  <link rel="stylesheet" href="styles/secguard.css" />
+  <script src="scripts/seekyu.js" defer></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">SeekYu</div>
+      <nav>
+        <ul>
+          <li><button onclick="App.showSection('dashboard')" class="active">Dashboard</button></li>
+          <li><button onclick="App.showSection('incident-report')">Submit Incident Report</button></li>
+          <li><button onclick="App.showSection('kpi-score')">KPI Performance</button></li>
+          <li><button onclick="App.showSection('shift-schedule')">Shift Schedule</button></li>
+          <li><button onclick="App.showSection('request-leave')">Request for Leave</button></li>
+          <li><button onclick="App.showSection('take-exam')">Take Exam</button></li>
+          <li><button onclick="location.href='index.html'">Logout</button></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <div class="content">
+  <div id="dashboard" class="section active">
+    <h1>Welcome to Your Dashboard</h1>
+    <p>View your activity summary here.</p>
+  </div>
+
+      <!-- Incident Reporting Main Section -->
+<div id="incident-report" class="section">
+  <h1>Incident Reporting</h1>
+  <p>Select an option below:</p>
+
+  <div class="incident-buttons">
+    <button class="action-btn" onclick="showIncidentForm()">Submit Incident Report</button>
+    <button class="view-btn" onclick="showIncidentLogs()">View Incident Report Logs</button>
+  </div>
+
+  <!-- Incident Report Form (hidden by default) -->
+  <div id="incidentFormContainer" class="incident-subsection" style="display:none;">
+    <h2>Submit New Incident Report</h2>
+    <form id="incidentForm" enctype="multipart/form-data">
+      <label>Guard Name:</label>
+      <input type="text" name="guardName" placeholder="Full Name" required />
+
+      <label>Guard ID:</label>
+      <input type="text" name="guardId" placeholder="ID Number" required />
+
+      <label>Incident Date:</label>
+      <input type="date" name="incidentDate" required />
+
+      <label>Incident Time:</label>
+      <input type="time" name="incidentTime" required />
+
+      <label>Type of Incident:</label>
+      <select name="incidentType" required>
+        <option value="">-- Select Type --</option>
+        <option value="Theft">Theft</option>
+        <option value="Trespassing">Trespassing</option>
+        <option value="Vandalism">Vandalism</option>
+        <option value="Disturbance">Disturbance</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label>Actions Taken:</label>
+      <select name="actionsTaken" required>
+        <option value="">-- Select Action --</option>
+        <option value="Reported to Police">Reported to Police</option>
+        <option value="Escorted Individual Off Premises">Escorted Individual Off Premises</option>
+        <option value="First Aid Administered">First Aid Administered</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label>Incident Description:</label>
+      <textarea name="description" placeholder="Describe the incident in detail" required></textarea>
+
+      <label>Location:</label>
+      <input type="text" name="location" placeholder="Building / Area" required />
+
+      <label>Persons Involved:</label>
+      <input type="text" name="personsInvolved" placeholder="Names or 'Unknown'" />
+
+      <label>Upload Image / Evidence:</label>
+      <input type="file" name="incidentImage" accept="image/*" />
+
+      <button type="submit">Submit Report</button>
+      <button type="button" onclick="hideIncidentForm()">Cancel</button>
+    </form>
+  </div>
+
+  <!-- Incident Report Logs (hidden by default) -->
+  <div id="incidentLogsContainer" class="incident-subsection" style="display:none;">
+    <h2>Incident Report Logs</h2>
+    <table border="1" cellpadding="8" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Guard Name</th>
+          <th>Guard ID</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Type</th>
+          <th>Actions Taken</th>
+          <th>Description</th>
+          <th>Location</th>
+          <th>Persons Involved</th>
+          <th>Evidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Example row -->
+        <tr>
+          <td>Juan Dela Cruz</td>
+          <td>SG001</td>
+          <td>2025-08-20</td>
+          <td>14:30</td>
+          <td>Theft</td>
+          <td>Reported to Police</td>
+          <td>Suspect attempted to steal merchandise from store.</td>
+          <td>ABC Mall - Ground Floor</td>
+          <td>Unknown Male</td>
+          <td><a href="#">View Image</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <button type="button" onclick="hideIncidentLogs()">Close</button>
+  </div>
+</div>
+
+
+      <div id="kpi-score" class="section">
+        <h1>KPI Performance Evaluation</h1>
+        <p>Check your latest KPI scores and evaluations.</p>
+      </div>
+
+      <div id="shift-schedule" class="section">
+        <h1>Shift Schedule</h1>
+        <p>View your assigned work schedules here.</p>
+      </div>
+
+      <div id="request-leave" class="section">
+  <h1>Requests for Leave</h1>
+  <p>Submit a new leave request and review past records.</p>
+
+  <!-- Leave Request Form -->
+  <div class="leave-form">
+    <h2>Submit Leave Request</h2>
+    <form>
+      <label>Leave Type:</label>
+      <select required>
+        <option value="">-- Select Leave Type --</option>
+        <option value="Sick Leave">Sick Leave</option>
+        <option value="Vacation Leave">Vacation Leave</option>
+        <option value="Emergency Leave">Emergency Leave</option>
+      </select>
+
+      <label>Start Date:</label>
+      <input type="date" required />
+
+      <label>End Date:</label>
+      <input type="date" required />
+
+      <label>Reason:</label>
+      <textarea placeholder="Enter reason for leave..." required></textarea>
+
+      <button type="submit">Submit Request</button>
+    </form>
+  </div>
+
+      <div id="take-exam" class="section">
+        <h1>Take Exam</h1>
+        <p>Proceed to take your assigned assessment.</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Highlight active button in sidebar
+    document.querySelectorAll('.sidebar button').forEach(button => {
+      button.addEventListener('click', function () {
+        document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    function showIncidentForm() {
+  document.getElementById('incidentFormContainer').style.display = 'block';
+  document.getElementById('incidentLogsContainer').style.display = 'none';
+}
+
+function hideIncidentForm() {
+  document.getElementById('incidentFormContainer').style.display = 'none';
+}
+
+function showIncidentLogs() {
+  document.getElementById('incidentLogsContainer').style.display = 'block';
+  document.getElementById('incidentFormContainer').style.display = 'none';
+}
+
+function hideIncidentLogs() {
+  document.getElementById('incidentLogsContainer').style.display = 'none';
+}
+
+  </script>
+</body>
+</html>

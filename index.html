@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeekYu - Security Recruitment</title>
+  <link rel="stylesheet" href="styles/index.css" />
+</head>
+<body>
+
+  <header>
+    <div class="logo">SeekYu</div>
+    <nav>
+      <button onclick="SeekYu.showSection('section-home')">Home</button>
+      <button onclick="SeekYu.showSection('section-about')">About</button>
+      <button onclick="SeekYu.showPopup('login')">Login</button>
+      <button onclick="SeekYu.showPopup('signup')">Sign Up</button>
+    </nav>
+  </header>
+
+  <!-- Sections for page views -->
+  <section id="section-home" class="section active">
+    <div class="home-message">
+      <h1>Apply as a Security Guard or Hire One</h1>
+      <p>Welcome to SeekYu – Your trusted platform to apply as a security personnel or to hire one.</p>
+      <button onclick="SeekYu.showPopup('signup')">Apply Now</button>
+    </div>
+  </section>
+
+  <section id="section-about" class="section">
+    <h2>About SeekYu</h2>
+    <p>SeekYu is a dedicated recruitment and job-matching platform specifically designed for the security industry.</p>
+  </section>
+
+  <!-- Login Popup -->
+  <div id="loginPopup" class="popup">
+    <div class="popup-content">
+      <span class="close" onclick="SeekYu.hidePopup('login')">&times;</span>
+      <h2>Login</h2>
+      <input type="text" placeholder="Enter User ID or Email Address" />
+      <input type="password" placeholder="Password" />
+      <button>Login</button>
+    </div>
+  </div>
+
+  <!-- Sign Up Popup -->
+  <div id="signupPopup" class="popup">
+    <div class="popup-content">
+      <span class="close" onclick="SeekYu.hidePopup('signup')">&times;</span>
+      <h2>Sign Up</h2>
+      <input type="text" placeholder="Full Name" />
+      <input type="text" placeholder="Email Address" />
+      <input type="password" placeholder="Password" />
+      <button>Register</button>
+    </div>
+  </div>
+
+  <script src="scripts/seekyu.js" defer></script>
+</body>
+</html>

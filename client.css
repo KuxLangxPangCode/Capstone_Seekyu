@@ -1,0 +1,386 @@
+/* ========================= */
+/* Base                      */
+/* ========================= */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #111;
+  color: #f0f0f0;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  flex: 0 0 220px;
+  background-color: #000;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+  height: 100%;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.6);
+}
+
+.sidebar .logo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin-bottom: 12px;
+}
+
+.sidebar button {
+  background: none;
+  color: #f0f0f0;
+  border: none;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s, color 0.3s;
+  width: 100%;
+  border-radius: 4px;
+}
+
+.sidebar button:hover,
+.sidebar button.active {
+  background-color: #333;
+}
+
+/* Main Content */
+main {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+  background-color: #1a1a1a;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+/* Sections */
+.section {
+  display: none;
+  width: 100%;
+  background-color: #181818;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+.section.active {
+  display: block;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #222;
+}
+
+table th,
+table td {
+  padding: 10px;
+  border: 1px solid #444;
+  text-align: left;
+}
+
+table th {
+  background-color: #111;
+}
+
+/* Search bars */
+.search-input {
+  margin-bottom: 15px;
+  padding: 10px;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: #222;
+  color: #f0f0f0;
+}
+
+/* Buttons */
+.view-btn,
+.action-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-right: 5px;
+}
+
+.view-btn {
+  background-color: #0066cc;
+  color: #fff;
+}
+
+.view-btn:hover {
+  background-color: #005bb5;
+}
+
+.action-btn {
+  background-color: #000;
+  color: #fff;
+}
+
+.action-btn:hover {
+  background-color: #333;
+}
+
+/* Popup */
+.popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #111;
+  padding: 20px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  z-index: 1000;
+  max-width: 600px;
+  width: 90%;
+  display: none;
+}
+
+.popup.active {
+  display: block;
+}
+
+.popup h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.popup button {
+  margin-top: 15px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  background-color: #900;
+  color: #fff;
+  cursor: pointer;
+}
+
+.popup button:hover {
+  background-color: #b00;
+}
+
+/* ========================= */
+/* Compact & Centered Forms  */
+/* ========================= */
+.section form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 350px;
+  padding: 6px;
+}
+
+.section form label {
+  font-size: 13px;
+  margin-bottom: 1px;
+  color: #ccc;
+}
+
+.section form input,
+.section form select,
+.section form textarea {
+  width: 100%;
+  max-width: 300px;
+  padding: 3px 5px;
+  font-size: 13px;
+  background-color: #222;
+  color: #f0f0f0;
+  border: 1px solid #444;
+  border-radius: 4px;
+  height: 30px;
+  line-height: 30px;
+  box-sizing: border-box;
+}
+
+.section form textarea {
+  height: auto;
+  line-height: 1.3;
+  resize: vertical;
+  padding: 5px;
+}
+
+.section form button {
+  padding: 5px 10px;
+  font-size: 13px;
+  background-color: #0066cc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.section form button:hover {
+  background-color: #005bb5;
+}
+
+/* Deployment form */
+.deployment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 500px;
+}
+
+.deployment-form h3 {
+  margin: 10px 0 5px;
+  font-size: 15px;
+  color: #fff;
+}
+
+.deployment-form div {
+  display: flex;
+  flex-direction: column;
+}
+
+.deployment-form label {
+  font-size: 13px;
+  margin-bottom: 2px;
+  color: #ccc;
+}
+
+.deployment-form input,
+.deployment-form select,
+.deployment-form textarea {
+  padding: 5px 8px;
+  font-size: 13px;
+  background-color: #222;
+  color: #f0f0f0;
+  border: 1px solid #444;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.deployment-form textarea {
+  resize: vertical;
+}
+
+.deployment-form button {
+  margin-top: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  background-color: #0066cc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.deployment-form button:hover {
+  background-color: #005bb5;
+}
+
+/* ========================= */
+/* KPI Evaluation Table      */
+/* ========================= */
+#kpi-evaluation table {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+#kpi-evaluation th,
+#kpi-evaluation td {
+  vertical-align: middle;
+}
+
+#kpi-evaluation th {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#kpi-evaluation .action-btn,
+#kpi-evaluation .view-btn {
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  margin: 2px 0;
+}
+
+/* KPI Popups */
+#kpiFormPopup,
+#kpiScorePopup {
+  background-color: #181818;
+  border: 1px solid #333;
+}
+
+#kpiFormPopup h2,
+#kpiScorePopup h2 {
+  color: #fff;
+  font-size: 18px;
+  border-bottom: 1px solid #333;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+#kpiFormPopup form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#kpiFormPopup label {
+  font-size: 13px;
+  color: #ccc;
+}
+
+#kpiFormPopup input[type="number"] {
+  width: 80px;
+  padding: 4px;
+  background-color: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #f0f0f0;
+}
+
+#kpiFormPopup button[type="submit"] {
+  background-color: #0066cc;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+#kpiFormPopup button[type="submit"]:hover {
+  background-color: #005bb5;
+}
+
+#kpiFormPopup button[type="button"] {
+  background-color: #900;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+#kpiFormPopup button[type="button"]:hover {
+  background-color: #b00;
+}
+

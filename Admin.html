@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeekYu Admin Dashboard</title>
+  <link rel="stylesheet" href="styles/admin.css" />
+  <script src="scripts/seekyu.js" defer></script>
+  <script src="scripts/Messaging.js" defer></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">SeekYu</div>
+      <nav>
+        <ul>
+          <li><button onclick="App.showSection('dashboard')" class="active">Dashboard</button></li>
+          <li><button onclick="App.showSection('recruiting-mgmt')">Recruitment Management</button></li>
+          <li><button onclick="App.showSection('accounts')">Account Management</button></li>
+          <li><button onclick="App.showSection('client-mgmt')">Client Management</button></li>
+          <li><button onclick="App.showSection('guard-mgmt')">Security Guard Management</button></li>
+          <li><button onclick="App.showSection('messaging-mgmt')">Messaging</button></li>
+          <li><button onclick="App.showSection('kpi')">KPI Evaluation</button></li>
+          <li><button onclick="App.showSection('leave-requests')">Leave Requests</button></li>
+          <li><button onclick="App.showSection('incident-reports')">Incident Reports</button></li>
+          <li><button onclick="location.href='index.html'">Logout</button></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Dashboard -->
+      <div id="dashboard" class="section active">
+        <h1>Admin Dashboard</h1>
+        <p>Welcome back! Use the sidebar to manage the system.</p>
+      </div>
+
+      <!-- Recruitment Management -->
+      <div id="recruiting-mgmt" class="section">
+        <h1>Online Recruitment Management</h1>
+        <p>Manage applications submitted by job seekers.</p>
+        <input type="text" id="recruitSearch" placeholder="Search applicants...">
+
+        <table id="recruitTable">
+          <thead>
+            <tr>
+              <th>Applicant Name</th>
+              <th>Applicant ID</th>
+              <th>Position Applied</th>
+              <th>Contact No.</th>
+              <th>Email</th>
+              <th>Resume</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Carlos Dela Cruz</td>
+              <td>AP-001</td>
+              <td>Security Guard</td>
+              <td>09179998888</td>
+              <td>carlos.cruz@email.com</td>
+              <td><a href="resumes/carlos.pdf" target="_blank">View</a></td>
+              <td>Pending</td>
+              <td>
+                <button class="accept-btn">Accept</button>
+                <button class="reject-btn">Reject</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Josefina Ramos</td>
+              <td>AP-002</td>
+              <td>Client</td>
+              <td>09172223333</td>
+              <td>josefina.ramos@email.com</td>
+              <td><a href="resumes/josefina.pdf" target="_blank">View</a></td>
+              <td>Pending</td>
+              <td>
+                <button class="accept-btn">Accept</button>
+                <button class="reject-btn">Reject</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- KPI -->
+      <div id="kpi" class="section">
+        <h1>KPI Evaluation</h1>
+        <p>Evaluate performance metrics of your guards.</p>
+
+        <div class="kpi-summary">
+          <div class="kpi-card"><h2>Average Attendance</h2><p>92%</p></div>
+          <div class="kpi-card"><h2>Average Punctuality</h2><p>88%</p></div>
+          <div class="kpi-card"><h2>Overall Performance</h2><p>4.3 / 5</p></div>
+          <div class="kpi-card"><h2>Training Completion</h2><p>95%</p></div>
+        </div>
+
+        <h2>General KPI Ratings Overview</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Excellent</th>
+              <th>Good</th>
+              <th>Average</th>
+              <th>Poor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Attendance</td><td>65%</td><td>20%</td><td>10%</td><td>5%</td></tr>
+            <tr><td>Punctuality</td><td>58%</td><td>25%</td><td>12%</td><td>5%</td></tr>
+            <tr><td>Performance</td><td>70%</td><td>18%</td><td>8%</td><td>4%</td></tr>
+            <tr><td>Training & Skills</td><td>80%</td><td>15%</td><td>4%</td><td>1%</td></tr>
+          </tbody>
+        </table>
+
+        <div class="kpi-chart">
+          <p>[Chart Visualization Placeholder — can be replaced with Chart.js / Recharts later]</p>
+        </div>
+      </div>
+
+      <!-- Account Management -->
+      <div id="accounts" class="section">
+        <h1>Account Management</h1>
+        <div class="account-actions">
+          <button class="account-btn active" data-target="view-accounts">View Accounts</button>
+          <button class="account-btn" data-target="create-account">Create Account</button>
+        </div>
+
+        <div id="view-accounts" class="sub-section active">
+          <h2>Accounts List</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Account ID</th>
+                <th>Role</th>
+                <th>Date Created</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="accountTableBody">
+              <tr>
+                <td>Juan Dela Cruz</td>
+                <td>AC-001</td>
+                <td>Client</td>
+                <td>2025-08-14</td>
+                <td><button class="delete-btn">Delete</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="create-account" class="sub-section">
+          <h2>Create New Account</h2>
+          <div class="form-container">
+            <div class="form-block">
+              <h3>Create Client Account</h3>
+              <form method="POST" action="backend/create_account.php">
+                <input type="hidden" name="role" value="Client">
+                <label>Name:</label><input type="text" name="name" required>
+                <label>Email:</label><input type="email" name="email" required>
+                <label>Username:</label><input type="text" name="username" required>
+                <label>Password:</label><input type="password" name="password" required>
+                <button type="submit" class="btn">Create Client</button>
+              </form>
+            </div>
+            <div class="form-block">
+              <h3>Create Security Guard Account</h3>
+              <form method="POST" action="backend/create_account.php">
+                <input type="hidden" name="role" value="Security Guard">
+                <label>Name:</label><input type="text" name="name" required>
+                <label>Email:</label><input type="email" name="email" required>
+                <label>Username:</label><input type="text" name="username" required>
+                <label>Password:</label><input type="password" name="password" required>
+                <button type="submit" class="btn">Create Guard</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Client Management -->
+      <div id="client-mgmt" class="section">
+        <h1>Client Management</h1>
+        <p>View and manage client information and job postings.</p>
+      </div>
+
+      <!-- Security Guard Management -->
+      <div id="guard-mgmt" class="section">
+        <h1>Security Guard Management</h1>
+        <p>Manage security guard records and assignments.</p>
+      </div>
+
+<!-- Messaging Management -->
+<div id="messaging-mgmt" class="section">
+  <h1>Messaging</h1>
+
+  <!-- Sub-navigation -->
+  <div class="sub-nav">
+  <button id="inboxBtn">Inbox</button>
+  <button id="composeBtn">Compose</button>
+</div>
+
+
+  <!-- Inbox Section -->
+  <div id="inbox-section" class="sub-section active">
+    <input type="text" id="messageSearch" placeholder="Search messages...">
+
+    <table class="message-table" id="messageTable">
+      <thead>
+        <tr>
+          <th>Sender</th>
+          <th>Subject</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-id="1">
+          <td>Admin</td>
+          <td>Shift Schedule Update</td>
+          <td>2025-08-25</td>
+          <td>
+            <button class="view-message-btn" data-from="Admin" data-subject="Shift Schedule Update" data-date="2025-08-25" data-body="Your shift schedule has been updated. Please check the system for details.">View</button>
+            <button class="delete-message-btn">Delete</button>
+          </td>
+        </tr>
+        <tr data-id="2">
+          <td>Client A</td>
+          <td>Incident Feedback</td>
+          <td>2025-08-22</td>
+          <td>
+            <button class="view-message-btn" data-from="Client A" data-subject="Incident Feedback" data-date="2025-08-22" data-body="Feedback regarding the incident you reported.">View</button>
+            <button class="delete-message-btn">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Compose Section -->
+  <div id="compose-section" class="sub-section">
+    <form id="composeForm" class="compose-form">
+      <label for="recipient">To:</label>
+      <input type="text" id="recipient" name="recipient" placeholder="Enter recipient name" required>
+
+      <label for="subject">Subject:</label>
+      <input type="text" id="subject" name="subject" placeholder="Enter subject" required>
+
+      <label for="message">Message:</label>
+      <textarea id="message" name="message" rows="5" placeholder="Write your message..." required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</div>
+
+<!-- Popup for Viewing Message -->
+<div id="message-popup" class="popup hidden">
+  <div class="popup-content">
+    <h2>Message Details</h2>
+    <p><strong>From:</strong> <span id="popupSender">Admin</span></p>
+    <p><strong>Subject:</strong> <span id="popupSubject">Shift Schedule Update</span></p>
+    <p><strong>Date:</strong> <span id="popupDate">2025-08-25</span></p>
+    <p><strong>Message:</strong></p>
+    <p id="popupBody">Your shift schedule has been updated. Please check the system for details.</p>
+    <div class="popup-actions">
+      <button onclick="App.hidePopup('message-popup')">Close</button>
+    </div>
+  </div>
+</div>
+
+      <!-- Incident Reports -->
+      <div id="incident-reports" class="section">
+        <h1>Incident Reports</h1>
+        <input type="text" id="incidentSearch" placeholder="Search incident reports...">
+
+        <div class="scrollable-content">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Guard Name</th>
+                <th>Guard ID</th>
+                <th>Type of Incident</th>
+                <th>Actions Taken</th>
+                <th>Location</th>
+                <th>Persons Involved</th>
+                <th>Evidence</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2025-08-20</td>
+                <td>14:30</td>
+                <td>Juan Dela Cruz</td>
+                <td>SG001</td>
+                <td>Unauthorized Access</td>
+                <td>Escorted Individual Off Premises</td>
+                <td>ABC Mall - Loading Dock</td>
+                <td>Unknown Male</td>
+                <td><a href="#" class="view-evidence">View Image</a></td>
+                <td><button class="view-report-btn" data-report-id="r1">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Leave Requests -->
+      <div id="leave-requests" class="section">
+        <h1>Leave Requests</h1>
+        <input type="text" id="leaveSearch" placeholder="Search leave requests...">
+
+        <div class="scrollable-content">
+          <table>
+            <thead>
+              <tr>
+                <th>Request ID</th>
+                <th>Guard Name</th>
+                <th>Guard ID</th>
+                <th>Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>LR-001</td>
+                <td>Maria Santos</td>
+                <td>SG045</td>
+                <td>Emergency Leave</td>
+                <td>2025-09-01</td>
+                <td>2025-09-03</td>
+                <td>Family emergency</td>
+                <td>Pending</td>
+                <td>
+                  <button class="accept-btn">Approve</button>
+                  <button class="reject-btn">Reject</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Popup for Incident Report -->
+      <div id="incident-popup" class="popup hidden">
+      <div class="popup-content">
+          <h2>Incident Report Details</h2>
+          <p><strong>Date:</strong> <span id="reportDate">2025-08-20</span></p>
+          <p><strong>Time:</strong> <span id="reportTime">14:30</span></p>
+          <p><strong>Guard:</strong> <span id="reportGuard">Juan Dela Cruz (SG001)</span></p>
+          <p><strong>Type of Incident:</strong> <span id="reportType">Unauthorized Access</span></p>
+          <p><strong>Actions Taken:</strong> <span id="reportActions">Escorted Individual Off Premises</span></p>
+          <p><strong>Location:</strong> <span id="reportLocation">ABC Mall - Loading Dock</span></p>
+          <p><strong>Persons Involved:</strong> <span id="reportPersons">Unknown Male</span></p>
+          <p><strong>Evidence:</strong> <a href="#" id="reportEvidence">View</a></p>
+          <div class="popup-actions">
+            <button onclick="App.hidePopup('report-popup')">Close</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Minimal App/SeekYu object to handle UI toggles used in this file.
+    window.App = window.SeekYu = {
+      showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+        // update sidebar active class
+        document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+        const sidebarBtn = Array.from(document.querySelectorAll('.sidebar button')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'"));
+        if (sidebarBtn) sidebarBtn.classList.add('active');
+      },
+      showSubSection(id) {
+        // hide all sub-sections within current section
+        document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+        // update tabs/account buttons
+        document.querySelectorAll('[data-target]').forEach(b => b.classList.remove('active'));
+        const btn = document.querySelector('[data-target="' + id + '"]');
+        if (btn) btn.classList.add('active');
+      },
+      showPopup(id) {
+        const popup = document.getElementById(id);
+        if (!popup) return console.warn('Popup not found:', id);
+        popup.classList.remove('hidden');
+        popup.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      },
+      hidePopup(id) {
+        const popup = document.getElementById(id);
+        if (!popup) return;
+        popup.classList.add('hidden');
+        popup.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    };
+
+    // Sidebar active toggle (for buttons without inline onclick)
+    document.querySelectorAll('.sidebar button').forEach(button => {
+      button.addEventListener('click', function () {
+        document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Account subsection toggle
+    document.querySelectorAll(".account-actions [data-target]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".account-actions [data-target]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.querySelectorAll(".sub-section").forEach(sec => sec.classList.remove("active"));
+        const target = btn.getAttribute("data-target");
+        if (target) document.getElementById(target).classList.add("active");
+      });
+    });
+
+    // Incident report view button
+    document.querySelectorAll('.view-report-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        // In real app, load report by id. Here we use static example values.
+        document.getElementById('reportDate').textContent = '2025-08-20';
+        document.getElementById('reportTime').textContent = '14:30';
+        document.getElementById('reportGuard').textContent = 'Juan Dela Cruz (SG001)';
+        document.getElementById('reportType').textContent = 'Unauthorized Access';
+        document.getElementById('reportActions').textContent = 'Escorted Individual Off Premises';
+        document.getElementById('reportLocation').textContent = 'ABC Mall - Loading Dock';
+        document.getElementById('reportPersons').textContent = 'Unknown Male';
+        SeekYu.showPopup('report-popup');
+      });
+    });
+
+    // Incident search
+    document.getElementById('incidentSearch')?.addEventListener('keyup', function () {
+      const filter = this.value.toLowerCase();
+      document.querySelectorAll('#incident-reports table tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+      });
+    });
+
+    // Leave requests search
+    document.getElementById('leaveSearch')?.addEventListener('keyup', function () {
+      const filter = this.value.toLowerCase();
+      document.querySelectorAll('#leave-requests table tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+      });
+    });
+
+    // Basic CSS fallback for .popup (if author CSS is missing)
+    (function ensurePopupStyles() {
+      const styleId = 'seekyu-helper-styles';
+      if (document.getElementById(styleId)) return;
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        .popup.hidden { display: none; }
+        .popup { position: fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); z-index:9999; }
+        .popup .popup-content { background:#fff; color:#000; max-width:800px; width:90%; padding:20px; border-radius:8px; }
+      `;
+      document.head.appendChild(style);
+    })();
+
+    document.addEventListener("DOMContentLoaded", () => {
+  const closeIncidentPopup = document.getElementById("closeIncidentPopup");
+  if (closeIncidentPopup) {
+    closeIncidentPopup.addEventListener("click", () => {
+      SeekYu.hidePopup("incident-popup");
+    });
+  }
+});
+
+  </script>
+</body>
+</html>

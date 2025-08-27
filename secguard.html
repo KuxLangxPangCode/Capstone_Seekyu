@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeekYu Security Guard Dashboard</title>
+  <link rel="stylesheet" href="styles/secguard.css" />
+  <script src="scripts/seekyu.js" defer></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">SeekYu</div>
+      <nav>
+        <ul>
+          <li><button onclick="App.showSection('dashboard')" class="active">Dashboard</button></li>
+          <li><button onclick="App.showSection('incident-report')">Submit Incident Report</button></li>
+          <li><button onclick="App.showSection('kpi-score')">KPI Performance</button></li>
+          <li><button onclick="App.showSection('shift-schedule')">Shift Schedule</button></li>
+          <li><button onclick="App.showSection('request-leave')">Request for Leave</button></li>
+          <li><button onclick="App.showSection('take-exam')">Take Exam</button></li>
+          <li><button onclick="location.href='index.html'">Logout</button></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <div class="content">
+  <div id="dashboard" class="section active">
+    <h1>Welcome to Your Dashboard</h1>
+    <p>View your activity summary here.</p>
+  </div>
+
+      <div id="incident-report" class="section">
+        <h1>Submit Incident Report</h1>
+        <form>
+          <input type="text" placeholder="Incident Title" required />
+          <textarea placeholder="Describe the incident in detail" required></textarea>
+          <input type="date" required />
+          <input type="time" required />
+          <button type="submit">Submit Report</button>
+        </form>
+      </div>
+
+      <div id="kpi-score" class="section">
+        <h1>KPI Performance Evaluation</h1>
+        <p>Check your latest KPI scores and evaluations.</p>
+      </div>
+
+      <div id="shift-schedule" class="section">
+        <h1>Shift Schedule</h1>
+        <p>View your assigned work schedules here.</p>
+      </div>
+
+      <div id="request-leave" class="section">
+  <h1>Requests for Leave</h1>
+  <p>Submit a new leave request and review past records.</p>
+
+  <!-- Leave Request Form -->
+  <div class="leave-form">
+    <h2>Submit Leave Request</h2>
+    <form>
+      <label>Leave Type:</label>
+      <select required>
+        <option value="">-- Select Leave Type --</option>
+        <option value="Sick Leave">Sick Leave</option>
+        <option value="Vacation Leave">Vacation Leave</option>
+        <option value="Emergency Leave">Emergency Leave</option>
+      </select>
+
+      <label>Start Date:</label>
+      <input type="date" required />
+
+      <label>End Date:</label>
+      <input type="date" required />
+
+      <label>Reason:</label>
+      <textarea placeholder="Enter reason for leave..." required></textarea>
+
+      <button type="submit">Submit Request</button>
+    </form>
+  </div>
+
+      <div id="take-exam" class="section">
+        <h1>Take Exam</h1>
+        <p>Proceed to take your assigned assessment.</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Highlight active button in sidebar
+    document.querySelectorAll('.sidebar button').forEach(button => {
+      button.addEventListener('click', function () {
+        document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
