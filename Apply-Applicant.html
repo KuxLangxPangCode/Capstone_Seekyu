@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Seekyu Applicant Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .section { display: none; }
+    .section.active { display: block; }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-gray-800 via-gray-900 to-black text-white">
+
+  <!-- Navbar -->
+  <header class="flex items-center justify-between p-6 bg-black">
+    <h1 class="text-2xl font-bold cursor-pointer">
+      <a href="New-User.html" class="hover:text-indigo-400">Seekyu</a>
+    </h1>
+    <div class="flex items-center gap-4">
+      <span id="user-email" class="text-gray-300">celim@example.com</span>
+      <a href="Index.html" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">Logout</a>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-950 p-6">
+      <nav class="space-y-4">
+        <button onclick="showSection('submit')" class="w-full text-left px-3 py-2 bg-gray-800 rounded hover:bg-gray-700">Submit Application</button>
+        <button onclick="showSection('status')" class="w-full text-left px-3 py-2 bg-gray-800 rounded hover:bg-gray-700">Your Application Status</button>
+      </nav>
+    </aside>
+
+    <!-- Content -->
+    <main class="flex-1 p-8 overflow-y-auto">
+      
+      <!-- Submit Application Section -->
+      <section id="submit" class="section active">
+        <h2 class="text-3xl font-bold mb-6">Submit Application</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+          <!-- Security Guard Application -->
+          <form id="guardForm" class="bg-gray-800 p-6 rounded-lg space-y-4">
+            <h3 class="text-xl font-semibold">Apply as Security Guard</h3>
+            <input type="text" placeholder="Full Name" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="date" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="email" value="celim@example.com" class="w-full p-2 rounded bg-gray-900 border border-gray-700" disabled />
+            <input type="tel" placeholder="Phone Number" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="text" placeholder="Complete Address" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="text" placeholder="License Number" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="date" placeholder="License Expiry Date" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="number" placeholder="Years of Experience" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="text" placeholder="Previous Agency or Employer" class="w-full p-2 rounded bg-gray-900 border border-gray-700" />
+            <input type="text" placeholder="Last Position Held" class="w-full p-2 rounded bg-gray-900 border border-gray-700" />
+            <input type="text" placeholder="Educational Attainment" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="text" placeholder="Emergency Contact Name" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="tel" placeholder="Emergency Contact Number" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <textarea placeholder="Why do you want to be a security guard?" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required></textarea>
+            <textarea placeholder="Additional Skills or Trainings (e.g., First Aid, Firearms)" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required></textarea>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded">Submit Application</button>
+          </form>
+
+          <!-- Client Job Posting -->
+          <form id="clientForm" class="bg-gray-800 p-6 rounded-lg space-y-4">
+            <h3 class="text-xl font-semibold">Client Job Posting</h3>
+            <input type="text" placeholder="Company Name" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="email" value="celim@example.com" class="w-full p-2 rounded bg-gray-900 border border-gray-700" disabled />
+            <input type="tel" placeholder="Phone Number" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="text" placeholder="Company Address or Job Location" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="text" placeholder="Job Title (e.g., Mall Security, Office Guard)" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="number" placeholder="Number of Guards Needed" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="text" placeholder="Required License Type (e.g., PNP, SOCO)" class="w-full p-2 rounded bg-gray-900 border border-gray-700" />
+            <input type="number" placeholder="Required Years of Experience" class="w-full p-2 rounded bg-gray-900 border border-gray-700" />
+            <input type="text" placeholder="Shift Schedule (e.g., Day/Night Shift)" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="text" placeholder="Monthly Salary Offer (PHP)" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <input type="text" placeholder="Contract Duration (e.g., 6 months, 1 year)" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required />
+            <textarea placeholder="Job Description and Responsibilities" class="w-full p-2 rounded bg-gray-900 border border-gray-700" required></textarea>
+            <textarea placeholder="Preferred Qualifications or Requirements" class="w-full p-2 rounded bg-gray-900 border border-gray-700"></textarea>
+            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded">Submit Request</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Application Status Section -->
+      <section id="status" class="section">
+        <h2 class="text-3xl font-bold mb-6">Your Application Status</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full border border-gray-700 rounded-lg overflow-hidden">
+            <thead class="bg-gray-800 text-gray-300">
+              <tr>
+                <th class="px-4 py-2 text-left">Type</th>
+                <th class="px-4 py-2 text-left">Name / Company</th>
+                <th class="px-4 py-2 text-left">Date Submitted</th>
+                <th class="px-4 py-2 text-left">Status</th>
+              </tr>
+            </thead>
+            <tbody class="bg-gray-900 divide-y divide-gray-700">
+              <tr>
+                <td class="px-4 py-2">Guard Application</td>
+                <td class="px-4 py-2">Pedro Santos</td>
+                <td class="px-4 py-2">2025-08-15</td>
+                <td class="px-4 py-2"><span class="bg-yellow-600 text-white px-2 py-1 rounded text-sm">Pending</span></td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2">Client Request</td>
+                <td class="px-4 py-2">ABC Corp</td>
+                <td class="px-4 py-2">2025-08-20</td>
+                <td class="px-4 py-2"><span class="bg-green-600 text-white px-2 py-1 rounded text-sm">Approved</span></td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2">Guard Application</td>
+                <td class="px-4 py-2">Pedro Santos</td>
+                <td class="px-4 py-2">2025-08-10</td>
+                <td class="px-4 py-2"><span class="bg-red-600 text-white px-2 py-1 rounded text-sm">Rejected</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Sidebar navigation
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(sectionId).classList.add('active');
+    }
+
+    // Mutual exclusivity logic
+    function setupMutualExclusiveForms(form1Id, form2Id) {
+      const form1 = document.getElementById(form1Id);
+      const form2 = document.getElementById(form2Id);
+
+      const inputs1 = form1.querySelectorAll("input, textarea, select");
+      const inputs2 = form2.querySelectorAll("input, textarea, select");
+
+      function isFormFilled(inputs) {
+        return Array.from(inputs).some(input => input.value.trim() !== "");
+      }
+
+      function toggleForms() {
+        if (isFormFilled(inputs1)) {
+          inputs2.forEach(input => input.disabled = true);
+        } else if (isFormFilled(inputs2)) {
+          inputs1.forEach(input => input.disabled = true);
+        } else {
+          inputs1.forEach(input => input.disabled = false);
+          inputs2.forEach(input => input.disabled = false);
+        }
+      }
+
+      [...inputs1, ...inputs2].forEach(input => {
+        input.addEventListener("input", toggleForms);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupMutualExclusiveForms("guardForm", "clientForm");
+    });
+  </script>
+</body>
+</html>
