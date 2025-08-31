@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Security Client & Guard List</title>
+  <style>
+    :root {
+      --card-bg: #1a1a1a;
+      --header-bg: #2b2b2b;
+      --row-alt-bg: #202020;
+      --text-color: #e0e0e0;
+      --accent-color: #4ea1ff;
+      --divider-color: #3a3a3a;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #121212;
+      color: var(--text-color);
+      margin: 0;
+      padding: 1rem;
+      line-height: 1.5;
+    }
+    .back-btn {
+  display: inline-block;
+  background: var(--header-bg);
+  color: var(--text-color);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.back-btn:hover {
+  background: var(--accent-color);
+  color: #fff;
+}
+
+    /* Client Card */
+    .client-card {
+      background: var(--card-bg);
+      padding: 1rem 1.2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      margin-bottom: 1rem;
+      transition: background 0.3s ease;
+    }
+    .client-card:hover {
+      background: #1e1e1e;
+    }
+
+    .client-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .client-summary h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .toggle-icon {
+      font-size: 1.25rem;
+      transition: transform 0.3s ease;
+    }
+    .toggle-icon.open {
+      transform: rotate(180deg);
+    }
+
+    .client-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+      border-top: 1px solid var(--divider-color);
+      margin-top: 0.6rem;
+      padding-top: 0;
+    }
+    .client-details.open {
+      max-height: 600px;
+      padding-top: 0.8rem;
+    }
+    .client-details p {
+      margin: 0.25rem 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+
+    /* Guards Section */
+    .guards-section {
+      background: var(--card-bg);
+      padding: 1rem 1.2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .guards-section h3 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    /* Table Styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 0.6rem;
+      text-align: left;
+    }
+    thead {
+      background: var(--header-bg);
+    }
+    thead th {
+      font-weight: 500;
+    }
+    tbody tr {
+      transition: background 0.2s ease;
+    }
+    tbody tr:nth-child(even) {
+      background: var(--row-alt-bg);
+    }
+    tbody tr:hover {
+      background: #2a2a2a;
+    }
+
+    /* Badges */
+    .badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: #fff;
+      font-weight: 500;
+    }
+    .badge.active { background: #2e8b57; }
+    .badge.leave { background: #d4a017; }
+    .badge.inactive { background: #555; }
+
+    /* Buttons */
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--accent-color);
+      cursor: pointer;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.85rem;
+      transition: color 0.2s ease;
+    }
+    .action-btn:hover {
+      color: #82c4ff;
+      text-decoration: underline;
+    }
+    .action-btn:focus {
+      outline: 1px solid var(--accent-color);
+      border-radius: 4px;
+    }
+
+    
+    .add-guard-container {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+/* Add Button */
+.add-guard-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--accent-color);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.add-guard-btn span {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.add-guard-btn:hover {
+  background-color: #66b3ff;
+  transform: translateY(-1px);
+}
+
+.add-guard-btn:active {
+  transform: translateY(0);
+}
+
+.add-guard-btn:focus {
+  outline: 2px solid #ffffff55;
+  outline-offset: 2px;
+}
+
+  </style>
+</head>
+<body>
+<!-- Back / Return Button -->
+  <div style="margin-bottom: 1rem;">
+    <a href="ClientProfile.html" class="back-btn">← Back to Client Profile</a>
+  </div>
+  <!-- Client Personal Data -->
+  <section class="client-card">
+    <div class="client-summary" id="clientToggle">
+      <h2>Acme Corp — Site Alpha</h2>
+      <span class="toggle-icon" id="toggleIcon">▼</span>
+    </div>
+    <div class="client-details" id="clientDetails">
+      <p><strong>Contact:</strong> contact@acme.com</p>
+      <p><strong>Phone:</strong> +63 912 345 6789</p>
+      <p><strong>Address:</strong> 123 Main St, Business City</p>
+      <p><strong>Job Title:</strong> Mall Security</p>
+      <p><strong>Guards Needed:</strong> 4</p>
+      <p><strong>License Type:</strong> PNP</p>
+      <p><strong>Experience Required:</strong> 2 years</p>
+      <p><strong>Shift:</strong> Night Shift</p>
+      <p><strong>Salary:</strong> PHP 20,000 / month</p>
+      <p><strong>Contract:</strong> 1 year</p>
+      <p><strong>Description:</strong> Monitor premises, assist visitors, respond to incidents</p>
+      <p><strong>Preferred Qualifications:</strong> First aid certified</p>
+    </div>
+  </section>
+
+  <!-- Guards List -->
+<section class="guards-section">
+  <h3>Assigned Security Guards</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Initials</th>
+        <th>Name</th>
+        <th>Shift</th>
+        <th>Date Deployed</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>JD</td>
+        <td>John Doe</td>
+        <td>Night</td>
+        <td>2025‑08‑15</td>
+        <td><span class="badge active">Active</span></td>
+        <td>
+          <button class="action-btn">Unassign</button>
+          <button class="action-btn">Reassign</button>
+        </td>
+      </tr>
+      <tr>
+        <td>MS</td>
+        <td>Maria Santos</td>
+        <td>Day</td>
+        <td>2025‑08‑20</td>
+        <td><span class="badge leave">On Leave</span></td>
+        <td>
+          <button class="action-btn">Unassign</button>
+          <button class="action-btn">Reassign</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Add New Security Guard Button -->
+  <div class="add-guard-container">
+    <a href="Assign-Guard.html" class="add-guard-btn" title="Assign New Security Guard">
+  <span>＋</span> Assign New Guard
+</a>
+  </div>
+</section>
+
+
+  <script>
+    const toggle = document.getElementById('clientToggle');
+    const details = document.getElementById('clientDetails');
+    const icon = document.getElementById('toggleIcon');
+
+    toggle.addEventListener('click', () => {
+      details.classList.toggle('open');
+      icon.classList.toggle('open');
+    });
+  </script>
+
+</body>
+</html>
