@@ -1,0 +1,164 @@
+/* ========================= */
+/* KPI Section Styles        */
+/* ========================= */
+#kpi {
+  padding: 20px;
+  color: #f0f0f0;
+}
+
+#kpi h1 {
+  font-size: 26px;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+#kpi h2 {
+  font-size: 20px;
+  margin: 25px 0 10px;
+  color: #ddd;
+}
+
+#kpi p {
+  margin-bottom: 20px;
+  color: #aaa;
+}
+
+/* KPI Summary Cards */
+.kpi-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.kpi-card {
+  background: #1c1c1c;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+.kpi-title {
+  font-size: 15px;
+  margin-bottom: 8px;
+  color: #bbb;
+}
+
+.kpi-value {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #4db8ff;
+}
+
+.progress {
+  background: #333;
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #4db8ff, #1a73e8);
+}
+
+/* KPI Ratings Table */
+.kpi-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 25px;
+  font-size: 14px;
+}
+
+.kpi-table thead {
+  background: #2b2b2b;
+}
+
+.kpi-table th,
+.kpi-table td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #333;
+}
+
+.kpi-table th {
+  color: #fff;
+  font-weight: 600;
+}
+
+.kpi-table tbody tr:nth-child(even) {
+  background: #202020;
+}
+
+/* Chart Placeholder */
+.kpi-chart {
+  background: #1a1a1a;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+  color: #888;
+  font-style: italic;
+}
+
+/* Controls */
+.kpi-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.kpi-controls input,
+.kpi-controls select {
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #f0f0f0;
+  font-size: 14px;
+}
+
+.kpi-controls input::placeholder {
+  color: #777;
+}
+
+.kpi-controls select:focus,
+.kpi-controls input:focus {
+  outline: none;
+  border-color: #4db8ff;
+}
+
+/* Guard Performance Table */
+.kpi-guard-list table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.kpi-guard-list thead {
+  background: #2b2b2b;
+}
+
+.kpi-guard-list th,
+.kpi-guard-list td {
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #333;
+}
+
+.kpi-guard-list th {
+  color: #fff;
+  font-weight: 600;
+}
+
+.kpi-guard-list tbody tr:nth-child(even) {
+  background: #202020;
+}
+
+.kpi-guard-list tbody tr:hover {
+  background: #2e2e2e;
+}
