@@ -31,97 +31,117 @@
 
     <!-- Main Content -->
     <main>
-      <!-- Dashboard -->
-      <div id="dashboard" class="section active">
-        <h1>Admin Dashboard</h1>
-        <p>Welcome back! Use the sidebar to manage the system.</p>
-      </div>
+      <!-- Updated Dashboard -->
+<div id="dashboard" class="section active">
+  <div class="dashboard-header">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p class="muted">Overview of system activity, guards, and pending actions.</p>
+    </div>
 
-      <!-- Recruitment Management -->
-      <div id="recruiting-mgmt" class="section">
-        <h1>Online Recruitment Management</h1>
-        <p>Manage applications submitted by job seekers.</p>
-        <input type="text" id="recruitSearch" placeholder="Search applicants...">
-
-        <table id="recruitTable">
-          <thead>
-            <tr>
-              <th>Applicant Name</th>
-              <th>Applicant ID</th>
-              <th>Position Applied</th>
-              <th>Contact No.</th>
-              <th>Email</th>
-              <th>Resume</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Carlos Dela Cruz</td>
-              <td>AP-001</td>
-              <td>Security Guard</td>
-              <td>09179998888</td>
-              <td>carlos.cruz@email.com</td>
-              <td><a href="resumes/carlos.pdf" target="_blank">View</a></td>
-              <td>Pending</td>
-              <td>
-                <button class="accept-btn">Accept</button>
-                <button class="reject-btn">Reject</button>
-              </td>
-            </tr>
-            <tr>
-              <td>Josefina Ramos</td>
-              <td>AP-002</td>
-              <td>Client</td>
-              <td>09172223333</td>
-              <td>josefina.ramos@email.com</td>
-              <td><a href="resumes/josefina.pdf" target="_blank">View</a></td>
-              <td>Pending</td>
-              <td>
-                <button class="accept-btn">Accept</button>
-                <button class="reject-btn">Reject</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- KPI -->
-      <div id="kpi" class="section">
-        <h1>KPI Evaluation</h1>
-        <p>Evaluate performance metrics of your guards.</p>
-
-        <div class="kpi-summary">
-          <div class="kpi-card"><h2>Average Attendance</h2><p>92%</p></div>
-          <div class="kpi-card"><h2>Average Punctuality</h2><p>88%</p></div>
-          <div class="kpi-card"><h2>Overall Performance</h2><p>4.3 / 5</p></div>
-          <div class="kpi-card"><h2>Training Completion</h2><p>95%</p></div>
-        </div>
-
-        <h2>General KPI Ratings Overview</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Excellent</th>
-              <th>Good</th>
-              <th>Average</th>
-              <th>Poor</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>Attendance</td><td>65%</td><td>20%</td><td>10%</td><td>5%</td></tr>
-            <tr><td>Punctuality</td><td>58%</td><td>25%</td><td>12%</td><td>5%</td></tr>
-            <tr><td>Performance</td><td>70%</td><td>18%</td><td>8%</td><td>4%</td></tr>
-            <tr><td>Training & Skills</td><td>80%</td><td>15%</td><td>4%</td><td>1%</td></tr>
-          </tbody>
-        </table>
-
-        <div class="kpi-chart">
-          <p>[Chart Visualization Placeholder — can be replaced with Chart.js / Recharts later]</p>
+    <div class="header-actions">
+      <div class="notification-dropdown">
+        <button id="notifToggle" class="icon-btn" aria-expanded="false">
+          Notifications <span id="notifCount" class="badge">3</span>
+        </button>
+        <div id="notifList" class="dropdown hidden">
+          <ul>
+            <li><strong>New Application:</strong> Carlos Dela Cruz submitted an application. <span class="time">2m</span></li>
+            <li><strong>Incident Report:</strong> Unauthorized access reported at ABC Mall. <span class="time">3h</span></li>
+            <li><strong>Leave Request:</strong> Maria Santos requested emergency leave. <span class="time">1d</span></li>
+          </ul>
+          <div class="dropdown-actions"><button id="viewAllNotifs">View all</button></div>
         </div>
       </div>
+
+      <div class="profile-summary">
+        <img src="https://via.placeholder.com/48" alt="Admin avatar" class="avatar">
+        <div>
+          <div class="name">Admin User</div>
+          <div class="role muted">System Administrator</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard layout: main column + right sidebar -->
+  <div class="dashboard-layout">
+    <!-- Main column (priority: guard tracking, then applications) -->
+    <div class="dashboard-main">
+      <!-- Guard tracking -->
+      <section class="guard-tracking card">
+        <h2>Security Guard Tracking</h2>
+        <p class="muted">Monitor deployments, attendance, absences and lateness in real-time.</p>
+
+        <div class="tracking-grid">
+          <div class="tracking-list">
+            <h3>Guards Overview</h3>
+            <table class="compact">
+              <thead><tr><th>Name</th><th>ID</th><th>Area</th><th>Status</th><th>Last Seen</th></tr></thead>
+              <tbody id="guardTableBody">
+                <tr><td>Juan Dela Cruz</td><td>SG001</td><td>ABC Mall</td><td><span class="status present">Present</span></td><td>10:42</td></tr>
+                <tr><td>Maria Santos</td><td>SG045</td><td>Towerville</td><td><span class="status on-leave">On Leave</span></td><td>—</td></tr>
+                <tr><td>Ramon Villanueva</td><td>SG078</td><td>Client A HQ</td><td><span class="status late">Late</span></td><td>09:35</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="tracking-stats">
+            <h3>Attendance Summary</h3>
+            <div class="stat-row"><span>Present</span><strong id="statPresent">98</strong></div>
+            <div class="stat-row"><span>Absent</span><strong id="statAbsent">6</strong></div>
+            <div class="stat-row"><span>Late</span><strong id="statLate">20</strong></div>
+            <div class="stat-row"><span>On Leave</span><strong id="statOnLeave">6</strong></div>
+
+            <h4>Recent Alerts</h4>
+            <ul id="recentAlerts" class="alerts-list">
+              <li>SG078 — Late arrival (09:35)</li>
+              <li>SG034 — Absent (No check-in)</li>
+              <li>Incident reported near ABC Mall loading dock</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Applications list sits directly under guard-tracking (full width of main column) -->
+      <section class="dashboard-applications card">
+        <h2>Recent Applications</h2>
+        <p class="muted">Latest job applications requiring review.</p>
+        <div class="scrollable-content">
+          <table class="applications-table">
+            <thead><tr><th>Applicant</th><th>ID</th><th>Position</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>Carlos Dela Cruz</td><td>AP-001</td><td>Security Guard</td><td>2025-08-28</td><td>Pending</td><td><button class="accept-btn">Accept</button> <button class="reject-btn">Reject</button></td></tr>
+              <tr><td>Josefina Ramos</td><td>AP-002</td><td>Client</td><td>2025-08-25</td><td>Pending</td><td><button class="accept-btn">Accept</button> <button class="reject-btn">Reject</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right sidebar: summary cards stacked -->
+    <aside class="dashboard-side">
+      <div class="card guard-count">
+        <h3>Total Guards</h3>
+        <p class="big" id="totalGuards">124</p>
+        <p class="muted">Active / On Leave / Late</p>
+        <div class="small-stats"><span id="presentCount">98</span> present • <span id="onLeaveCount">6</span> on leave • <span id="lateCount">20</span> late</div>
+      </div>
+
+      <div class="card deployment-areas">
+        <h3>Deployments</h3>
+        <p class="muted">Guards per area</p>
+        <ul class="area-list">
+          <li>ABC Mall — 32</li>
+          <li>Towerville Industrial Park — 18</li>
+          <li>Greenfield Estate — 12</li>
+          <li>Client A HQ — 20</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
 
       <!-- Account Management -->
       <div id="accounts" class="section">
@@ -485,6 +505,17 @@
   }
 });
 
+(function () {
+const notifToggle = document.getElementById('notifToggle');
+const notifList = document.getElementById('notifList');
+notifToggle?.addEventListener('click', () => {
+const open = !notifList.classList.contains('hidden');
+notifList.classList.toggle('hidden', open);
+notifToggle.setAttribute('aria-expanded', String(!open));
+});
+
+
+document.getElementById('btnReviewReports')?.addEventListener('click', () => App.showSection('incident-reports'));})();
   </script>
 </body>
 </html>
