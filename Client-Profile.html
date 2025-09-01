@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Security Client & Guard List</title>
+  <title>Security Client & Guard List — KPI Monitoring</title>
   <style>
     :root {
       --card-bg: #1a1a1a;
@@ -12,6 +12,7 @@
       --text-color: #e0e0e0;
       --accent-color: #4ea1ff;
       --divider-color: #3a3a3a;
+      --muted: #9aa3ad;
     }
 
     body {
@@ -23,21 +24,20 @@
       line-height: 1.5;
     }
     .back-btn {
-  display: inline-block;
-  background: var(--header-bg);
-  color: var(--text-color);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 0.85rem;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-.back-btn:hover {
-  background: var(--accent-color);
-  color: #fff;
-}
+      display: inline-block;
+      background: var(--header-bg);
+      color: var(--text-color);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .back-btn:hover {
+      background: var(--accent-color);
+      color: #fff;
+    }
 
-    /* Client Card */
     .client-card {
       background: var(--card-bg);
       padding: 1rem 1.2rem;
@@ -46,165 +46,73 @@
       margin-bottom: 1rem;
       transition: background 0.3s ease;
     }
-    .client-card:hover {
-      background: #1e1e1e;
-    }
+    .client-card:hover { background: #1e1e1e; }
 
-    .client-summary {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-    }
-    .client-summary h2 {
-      margin: 0;
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-    .toggle-icon {
-      font-size: 1.25rem;
-      transition: transform 0.3s ease;
-    }
-    .toggle-icon.open {
-      transform: rotate(180deg);
-    }
+    .client-summary { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .client-summary h2 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+    .toggle-icon { font-size: 1.25rem; transition: transform 0.3s ease; }
+    .toggle-icon.open { transform: rotate(180deg); }
 
-    .client-details {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s ease;
-      border-top: 1px solid var(--divider-color);
-      margin-top: 0.6rem;
-      padding-top: 0;
-    }
-    .client-details.open {
-      max-height: 600px;
-      padding-top: 0.8rem;
-    }
-    .client-details p {
-      margin: 0.25rem 0;
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
+    .client-details { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; border-top: 1px solid var(--divider-color); margin-top: 0.6rem; padding-top: 0; }
+    .client-details.open { max-height: 600px; padding-top: 0.8rem; }
+    .client-details p { margin: 0.25rem 0; font-size: 0.9rem; opacity: 0.95; }
 
-    /* Guards Section */
-    .guards-section {
-      background: var(--card-bg);
-      padding: 1rem 1.2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    }
-    .guards-section h3 {
-      margin-top: 0;
-      font-size: 1.1rem;
-      font-weight: 500;
-    }
+    .guards-section { background: var(--card-bg); padding: 1rem 1.2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.4); margin-bottom: 1rem; }
+    .guards-section h3 { margin-top: 0; font-size: 1.1rem; font-weight: 500; }
 
-    /* Table Styling */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-    th, td {
-      padding: 0.6rem;
-      text-align: left;
-    }
-    thead {
-      background: var(--header-bg);
-    }
-    thead th {
-      font-weight: 500;
-    }
-    tbody tr {
-      transition: background 0.2s ease;
-    }
-    tbody tr:nth-child(even) {
-      background: var(--row-alt-bg);
-    }
-    tbody tr:hover {
-      background: #2a2a2a;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 0.6rem; text-align: left; }
+    thead { background: var(--header-bg); }
+    thead th { font-weight: 500; }
+    tbody tr { transition: background 0.2s ease; }
+    tbody tr:nth-child(even) { background: var(--row-alt-bg); }
+    tbody tr:hover { background: #2a2a2a; }
 
-    /* Badges */
-    .badge {
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      color: #fff;
-      font-weight: 500;
-    }
+    .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; color: #fff; font-weight: 500; }
     .badge.active { background: #2e8b57; }
     .badge.leave { background: #d4a017; }
     .badge.inactive { background: #555; }
 
-    /* Buttons */
-    .action-btn {
-      background: none;
-      border: none;
-      color: var(--accent-color);
-      cursor: pointer;
-      padding: 0.3rem 0.5rem;
-      font-size: 0.85rem;
-      transition: color 0.2s ease;
-    }
-    .action-btn:hover {
-      color: #82c4ff;
-      text-decoration: underline;
-    }
-    .action-btn:focus {
-      outline: 1px solid var(--accent-color);
-      border-radius: 4px;
-    }
+    .action-btn { background: none; border: none; color: var(--accent-color); cursor: pointer; padding: 0.3rem 0.5rem; font-size: 0.85rem; transition: color 0.2s ease; }
+    .action-btn:hover { color: #82c4ff; text-decoration: underline; }
+    .action-btn:focus { outline: 1px solid var(--accent-color); border-radius: 4px; }
 
-    
-    .add-guard-container {
-  text-align: center;
-  margin-top: 1.5rem;
-}
-/* Add Button */
-.add-guard-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: var(--accent-color);
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
-}
+    .add-guard-container { text-align: center; margin-top: 1.5rem; }
+    .add-guard-btn { display: inline-flex; align-items: center; gap: 0.5rem; background-color: var(--accent-color); color: #fff; font-size: 1rem; font-weight: 500; padding: 0.8rem 1.5rem; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s ease, transform 0.1s ease; }
+    .add-guard-btn span { font-size: 1.4rem; font-weight: bold; }
+    .add-guard-btn:hover { background-color: #66b3ff; transform: translateY(-1px); }
+    .add-guard-btn:active { transform: translateY(0); }
+    .add-guard-btn:focus { outline: 2px solid #ffffff55; outline-offset: 2px; }
 
-.add-guard-btn span {
-  font-size: 1.4rem;
-  font-weight: bold;
-}
+    .kpi-section { background: var(--card-bg); padding: 1rem 1.2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.45); margin-bottom: 1rem; }
+    .kpi-header { display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+    .kpi-header h3 { margin:0; font-size:1.1rem; }
+    .kpi-cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:0.8rem; margin-top:0.8rem; }
+    .kpi-card { background:#161616; padding:0.8rem; border-radius:8px; border:1px solid var(--divider-color); }
+    .kpi-title { font-size:0.85rem; color:var(--muted); margin-bottom:0.35rem; }
+    .kpi-value { font-size:1.25rem; font-weight:600; }
+    .progress { height:8px; background:#0f0f0f; border-radius:6px; overflow:hidden; margin-top:0.6rem; }
+    .progress > i { display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--accent-color),#66b3ff); border-radius:6px; transition: width 0.6s ease; }
 
-.add-guard-btn:hover {
-  background-color: #66b3ff;
-  transform: translateY(-1px);
-}
+    .kpi-footer { display:flex; gap:0.75rem; align-items:center; margin-top:0.9rem; }
+    .kpi-legend { font-size:0.85rem; color:var(--muted); }
 
-.add-guard-btn:active {
-  transform: translateY(0);
-}
+    .kpi-chart-wrap { display:flex; gap:1rem; margin-top:0.8rem; align-items:center; }
+    .kpi-chart { flex:1 1 320px; min-width:240px; }
+    .kpi-list { flex:1 1 260px; min-width:220px; }
+    .guard-kpi-row { display:flex; justify-content:space-between; align-items:center; gap:0.6rem; padding:0.5rem 0; border-bottom:1px dashed rgba(255,255,255,0.03); }
+    .guard-name { font-weight:600; }
+    .kpi-score { min-width:80px; text-align:right; font-weight:600; }
 
-.add-guard-btn:focus {
-  outline: 2px solid #ffffff55;
-  outline-offset: 2px;
-}
+    @media (max-width:640px){ .kpi-chart-wrap { flex-direction:column; } }
 
   </style>
 </head>
 <body>
-<!-- Back / Return Button -->
   <div style="margin-bottom: 1rem;">
     <a href="Admin.html" class="back-btn">← Return to Admin Dashboard</a>
   </div>
-  <!-- Client Personal Data -->
+
   <section class="client-card">
     <div class="client-summary" id="clientToggle">
       <h2>Acme Corp — Site Alpha</h2>
@@ -226,55 +134,115 @@
     </div>
   </section>
 
-  <!-- Guards List -->
-<section class="guards-section">
-  <h3>Assigned Security Guards</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Initials</th>
-        <th>Name</th>
-        <th>Shift</th>
-        <th>Date Deployed</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>JD</td>
-        <td>John Doe</td>
-        <td>Night</td>
-        <td>2025‑08‑15</td>
-        <td><span class="badge active">Active</span></td>
-        <td>
-          <button class="action-btn">Unassign</button>
-          <button class="action-btn">Reassign</button>
-        </td>
-      </tr>
-      <tr>
-        <td>MS</td>
-        <td>Maria Santos</td>
-        <td>Day</td>
-        <td>2025‑08‑20</td>
-        <td><span class="badge leave">On Leave</span></td>
-        <td>
-          <button class="action-btn">Unassign</button>
-          <button class="action-btn">Reassign</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <section class="guards-section">
+    <h3>Assigned Security Guards</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Initials</th>
+          <th>Name</th>
+          <th>Shift</th>
+          <th>Date Deployed</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>JD</td>
+          <td>John Doe</td>
+          <td>Night</td>
+          <td>2025‑08‑15</td>
+          <td><span class="badge active">Active</span></td>
+          <td>
+            <button class="action-btn">Unassign</button>
+            <button class="action-btn">Reassign</button>
+          </td>
+        </tr>
+        <tr>
+          <td>MS</td>
+          <td>Maria Santos</td>
+          <td>Day</td>
+          <td>2025‑08‑20</td>
+          <td><span class="badge leave">On Leave</span></td>
+          <td>
+            <button class="action-btn">Unassign</button>
+            <button class="action-btn">Reassign</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-  <!-- Add New Security Guard Button -->
-  <div class="add-guard-container">
-    <a href="Assign-Guard.html" class="add-guard-btn" title="Assign New Security Guard">
-  <span>＋</span> Assign New Guard
-</a>
-  </div>
-</section>
+    <div class="add-guard-container">
+      <a href="Assign-Guard.html" class="add-guard-btn" title="Assign New Security Guard">
+        <span>＋</span> Assign New Guard
+      </a>
+    </div>
+  </section>
 
+  <section class="kpi-section" aria-labelledby="kpiHeading">
+    <div class="kpi-header">
+      <h3 id="kpiHeading">Key Performance Indicator Monitoring</h3>
+      <div style="display:flex;gap:0.6rem;align-items:center;">
+        <a href="kpi-dashboard.html" class="back-btn" style="background:transparent;border:1px solid var(--divider-color);">View Full KPI Dashboard</a>
+      </div>
+    </div>
 
+    <div class="kpi-cards" role="list">
+      <div class="kpi-card" role="listitem">
+        <div class="kpi-title">Average Incident Response Time</div>
+        <div class="kpi-value" id="avgResponse">2m 30s</div>
+        <div class="progress" aria-hidden="true"><i id="pResp" style="width:60%"></i></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Incidents Resolved</div>
+        <div class="kpi-value" id="incResolved">48</div>
+        <div class="progress"><i id="pResolved" style="width:80%"></i></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Attendance Rate</div>
+        <div class="kpi-value" id="attendance">92%</div>
+        <div class="progress"><i id="pAttend" style="width:92%"></i></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Compliance Score</div>
+        <div class="kpi-value" id="compliance">87%</div>
+        <div class="progress"><i id="pComp" style="width:87%"></i></div>
+      </div>
+    </div>
+
+    <div class="kpi-chart-wrap">
+      <div class="kpi-chart">
+        <canvas id="kpiChart" aria-label="KPI distribution chart" role="img"></canvas>
+      </div>
+      <div class="kpi-list">
+        <div class="guard-kpi-row">
+          <div>
+            <div class="guard-name">John Doe</div>
+            <div class="kpi-legend">Shift: Night • Deployed: 2025-08-15</div>
+          </div>
+          <div class="kpi-score">78%</div>
+        </div>
+        <div class="guard-kpi-row">
+          <div>
+            <div class="guard-name">Maria Santos</div>
+            <div class="kpi-legend">Shift: Day • Deployed: 2025-08-20</div>
+          </div>
+          <div class="kpi-score">91%</div>
+        </div>
+        <div class="guard-kpi-row">
+          <div>
+            <div class="guard-name">Alex Cruz</div>
+            <div class="kpi-legend">Shift: Night • Deployed: 2025-07-30</div>
+          </div>
+          <div class="kpi-score">85%</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const toggle = document.getElementById('clientToggle');
     const details = document.getElementById('clientDetails');
@@ -284,8 +252,47 @@
       details.classList.toggle('open');
       icon.classList.toggle('open');
     });
-  </script>
 
+    const ctx = document.getElementById('kpiChart').getContext('2d');
+    const kpiChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Compliance', 'Attendance', 'Response', 'Resolved'],
+        datasets: [{
+          data: [87, 92, 60, 80],
+          backgroundColor: [
+            'rgba(78,161,255,0.95)',
+            'rgba(102,179,255,0.95)',
+            'rgba(120,200,255,0.95)',
+            'rgba(60,150,200,0.95)'
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        plugins: { legend: { position: 'bottom', labels: { color: '#cfd8dd' } } },
+        maintainAspectRatio: false
+      }
+    });
+
+    // Example: function to update KPI values (placeholder for hooking real data)
+    function updateKPI(data){
+      document.getElementById('avgResponse').textContent = data.avgResponse || '—';
+      document.getElementById('incResolved').textContent = data.resolved ?? '—';
+      document.getElementById('attendance').textContent = (data.attendance ?? '—') + '%';
+      document.getElementById('compliance').textContent = (data.compliance ?? '—') + '%';
+      document.getElementById('pResp').style.width = (data.respPct ?? 0) + '%';
+      document.getElementById('pResolved').style.width = (data.resolvedPct ?? 0) + '%';
+      document.getElementById('pAttend').style.width = (data.attendance ?? 0) + '%';
+      document.getElementById('pComp').style.width = (data.compliance ?? 0) + '%';
+      if(data.chart){
+        kpiChart.data.datasets[0].data = data.chart;
+        kpiChart.update();
+      }
+    }
+
+    // Example call with initial data
+    updateKPI({ avgResponse: '2m 30s', resolved: 48, attendance: 92, compliance: 87, respPct: 60, resolvedPct: 80, chart: [87,92,60,80] });
+  </script>
 </body>
 </html>
-
