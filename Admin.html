@@ -4,9 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SeekYu Admin Dashboard</title>
-  <link rel="stylesheet" href="styles/admin.css" />
-  <script src="scripts/seekyu.js" defer></script>
+  <link rel="stylesheet" href="styles/Admin.css" />
+  <link rel="stylesheet" href="styles/KPI.css" />
+  <script src="scripts/Seekyu.js" defer></script>
   <script src="scripts/Messaging.js" defer></script>
+  <script src="scripts/KPI.js" defer></script>
 </head>
 <body>
   <div class="app-container">
@@ -24,121 +26,260 @@
           <li><button onclick="App.showSection('kpi')">KPI Evaluation</button></li>
           <li><button onclick="App.showSection('leave-requests')">Leave Requests</button></li>
           <li><button onclick="App.showSection('incident-reports')">Incident Reports</button></li>
-          <li><button onclick="location.href='index.html'">Logout</button></li>
+          <li><button onclick="location.href='Index.html'">Logout</button></li>
         </ul>
       </nav>
     </aside>
 
     <!-- Main Content -->
     <main>
-      <!-- Updated Dashboard -->
-<div id="dashboard" class="section active">
-  <div class="dashboard-header">
-    <div>
-      <h1>Admin Dashboard</h1>
-      <p class="muted">Overview of system activity, guards, and pending actions.</p>
+      <!-- Dashboard -->
+      <div id="dashboard" class="section active">
+        <div class="dashboard-header">
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p class="muted">Overview of system activity, guards, and pending actions.</p>
+          </div>
+
+          <div class="header-actions">
+            <div class="notification-dropdown">
+              <button id="notifToggle" class="icon-btn" aria-expanded="false">
+                Notifications <span id="notifCount" class="badge">3</span>
+              </button>
+              <div id="notifList" class="dropdown hidden">
+                <ul>
+                  <li><strong>New Application:</strong> Carlos Dela Cruz submitted an application. <span class="time">2m</span></li>
+                  <li><strong>Incident Report:</strong> Unauthorized access reported at ABC Mall. <span class="time">3h</span></li>
+                  <li><strong>Leave Request:</strong> Maria Santos requested emergency leave. <span class="time">1d</span></li>
+                </ul>
+                <div class="dropdown-actions"><button id="viewAllNotifs">View all</button></div>
+              </div>
+            </div>
+
+            <div class="profile-summary">
+              <img src="https://via.placeholder.com/48" alt="Admin avatar" class="avatar">
+              <div>
+                <div class="name">Admin User</div>
+                <div class="role muted">System Administrator</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard layout -->
+        <div class="dashboard-layout">
+          <div class="dashboard-main">
+
+            <!-- Guard Tracking -->
+            <section class="guard-tracking card">
+              <h2>Security Guard Tracking</h2>
+              <p class="muted">Monitor deployments, attendance, absences and lateness in real-time.</p>
+              <div class="dshbrdtracking-grid">
+                <div class="dshbrdtracking-list">
+                  <h3>Guards Overview</h3>
+                  <table class="compact">
+                    <thead>
+                      <tr><th>Name</th><th>ID</th><th>Area</th><th>Status</th><th>Last Seen</th></tr>
+                    </thead>
+                    <tbody id="dshbrdguardTableBody">
+                      <tr><td>Juan Dela Cruz</td><td>SG001</td><td>ABC Mall</td><td><span class="status present">Present</span></td><td>10:42</td></tr>
+                      <tr><td>Maria Santos</td><td>SG045</td><td>Towerville</td><td><span class="status on-leave">On Leave</span></td><td>—</td></tr>
+                      <tr><td>Ramon Villanueva</td><td>SG078</td><td>Client A HQ</td><td><span class="status late">Late</span></td><td>09:35</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="tracking-stats">
+                  <h3>Attendance Summary</h3>
+                  <div class="stat-row"><span>Present</span><strong id="statPresent">98</strong></div>
+                  <div class="stat-row"><span>Absent</span><strong id="statAbsent">6</strong></div>
+                  <div class="stat-row"><span>Late</span><strong id="statLate">20</strong></div>
+                  <div class="stat-row"><span>On Leave</span><strong id="statOnLeave">6</strong></div>
+
+                  <h4>Recent Alerts</h4>
+                  <ul id="recentAlerts" class="alerts-list">
+                    <li>SG078 — Late arrival (09:35)</li>
+                    <li>SG034 — Absent (No check-in)</li>
+                    <li>Incident reported near ABC Mall loading dock</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <!-- Applications -->
+            <section class="dashboard-applications card">
+              <h2>Recent Applications</h2>
+              <p class="muted">Latest job applications requiring review.</p>
+              <div class="scrollable-content">
+                <!-- Application items go here -->
+              </div>
+            </section>
+
+            <!-- KPI Monitoring -->
+            <section class="dshbrdcard kpi-tracking card">
+              <h3>KPI Monitoring</h3>
+              <div class="dshbrdkpi-grid">
+                <div class="dshbrdkpi-card">
+                  <h4>Attendance</h4>
+                  <p>95%</p>
+                </div>
+                <div class="dshbrdkpi-card">
+                  <h4>Punctuality</h4>
+                  <p>88%</p>
+                </div>
+                <div class="dshbrdkpi-card">
+                  <h4>Performance</h4>
+                  <p>92%</p>
+                </div>
+                <div class="dshbrdkpi-card">
+                  <h4>Training & Skills</h4>
+                  <p>92%</p>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Recruitment Management -->
+      <div id="recruiting-mgmt" class="section">
+        <h1>Online Recruitment Management</h1>
+        <p>Manage applications submitted by job seekers.</p>
+        <input type="text" id="recruitSearch" placeholder="Search applicants...">
+
+        <table id="recruitTable">
+          <thead>
+            <tr>
+              <th>Applicant Name</th>
+              <th>Applicant ID</th>
+              <th>Position Applied</th>
+              <th>Contact No.</th>
+              <th>Email</th>
+              <th>Resume</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Carlos Dela Cruz</td>
+              <td>AP-001</td>
+              <td>Security Guard</td>
+              <td>09179998888</td>
+              <td>carlos.cruz@email.com</td>
+              <td><a href="resumes/carlos.pdf" target="_blank">View</a></td>
+              <td>Pending</td>
+              <td>
+                <button class="accept-btn">Accept</button>
+                <button class="reject-btn">Reject</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Josefina Ramos</td>
+              <td>AP-002</td>
+              <td>Client</td>
+              <td>09172223333</td>
+              <td>josefina.ramos@email.com</td>
+              <td><a href="resumes/josefina.pdf" target="_blank">View</a></td>
+              <td>Pending</td>
+              <td>
+                <button class="accept-btn">Accept</button>
+                <button class="reject-btn">Reject</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+<!-- KPI -->
+<div id="kpi" class="section">
+  <h1>KPI Evaluation</h1>
+  <p>Evaluate performance metrics of your guards.</p>
+
+  <!-- KPI Summary Cards -->
+  <div class="kpi-cards">
+    <div class="kpi-card">
+      <div class="kpi-title">Average Attendance</div>
+      <div class="kpi-value">92%</div>
+      <div class="progress"><i style="width:92%"></i></div>
     </div>
-
-    <div class="header-actions">
-      <div class="notification-dropdown">
-        <button id="notifToggle" class="icon-btn" aria-expanded="false">
-          Notifications <span id="notifCount" class="badge">3</span>
-        </button>
-        <div id="notifList" class="dropdown hidden">
-          <ul>
-            <li><strong>New Application:</strong> Carlos Dela Cruz submitted an application. <span class="time">2m</span></li>
-            <li><strong>Incident Report:</strong> Unauthorized access reported at ABC Mall. <span class="time">3h</span></li>
-            <li><strong>Leave Request:</strong> Maria Santos requested emergency leave. <span class="time">1d</span></li>
-          </ul>
-          <div class="dropdown-actions"><button id="viewAllNotifs">View all</button></div>
-        </div>
-      </div>
-
-      <div class="profile-summary">
-        <img src="https://via.placeholder.com/48" alt="Admin avatar" class="avatar">
-        <div>
-          <div class="name">Admin User</div>
-          <div class="role muted">System Administrator</div>
-        </div>
-      </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Average Punctuality</div>
+      <div class="kpi-value">88%</div>
+      <div class="progress"><i style="width:88%"></i></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Overall Performance</div>
+      <div class="kpi-value">4.3 / 5</div>
+      <div class="progress"><i style="width:86%"></i></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Training Completion</div>
+      <div class="kpi-value">95%</div>
+      <div class="progress"><i style="width:95%"></i></div>
     </div>
   </div>
 
-  <!-- Dashboard layout: main column + right sidebar -->
-  <div class="dashboard-layout">
-    <!-- Main column (priority: guard tracking, then applications) -->
-    <div class="dashboard-main">
-      <!-- Guard tracking -->
-      <section class="guard-tracking card">
-        <h2>Security Guard Tracking</h2>
-        <p class="muted">Monitor deployments, attendance, absences and lateness in real-time.</p>
+  <!-- KPI Ratings Table -->
+  <h2>General KPI Ratings Overview</h2>
+  <div class="kpi-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Excellent</th>
+          <th>Good</th>
+          <th>Average</th>
+          <th>Poor</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Attendance</td><td>65%</td><td>20%</td><td>10%</td><td>5%</td></tr>
+        <tr><td>Punctuality</td><td>58%</td><td>25%</td><td>12%</td><td>5%</td></tr>
+        <tr><td>Performance</td><td>70%</td><td>18%</td><td>8%</td><td>4%</td></tr>
+        <tr><td>Training & Skills</td><td>80%</td><td>15%</td><td>4%</td><td>1%</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-        <div class="tracking-grid">
-          <div class="tracking-list">
-            <h3>Guards Overview</h3>
-            <table class="compact">
-              <thead><tr><th>Name</th><th>ID</th><th>Area</th><th>Status</th><th>Last Seen</th></tr></thead>
-              <tbody id="guardTableBody">
-                <tr><td>Juan Dela Cruz</td><td>SG001</td><td>ABC Mall</td><td><span class="status present">Present</span></td><td>10:42</td></tr>
-                <tr><td>Maria Santos</td><td>SG045</td><td>Towerville</td><td><span class="status on-leave">On Leave</span></td><td>—</td></tr>
-                <tr><td>Ramon Villanueva</td><td>SG078</td><td>Client A HQ</td><td><span class="status late">Late</span></td><td>09:35</td></tr>
-              </tbody>
-            </table>
-          </div>
+  <!-- KPI Chart -->
+  <div class="kpi-chart">
+    <canvas id="kpiChart"></canvas>
+  </div>
 
-          <div class="tracking-stats">
-            <h3>Attendance Summary</h3>
-            <div class="stat-row"><span>Present</span><strong id="statPresent">98</strong></div>
-            <div class="stat-row"><span>Absent</span><strong id="statAbsent">6</strong></div>
-            <div class="stat-row"><span>Late</span><strong id="statLate">20</strong></div>
-            <div class="stat-row"><span>On Leave</span><strong id="statOnLeave">6</strong></div>
+  <!-- Guard Performance List -->
+  <h2>Guard Performance Rankings</h2>
+  <div class="kpi-controls">
+    <input type="text" id="guardSearch" placeholder="Search guard by name...">
+    <select id="performanceFilter">
+      <option value="all">Show All</option>
+      <option value="high">Highest Rated</option>
+      <option value="low">Lowest Rated</option>
+    </select>
+  </div>
 
-            <h4>Recent Alerts</h4>
-            <ul id="recentAlerts" class="alerts-list">
-              <li>SG078 — Late arrival (09:35)</li>
-              <li>SG034 — Absent (No check-in)</li>
-              <li>Incident reported near ABC Mall loading dock</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <!-- Applications list sits directly under guard-tracking (full width of main column) -->
-      <section class="dashboard-applications card">
-        <h2>Recent Applications</h2>
-        <p class="muted">Latest job applications requiring review.</p>
-        <div class="scrollable-content">
-          <table class="applications-table">
-            <thead><tr><th>Applicant</th><th>ID</th><th>Position</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody>
-              <tr><td>Carlos Dela Cruz</td><td>AP-001</td><td>Security Guard</td><td>2025-08-28</td><td>Pending</td><td><button class="accept-btn">Accept</button> <button class="reject-btn">Reject</button></td></tr>
-              <tr><td>Josefina Ramos</td><td>AP-002</td><td>Client</td><td>2025-08-25</td><td>Pending</td><td><button class="accept-btn">Accept</button> <button class="reject-btn">Reject</button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
-
-    <!-- Right sidebar: summary cards stacked -->
-    <aside class="dashboard-side">
-      <div class="card guard-count">
-        <h3>Total Guards</h3>
-        <p class="big" id="totalGuards">124</p>
-        <p class="muted">Active / On Leave / Late</p>
-        <div class="small-stats"><span id="presentCount">98</span> present • <span id="onLeaveCount">6</span> on leave • <span id="lateCount">20</span> late</div>
-      </div>
-
-      <div class="card deployment-areas">
-        <h3>Deployments</h3>
-        <p class="muted">Guards per area</p>
-        <ul class="area-list">
-          <li>ABC Mall — 32</li>
-          <li>Towerville Industrial Park — 18</li>
-          <li>Greenfield Estate — 12</li>
-          <li>Client A HQ — 20</li>
-        </ul>
-      </div>
-    </aside>
+  <div class="kpi-guard-list">
+    <table id="guardTable">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Guard Name</th>
+          <th>Attendance</th>
+          <th>Punctuality</th>
+          <th>Performance</th>
+          <th>Training</th>
+          <th>Overall</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Juan Dela Cruz</td><td>95%</td><td>90%</td><td>4.8</td><td>100%</td><td>94%</td></tr>
+        <tr><td>2</td><td>Pedro Santos</td><td>92%</td><td>88%</td><td>4.5</td><td>95%</td><td>90%</td></tr>
+        <tr><td>3</td><td>Mark Reyes</td><td>88%</td><td>85%</td><td>4.2</td><td>92%</td><td>87%</td></tr>
+        <tr><td>4</td><td>Carlos Cruz</td><td>80%</td><td>78%</td><td>3.9</td><td>85%</td><td>81%</td></tr>
+        <tr><td>5</td><td>Ramon Lopez</td><td>75%</td><td>70%</td><td>3.5</td><td>80%</td><td>75%</td></tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -205,16 +346,66 @@
       </div>
 
       <!-- Client Management -->
-      <div id="client-mgmt" class="section">
-        <h1>Client Management</h1>
-        <p>View and manage client information and job postings.</p>
-      </div>
+<div id="client-mgmt" class="section">
+  <h1>Client Management</h1>
+  <p>View and manage client information and job postings.</p>
 
-      <!-- Security Guard Management -->
-      <div id="guard-mgmt" class="section">
-        <h1>Security Guard Management</h1>
-        <p>Manage security guard records and assignments.</p>
-      </div>
+  <!-- Search + Filter -->
+  <div class="toolbar">
+    <input type="text" id="clientSearch" placeholder="Search clients...">
+    <select id="clientFilter">
+      <option value="all">All</option>
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+    </select>
+  </div>
+
+  <div class="client-list">
+    <a href="Client-Profile.html" class="client-card" data-status="active">
+      <h2>ABC Corporation</h2>
+      <p><strong>Contact:</strong> Juan Dela Cruz</p>
+      <p><strong>Email:</strong> abc.corp@email.com</p>
+      <p><strong>Job Posting:</strong> 5 Guards for Night Shift</p>
+    </a>
+
+    <a href="Client-Profile.html" class="client-card" data-status="inactive">
+      <h2>XYZ Mall</h2>
+      <p><strong>Contact:</strong> Maria Santos</p>
+      <p><strong>Email:</strong> xyz.mall@email.com</p>
+      <p><strong>Job Posting:</strong> 8 Guards for Parking Security</p>
+    </a>
+  </div>
+</div>
+
+<!-- Security Guard Management -->
+<div id="guard-mgmt" class="section">
+  <h1>Security Guard Management</h1>
+  <p>Manage security guard records and assignments.</p>
+
+  <!-- Search + Filter -->
+  <div class="toolbar">
+    <input type="text" id="guardSearch" placeholder="Search guards...">
+    <select id="guardFilter">
+      <option value="all">All</option>
+      <option value="active">Active</option>
+      <option value="onleave">On Leave</option>
+    </select>
+  </div>
+
+  <div class="guard-list">
+    <a href="Guard-Profile.html" class="guard-card" data-status="active">
+      <h2>Ramon Reyes</h2>
+      <p><strong>Status:</strong> Active</p>
+      <p><strong>Deployment:</strong> ABC Corporation – Night Shift</p>
+    </a>
+
+    <a href="Guard-Profile.html" class="guard-card" data-status="onleave">
+      <h2>Josefina Cruz</h2>
+      <p><strong>Status:</strong> On Leave</p>
+      <p><strong>Deployment:</strong> XYZ Mall – Parking Security</p>
+    </a>
+  </div>
+</div>
 
 <!-- Messaging Management -->
 <div id="messaging-mgmt" class="section">
@@ -387,7 +578,6 @@
           <p><strong>Persons Involved:</strong> <span id="reportPersons">Unknown Male</span></p>
           <p><strong>Evidence:</strong> <a href="#" id="reportEvidence">View</a></p>
           <div class="popup-actions">
-            <button onclick="App.hidePopup('report-popup')">Close</button>
           </div>
         </div>
       </div>
@@ -497,7 +687,6 @@
     })();
 
     document.addEventListener("DOMContentLoaded", () => {
-  const closeIncidentPopup = document.getElementById("closeIncidentPopup");
   if (closeIncidentPopup) {
     closeIncidentPopup.addEventListener("click", () => {
       SeekYu.hidePopup("incident-popup");
@@ -505,17 +694,29 @@
   }
 });
 
-(function () {
-const notifToggle = document.getElementById('notifToggle');
-const notifList = document.getElementById('notifList');
-notifToggle?.addEventListener('click', () => {
-const open = !notifList.classList.contains('hidden');
-notifList.classList.toggle('hidden', open);
-notifToggle.setAttribute('aria-expanded', String(!open));
-});
+function setupSearchAndFilter(searchId, filterId, listSelector, cardSelector) {
+    const search = document.getElementById(searchId);
+    const filter = document.getElementById(filterId);
+    const list = document.querySelector(listSelector);
 
+    function updateList() {
+      const query = search.value.toLowerCase();
+      const filterVal = filter.value;
+      list.querySelectorAll(cardSelector).forEach(card => {
+        const text = card.innerText.toLowerCase();
+        const status = card.dataset.status;
+        const matchesSearch = text.includes(query);
+        const matchesFilter = filterVal === "all" || status === filterVal;
+        card.style.display = matchesSearch && matchesFilter ? "block" : "none";
+      });
+    }
 
-document.getElementById('btnReviewReports')?.addEventListener('click', () => App.showSection('incident-reports'));})();
+    search.addEventListener("input", updateList);
+    filter.addEventListener("change", updateList);
+  }
+
+  setupSearchAndFilter("clientSearch", "clientFilter", ".client-list", ".client-card");
+  setupSearchAndFilter("guardSearch", "guardFilter", ".guard-list", ".guard-card");
   </script>
 </body>
 </html>
