@@ -48,100 +48,80 @@
       </div>
     </section>
 
-    <!-- Login -->
-    <section id="login" class="section hidden min-h-screen flex items-center justify-center px-6">
-      <div class="max-w-5xl w-full">
-        <h2 class="text-3xl font-bold text-center text-white">Login</h2>
-        <p class="text-center text-gray-400 mt-2">Choose your role to access Seekyu</p>
-        <div class="mt-10 grid gap-8 md:grid-cols-3">
+<!-- Login -->
+<section id="login" class="section hidden min-h-screen flex items-center justify-center px-6">
+  <div class="max-w-md w-full bg-gray-800 p-8 rounded-lg shadow-lg">
+    <h2 class="text-3xl font-bold text-center text-white">Login</h2>
+    <p class="text-center text-gray-400 mt-2">Choose your role to access Seekyu</p>
 
-          <!-- Admin -->
-          <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 class="text-xl font-semibold text-white mb-4">Admin Login</h3>
-            <form id="adminForm" class="space-y-4">
-              <input type="text" placeholder="Enter your ID" class="w-full rounded-md p-2 bg-gray-700 text-white">
-              <input type="password" placeholder="Password" class="w-full rounded-md p-2 bg-gray-700 text-white">
-              <button type="button" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-2 rounded-md">Log in</button>
-            </form>
-          </div>
+    <form id="loginForm" class="space-y-4 mt-6">
+      <!-- Dropdown for role -->
+      <select id="roleSelect" class="w-full rounded-md p-2 bg-gray-700 text-white">
+        <option value="" disabled selected>Select Role</option>
+        <option value="admin">Admin</option>
+        <option value="guard">Security Guard / Client</option>
+        <option value="applicant">Applicant</option>
+      </select>
 
-          <!-- Guard / Client -->
-          <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 class="text-xl font-semibold text-white mb-4">Security Guard / Client Login</h3>
-            <form id="guardForm" class="space-y-4">
-              <input type="text" placeholder="Enter your ID" class="w-full rounded-md p-2 bg-gray-700 text-white">
-              <input type="password" placeholder="Password" class="w-full rounded-md p-2 bg-gray-700 text-white">
-              <button type="button" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-2 rounded-md">Log in</button>
-            </form>
-          </div>
+      <!-- Common inputs -->
+      <input type="text" id="loginId" placeholder="Enter your ID / Email" class="w-full rounded-md p-2 bg-gray-700 text-white">
+      <input type="password" id="loginPass" placeholder="Password" class="w-full rounded-md p-2 bg-gray-700 text-white">
 
-          <!-- Applicant -->
-          <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 class="text-xl font-semibold text-white mb-4">Applicant Login</h3>
-            <form id="applicantForm" class="space-y-4">
-              <input id="appEmail" type="email" placeholder="Email" class="w-full rounded-md p-2 bg-gray-700 text-white">
-              <input id="appPass" type="password" placeholder="Password" class="w-full rounded-md p-2 bg-gray-700 text-white">
-              <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-2 rounded-md">Log in</button>
-              <p class="text-xs text-gray-400 mt-2">Use dummy credentials: <br>Email: <span class="text-indigo-400">your.email@example.com</span> <br>Password: <span class="text-indigo-400">1234</span></p>
-            </form>
-          </div>
+      <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-2 rounded-md">Log in</button>
+    </form>
 
-        </div>
-      </div>
-    </section>
+    <!-- Hint for applicant dummy login -->
+    <p class="text-xs text-gray-400 mt-4 text-center">
+      Applicant test credentials: <br>
+      Email: <span class="text-indigo-400">celim@example.com</span> <br>
+      Password: <span class="text-indigo-400">1234</span>
+    </p>
+  </div>
+</section>
+
 
   </main>
 
   <script>
-    function showSection(id) {
-      document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
-      document.getElementById(id).classList.remove('hidden');
-    }
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+  }
 
-    // Dummy login check for applicant
-    document.getElementById("applicantForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const email = document.getElementById("appEmail").value.trim();
-      const pass = document.getElementById("appPass").value.trim();
+  // Unified login form
+  document.getElementById("loginForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const role = document.getElementById("roleSelect").value;
+    const id = document.getElementById("loginId").value.trim();
+    const pass = document.getElementById("loginPass").value.trim();
 
-      if (email === "celim@example.com" && pass === "1234") {
+    if (role === "admin") {
+      // Admin login (demo redirect)
+      if (id && pass) {
+        window.location.href = "Admin-Dashboard.html";
+      } else {
+        alert("Please enter valid Admin credentials.");
+      }
+    } else if (role === "guard") {
+      // Guard/Client login (demo redirect)
+      if (id && pass) {
+        window.location.href = "Guard-Client-Dashboard.html";
+      } else {
+        alert("Please enter valid Guard/Client credentials.");
+      }
+    } else if (role === "applicant") {
+      // Applicant dummy credentials
+      if (id === "celim@example.com" && pass === "1234") {
         window.location.href = "Apply-Applicant.html";
       } else {
-        alert("Invalid credentials. Try: your.email@example.com / 1234");
+        alert("Invalid Applicant credentials. Try: celim@example.com / 1234");
       }
-    });
-
-    // Mutual exclusivity logic
-    function setupMutualExclusiveForms(...formIds) {
-      const forms = formIds.map(id => document.getElementById(id));
-
-      function isFormFilled(inputs) {
-        return Array.from(inputs).some(input => input.value.trim() !== "");
-      }
-
-      function toggleForms() {
-        const activeForm = forms.find(form => isFormFilled(form.querySelectorAll("input, textarea, select")));
-        forms.forEach(form => {
-          const inputs = form.querySelectorAll("input, textarea, select");
-          if (activeForm && form !== activeForm) {
-            inputs.forEach(input => input.disabled = true);
-          } else {
-            inputs.forEach(input => input.disabled = false);
-          }
-        });
-      }
-
-      forms.forEach(form => {
-        form.querySelectorAll("input, textarea, select").forEach(input => {
-          input.addEventListener("input", toggleForms);
-        });
-      });
+    } else {
+      alert("Please select a role.");
     }
+  });
+</script>
 
-    document.addEventListener("DOMContentLoaded", () => {
-      setupMutualExclusiveForms("adminForm", "guardForm", "applicantForm");
-    });
-  </script>
 
 </body>
 </html>
