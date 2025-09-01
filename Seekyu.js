@@ -126,5 +126,104 @@ document.addEventListener('click', function(e) {
   }
 });
 
+// Ensure SeekYu exists
+window.SeekYu = window.SeekYu || {};
 
+// Unified popup show/hide using .hidden
+SeekYu.showPopup = function(id) {
+  const el = document.getElementById(id);
+  if (!el) return console.warn('showPopup: missing', id);
+  el.classList.remove('hidden');
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
+  // focus first focusable for accessibility
+  setTimeout(() => {
+    const focusable = el.querySelector('button, [href], input, textarea, select');
+    if (focusable) focusable.focus();
+  }, 10);
+};
 
+SeekYu.hidePopup = function(id) {
+  const el = document.getElementById(id);
+  if (!el) return console.warn('hidePopup: missing', id);
+  el.classList.add('hidden');
+  document.documentElement.style.overflow = '';
+  document.body.style.overflow = '';
+};
+
+// Close on X (.close-btn), click outside content, or ESC
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.close-btn');
+  if (btn) {
+    const popup = btn.closest('.popup');
+    if (popup) SeekYu.hidePopup(popup.id);
+    return;
+  }
+  // click outside popup-content
+  const popupBg = e.target.closest('.popup');
+  if (popupBg && !e.target.closest('.popup-content')) {
+    SeekYu.hidePopup(popupBg.id);
+  }
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.popup:not(.hidden)').forEach(p => SeekYu.hidePopup(p.id));
+  }
+});
+
+// ---------------- KPI logic (in-memory store) ----------------
+SeekYu.kpiData = SeekYu.kpiData || {};
+
+// open evaluation form (call from button onclick="openEvaluationForm('SG001')")
+window.openEvaluationForm = function(empId) {
+  document.getElementById('employeeId').value = empId;
+  const prev = SeekYu.kpiData[empId] || null;
+  document.getElementById('attendance').value = prev ? prev.attendance : '';
+  document.getElementById('discipline').value = prev ? prev.discipline : '';
+  document.getElementById('alertness').value = prev ? prev.alertness : '';
+  document.getElementById('communication').value = prev ? prev.communication : '';
+  SeekYu.showPopup('kpiFormPopup');
+};
+
+// open view score popup
+window.openViewScore = function(empId) {
+  const s = SeekYu.kpiData[empId];
+  if (!s) {
+    document.getElementById('scoreDetails').innerHTML = `<p>No KPI evaluation found for <strong>${empId}</strong>.</p>`;
+  } else {
+    const avg = ((+s.attendance + +s.discipline + +s.alertness + +s.communication) / 4).toFixed(2);
+    document.getElementById('scoreDetails').innerHTML = `
+      <p><strong>Employee:</strong> ${empId}</p>
+      <p><strong>Attendance:</strong> ${s.attendance}</p>
+      <p><strong>Discipline:</strong> ${s.discipline}</p>
+      <p><strong>Alertness:</strong> ${s.alertness}</p>
+      <p><strong>Communication:</strong> ${s.communication}</p>
+      <p><strong>Average Score:</strong> ${avg} / 5</p>
+    `;
+  }
+  SeekYu.showPopup('kpiScorePopup');
+};
+
+// handle KPI form submit
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('kpiForm');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const empId = document.getElementById('employeeId').value || 'Unknown';
+      const attendance = Number(document.getElementById('attendance').value);
+      const discipline = Number(document.getElementById('discipline').value);
+      const alertness = Number(document.getElementById('alertness').value);
+      const communication = Number(document.getElementById('communication').value);
+      const vals = [attendance, discipline, alertness, communication];
+      if (vals.some(v => Number.isNaN(v) || v < 1 || v > 5)) {
+        alert('Please provide values between 1 and 5 for all fields.');
+        return;
+      }
+      SeekYu.kpiData[empId] = { attendance, discipline, alertness, communication, updatedAt: new Date().toISOString() };
+      SeekYu.hidePopup('kpiFormPopup');
+      // optionally show the score
+      openViewScore(empId);
+    });
+  }
+});
