@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeekYu Client Dashboard</title>
+  <link rel="stylesheet" href="styles/Client.css" />
+  <script src="scripts/Seekyu.js" defer></script>
+  <script src="scripts/Messaging.js" defer></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">SeekYu</div>
+      <nav>
+        <ul>
+          <li><button onclick="App.showSection('dashboard')" class="active">Dashboard</button></li>
+          <li><button onclick="App.showSection('incident-reports')">Incident Reports</button></li>
+          <li><button onclick="App.showSection('messaging-mgmt')">Send Message</button></li>
+          <li><button onclick="App.showSection('kpi-evaluation')">KPI Evaluation</button></li>
+          <li><button onclick="App.showSection('deployment')">Deployement Request</button></li>
+          <li><a href="Index.html"><button>Logout</button></a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Sections -->
+    <div id="dashboard" class="section active">
+      <h1>Welcome, Client</h1>
+      <p>View security summaries and updates here.</p>
+    </div>
+
+            <!-- Incident Reports -->
+      <div id="incident-reports" class="section">
+        <h1>Incident Reports</h1>
+        <input type="text" id="incidentSearch" placeholder="Search incident reports...">
+
+        <div class="scrollable-content">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Guard Name</th>
+                <th>Guard ID</th>
+                <th>Type of Incident</th>
+                <th>Actions Taken</th>
+                <th>Location</th>
+                <th>Persons Involved</th>
+                <th>Evidence</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2025-08-20</td>
+                <td>14:30</td>
+                <td>Juan Dela Cruz</td>
+                <td>SG001</td>
+                <td>Unauthorized Access</td>
+                <td>Escorted Individual Off Premises</td>
+                <td>ABC Mall - Loading Dock</td>
+                <td>Unknown Male</td>
+                <td><a href="#" class="view-evidence">View Image</a></td>
+                <td><button class="view-report-btn" data-report-id="r1">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+<!-- Messaging Management -->
+<div id="messaging-mgmt" class="section">
+  <h1>Messaging</h1>
+
+  <!-- Sub-navigation -->
+  <div class="sub-nav">
+  <button id="inboxBtn" class="active">Inbox</button>
+  <button id="composeBtn">Compose</button>
+</div>
+
+  <!-- Inbox Section -->
+  <div id="inbox-section" class="sub-section active">
+    <input type="text" id="messageSearch" placeholder="Search messages...">
+
+    <table class="message-table" id="messageTable">
+      <thead>
+        <tr>
+          <th>Sender</th>
+          <th>Subject</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-id="1">
+          <td>Admin</td>
+          <td>Shift Schedule Update</td>
+          <td>2025-08-25</td>
+          <td>
+            <button class="view-message-btn" 
+              data-from="Admin" 
+              data-subject="Shift Schedule Update" 
+              data-date="2025-08-25" 
+              data-body="Your shift schedule has been updated. Please check the system for details.">View</button>
+            <button class="delete-message-btn">Delete</button>
+          </td>
+        </tr>
+        <tr data-id="2">
+          <td>Client A</td>
+          <td>Incident Feedback</td>
+          <td>2025-08-22</td>
+          <td>
+            <button class="view-message-btn" 
+              data-from="Client A" 
+              data-subject="Incident Feedback" 
+              data-date="2025-08-22" 
+              data-body="Feedback regarding the incident you reported.">View</button>
+            <button class="delete-message-btn">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Compose Section -->
+  <div id="compose-section" class="sub-section">
+    <form id="composeForm" class="compose-form">
+      <label for="recipient">To:</label>
+      <input type="text" id="recipient" name="recipient" placeholder="Enter recipient name" required>
+
+      <label for="subject">Subject:</label>
+      <input type="text" id="subject" name="subject" placeholder="Enter subject" required>
+
+      <label for="message">Message:</label>
+      <textarea id="message" name="message" rows="5" placeholder="Write your message..." required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</div>
+
+    <div id="kpi-evaluation" class="section">
+  <h1>KPI Evaluation</h1>
+  <p>List of deployed security guards. You can evaluate their performance or view their KPI scores.</p>
+
+  <table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+      <tr>
+        <th>Employee ID</th>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Deployment Location</th>
+        <th>Last Evaluation Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>SG001</td>
+        <td>Juan Dela Cruz</td>
+        <td>Security Guard</td>
+        <td>ABC Mall</td>
+        <td>2025-08-15</td>
+        <td>
+          <button class="action-btn" onclick="openEvaluationForm('SG001')">Evaluate KPI</button>
+          <button class="view-btn" onclick="openViewScore('SG001')">View KPI Score</button>
+        </td>
+      </tr>
+      <tr>
+        <td>SG002</td>
+        <td>Maria Santos</td>
+        <td>Head Security Guard</td>
+        <td>XYZ Tower</td>
+        <td>2025-08-10</td>
+        <td>
+          <button class="action-btn" onclick="openEvaluationForm('SG002')">Evaluate KPI</button>
+          <button class="view-btn" onclick="openViewScore('SG002')">View KPI Score</button>
+        </td>
+      </tr>
+      <!-- Add more guards here -->
+    </tbody>
+  </table>
+</div>
+
+    <div id="deployment" class="section active">
+  <h1>Deployment Request</h1>
+  <p>Fill in details for deployment.</p>
+  <div class="scrollable-content">
+<form id="deploymentForm" class="deployment-form">
+  <h3>Client Information</h3>
+
+  <div>
+    <label for="companyName">Company/Client Name:</label>
+    <input type="text" id="companyName" name="companyName" required>
+  </div>
+
+  <div>
+    <label for="contactPerson">Contact Person:</label>
+    <input type="text" id="contactPerson" name="contactPerson" required>
+  </div>
+
+  <div>
+    <label for="contactNumber">Contact Number:</label>
+    <input type="tel" id="contactNumber" name="contactNumber" required>
+  </div>
+
+  <div>
+    <label for="location">Deployment Location:</label>
+    <input type="text" id="location" name="location" required>
+  </div>
+
+  <h3>Deployment Details</h3>
+
+  <div>
+    <label for="numGuards">Number of Guards Required:</label>
+    <input type="number" id="numGuards" name="numGuards" min="1" required>
+  </div>
+
+  <div>
+    <label for="position">Position:</label>
+    <select id="position" name="position" required>
+      <option value="">Select Position</option>
+      <option value="Security Guard">Security Guard</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="startDate">Deployment Start Date:</label>
+    <input type="date" id="startDate" name="startDate" required>
+  </div>
+
+  <div>
+    <label for="shiftSchedule">Shift Schedule:</label>
+    <select id="shiftSchedule" name="shiftSchedule" required>
+      <option value="">Select Schedule</option>
+      <option value="Day Shift (8 AM - 4 PM)">Day Shift (8 AM - 4 PM)</option>
+      <option value="Night Shift (8 PM - 4 AM)">Night Shift (8 PM - 4 AM)</option>
+      <option value="12-Hour Shift">12-Hour Shift</option>
+    </select>
+  </div>
+
+  <div>
+    <label for="duration">Deployment Duration:</label>
+    <input type="text" id="duration" name="duration" placeholder="e.g., 3 months, 1 year" required>
+  </div>
+
+  <h3>Additional Notes</h3>
+
+  <div>
+    <label for="remarks">Special Instructions / Remarks:</label>
+    <textarea id="remarks" name="remarks" rows="4"></textarea>
+  </div>
+
+  <button type="submit" class="action-btn">Submit Request</button>
+</form>
+
+   </div>
+</div>
+
+<!-- Incident Report Popup -->
+<div id="incident-popup" class="popup hidden" role="dialog" aria-modal="true">
+  <div class="popup-content" role="document">
+    <button class="close-btn" aria-label="Close incident">&times;</button>
+    <h2>Incident Report Details</h2>
+    <p><strong>Date:</strong> <span id="reportDate"></span></p>
+    <p><strong>Time:</strong> <span id="reportTime"></span></p>
+    <p><strong>Guard:</strong> <span id="reportGuard"></span></p>
+    <p><strong>Type of Incident:</strong> <span id="reportType"></span></p>
+    <p><strong>Actions Taken:</strong> <span id="reportActions"></span></p>
+    <p><strong>Location:</strong> <span id="reportLocation"></span></p>
+    <p><strong>Persons Involved:</strong> <span id="reportPersons"></span></p>
+    <p><strong>Evidence:</strong> <a href="#" id="reportEvidence" target="_blank">View</a></p>
+  </div>
+</div>
+
+<!-- Popup Overlay -->
+<div id="kpi-popup" class="popup hidden">
+  <div class="popup-content">
+    <button id="closeKpiPopup" class="close-btn">&times;</button>
+    <h2>KPI Evaluation Form</h2>
+    <form>
+      <input type="hidden" id="employeeId" name="employeeId" value="">
+      <label for="attendance">Attendance (1-5)</label>
+      <input id="attendance" name="attendance" type="number" min="1" max="5" required>
+      <label for="discipline">Discipline (1-5)</label>
+      <input id="discipline" name="discipline" type="number" min="1" max="5" required>
+      <label for="alertness">Alertness (1-5)</label>
+      <input id="alertness" name="alertness" type="number" min="1" max="5" required>
+      <label for="communication">Communication (1-5)</label>
+      <input id="communication" name="communication" type="number" min="1" max="5" required>
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button type="submit" class="action-btn">Submit Evaluation</button>
+        <button type="button" class="action-btn" id="cancelKpiBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- KPI Score View Popup -->
+<div id="kpiScorePopup" class="popup hidden" role="dialog" aria-modal="true">
+  <div class="popup-content" role="document">
+    <button class="close-btn" aria-label="Close KPI score">&times;</button>
+    <h2>KPI Scores</h2>
+    <div id="scoreDetails"></div>
+    <div style="margin-top:12px;text-align:right;">
+      <button type="button" class="action-btn" id="closeKpiScoreBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Message Popup (put near end of body) -->
+<div id="message-popup" class="popup hidden" aria-modal="true" role="dialog">
+  <div class="popup-content" role="document">
+    <button class="close-btn" aria-label="Close message">&times;</button>
+    <h2>Message Details</h2>
+    <p><strong>From:</strong> <span id="popupSender"></span></p>
+    <p><strong>Subject:</strong> <span id="popupSubject"></span></p>
+    <p><strong>Date:</strong> <span id="popupDate"></span></p>
+    <p><strong>Message:</strong></p>
+    <div id="popupBody" style="white-space:pre-wrap"></div>
+  </div>
+</div>
+
+  <script>
+    // Highlight active button in sidebar
+    document.querySelectorAll('.sidebar button').forEach(button => {
+      button.addEventListener('click', function () {
+        document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    function openEvaluationForm(empId) {
+  document.getElementById('employeeId').value = empId;
+  document.getElementById('kpiFormPopup').classList.add('active');
+}
+
+function openViewScore(empId) {
+  // Example: load scores dynamically (replace with real data fetch)
+  const scores = {
+    SG001: { attendance: 4.5, discipline: 4.2, alertness: 4.7, communication: 4.4 },
+    SG002: { attendance: 4.8, discipline: 4.5, alertness: 4.6, communication: 4.3 }
+  };
+  const s = scores[empId];
+  document.getElementById('scoreDetails').innerHTML = `
+    <p><strong>Attendance:</strong> ${s.attendance}</p>
+    <p><strong>Discipline:</strong> ${s.discipline}</p>
+    <p><strong>Alertness:</strong> ${s.alertness}</p>
+    <p><strong>Communication:</strong> ${s.communication}</p>
+  `;
+  document.getElementById('kpiScorePopup').classList.add('active');
+}
+
+function closePopup(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// Close popups
+const closeMessagePopup = document.getElementById("closeMessagePopup");
+if (closeMessagePopup) {
+  closeMessagePopup.addEventListener("click", () => {
+    SeekYu.hidePopup("message-popup");
+  });
+}
+
+const closeIncidentPopup = document.getElementById("closeIncidentPopup");
+if (closeIncidentPopup) {
+  closeIncidentPopup.addEventListener("click", () => {
+    SeekYu.hidePopup("incident-popup");
+  });
+}
+
+const inboxBtn = document.getElementById("inboxBtn");
+const composeBtn = document.getElementById("composeBtn");
+const inboxSection = document.getElementById("inbox-section");
+const composeSection = document.getElementById("compose-section");
+
+if (inboxBtn && composeBtn) {
+  inboxBtn.addEventListener("click", () => {
+    inboxSection.classList.add("active");
+    composeSection.classList.remove("active");
+    inboxBtn.classList.add("active");
+    composeBtn.classList.remove("active");
+  });
+
+  composeBtn.addEventListener("click", () => {
+    composeSection.classList.add("active");
+    inboxSection.classList.remove("active");
+    composeBtn.classList.add("active");
+    inboxBtn.classList.remove("active");
+  });
+}
+
+    // Account subsection toggle
+    document.querySelectorAll(".account-actions [data-target]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".account-actions [data-target]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.querySelectorAll(".sub-section").forEach(sec => sec.classList.remove("active"));
+        const target = btn.getAttribute("data-target");
+        if (target) document.getElementById(target).classList.add("active");
+      });
+    });
+
+    // Incident search
+    document.getElementById('incidentSearch')?.addEventListener('keyup', function () {
+      const filter = this.value.toLowerCase();
+      document.querySelectorAll('#incident-reports table tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+      });
+    });
+
+    // Leave requests search
+    document.getElementById('leaveSearch')?.addEventListener('keyup', function () {
+      const filter = this.value.toLowerCase();
+      document.querySelectorAll('#leave-requests table tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+      });
+    });
+    // Incident report view button
+document.querySelectorAll('.view-report-btn').forEach(btn => {
+  btn.addEventListener('click', function () {
+    // Fill with static data for now
+    document.getElementById('reportDate').textContent = '2025-08-20';
+    document.getElementById('reportTime').textContent = '14:30';
+    document.getElementById('reportGuard').textContent = 'Juan Dela Cruz (SG001)';
+    document.getElementById('reportType').textContent = 'Unauthorized Access';
+    document.getElementById('reportActions').textContent = 'Escorted Individual Off Premises';
+    document.getElementById('reportLocation').textContent = 'ABC Mall - Loading Dock';
+    document.getElementById('reportPersons').textContent = 'Unknown Male';
+    SeekYu.showPopup('incident-popup'); // ✅ fixed ID
+  });
+});
+
+  </script>
+</body>
+</html>
