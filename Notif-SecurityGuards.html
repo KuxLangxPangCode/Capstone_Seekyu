@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Notifications — Guards</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root { --accent-color:#4cafef; --divider-color:#333; }
+    body{margin:0;font-family:Arial;background:#111;color:#f0f0f0}
+    .wrap{padding:24px;display:flex;justify-content:center}
+    main{width:100%;max-width:1100px;background:#1a1a1a;padding:20px;border-radius:8px;border:1px solid var(--divider-color)}
+    .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .title h1{margin:0;font-size:20px} .title p{margin:0;color:#b7bec6;font-size:13px}
+    .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .filter-btn{padding:8px 12px;border-radius:999px;background:#0f1214;border:1px solid #222;color:#cdd6dd;cursor:pointer}
+    .filter-btn.active{background:rgba(76,175,239,0.12);color:var(--accent-color);border-color:rgba(76,175,239,0.2)}
+    .notifications-list{display:flex;flex-direction:column;gap:12px}
+    .notification-card{background:#0f1214;border:1px solid #222;border-radius:10px;padding:16px;display:flex;gap:14px;align-items:flex-start}
+    .notification-card.unread{border-left:4px solid var(--accent-color);box-shadow:0 6px 18px rgba(0,0,0,0.5)}
+    .icon{width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+    .icon.exam{background:rgba(76,175,239,0.12);color:var(--accent-color)}
+    .icon.msg{background:rgba(80,200,120,0.06);color:#6ee08f}
+    .icon.leave{background:rgba(171,237,133,0.06);color:#9bd65a}
+    .content{flex:1;min-width:0}
+    .content-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .content-head h3{margin:0;font-size:16px;color:#fff}
+    .meta-time{color:#9aa4b2;font-size:12px;white-space:nowrap}
+    .message{margin:8px 0 10px;color:#b7bec6;font-size:14px;line-height:1.35}
+    .tags{display:flex;gap:8px;flex-wrap:wrap}
+    .tag{background:#0b0d0f;border:1px solid #222;padding:6px 10px;border-radius:6px;color:#b7bec6;font-size:12px}
+    .card-actions{display:flex;gap:8px;margin-top:10px}
+    .small-btn{padding:7px 10px;border-radius:6px;border:none;cursor:pointer;font-size:13px;background:transparent;color:#cfe9ff;border:1px solid rgba(255,255,255,0.03)}
+    .small-btn.mark{color:var(--accent-color);border-color:rgba(76,175,239,0.12)}
+    .empty{padding:30px;text-align:center;color:#9099a3;border:1px dashed #222;border-radius:8px;margin-top:8px}
+    @media(max-width:900px){main{padding:16px}.icon{width:44px;height:44px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <main role="main">
+      <div class="toolbar">
+        <div class="title"><h1>Guard Notifications</h1><p>Only items relevant to guards (exams, messages, leave requests).</p></div>
+        <div><button id="markAll" class="small-btn mark">Mark all</button></div>
+      </div>
+
+      <div class="filters" role="tablist" aria-label="Notification filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="exam">Exams</button>
+        <button class="filter-btn" data-filter="message">Messages</button>
+        <button class="filter-btn" data-filter="leave">Leave Requests</button>
+      </div>
+
+      <section id="notifications" class="notifications-list" aria-live="polite">
+        <article class="notification-card unread" data-type="exam" data-id="g1">
+          <div class="icon exam"><i class="fa-solid fa-file-alt"></i></div>
+          <div class="content">
+            <div class="content-head"><h3>New Exam: Emergency Procedures</h3><div class="meta-time">2 hrs</div></div>
+            <div class="message">Complete the emergency procedures exam by Friday.</div>
+            <div class="tags"><span class="tag">Assigned</span></div>
+            <div class="card-actions"><button class="small-btn mark" data-action="mark">Mark</button><button class="small-btn" data-action="view">View</button></div>
+          </div>
+        </article>
+
+        <article class="notification-card" data-type="message" data-id="g2">
+          <div class="icon msg"><i class="fa-solid fa-envelope"></i></div>
+          <div class="content">
+            <div class="content-head"><h3>Schedule Update</h3><div class="meta-time">1 day</div></div>
+            <div class="message">Client changed schedule for next week. Check shifts.</div>
+            <div class="tags"><span class="tag">Info</span></div>
+            <div class="card-actions"><button class="small-btn mark" data-action="mark">Mark</button><button class="small-btn" data-action="view">View</button></div>
+          </div>
+        </article>
+
+        <article class="notification-card" data-type="leave" data-id="g3">
+          <div class="icon leave"><i class="fa-solid fa-bed"></i></div>
+          <div class="content">
+            <div class="content-head"><h3>Leave Approved: John D.</h3><div class="meta-time">1 day</div></div>
+            <div class="message">Your leave request for 2025-09-10 to 2025-09-12 has been approved.</div>
+            <div class="tags"><span class="tag">Approved</span></div>
+            <div class="card-actions"><button class="small-btn" data-action="view">Details</button><button class="small-btn mark" data-action="mark">Mark</button></div>
+          </div>
+        </article>
+      </section>
+
+      <div id="emptyState" class="empty" style="display:none">No notifications.</div>
+    </main>
+  </div>
+
+  <script>
+    (function(){
+      const filters = document.querySelectorAll('.filter-btn');
+      const list = document.getElementById('notifications');
+      const markAll = document.getElementById('markAll');
+      const empty = document.getElementById('emptyState');
+
+      filters.forEach(f=>f.addEventListener('click',function(){filters.forEach(b=>b.classList.remove('active'));this.classList.add('active');filterBy(this.dataset.filter);}));
+
+      function filterBy(type){
+        const cards = list.querySelectorAll('.notification-card'); let visible=0;
+        cards.forEach(c=>{const t=c.dataset.type; if(type==='all'||t===type){c.style.display='';visible++;}else c.style.display='none';});
+        empty.style.display = visible? 'none':'block';
+      }
+
+      list.addEventListener('click',e=>{const btn=e.target.closest('[data-action]'); if(!btn) return; const a=btn.dataset.action; const card=btn.closest('.notification-card'); if(a==='mark') card.classList.remove('unread'); if(a==='view'){card.style.transform='translateY(-2px)'; setTimeout(()=>card.style.transform='',150);} });
+
+      markAll.addEventListener('click',()=>{list.querySelectorAll('.notification-card').forEach(c=>c.classList.remove('unread'));});
+    })();
+  </script>
+</body>
+</html>
