@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SeekYu Admin Dashboard</title>
   <link rel="stylesheet" href="styles/Admin.css" />
-  <link rel="stylesheet" href="styles/KPI.css" />
-  <script src="scripts/Seekyu.js" defer></script>
+  
   <script src="scripts/Messaging.js" defer></script>
   <script src="scripts/KPI.js" defer></script>
 </head>
@@ -22,7 +21,7 @@
           <li><button onclick="App.showSection('accounts')">Account Management</button></li>
           <li><button onclick="App.showSection('client-mgmt')">Client Management</button></li>
           <li><button onclick="App.showSection('guard-mgmt')">Security Guard Management</button></li>
-          <li><button onclick="App.showSection('messaging-mgmt')">Messaging</button></li>
+          <li><button onclick="App.showSection('messaging-mgmt')">Send Message</button></li>
           <li><button onclick="App.showSection('kpi')">KPI Evaluation</button></li>
           <li><button onclick="App.showSection('leave-requests')">Leave Requests</button></li>
           <li><button onclick="App.showSection('incident-reports')">Incident Reports</button></li>
@@ -280,9 +279,8 @@
         <tr><td>5</td><td>Ramon Lopez</td><td>75%</td><td>70%</td><td>3.5</td><td>80%</td><td>75%</td></tr>
       </tbody>
     </table>
-  </div>
+  </div> 
 </div>
-
 
       <!-- Account Management -->
       <div id="accounts" class="section">
@@ -417,7 +415,6 @@
   <button id="composeBtn">Compose</button>
 </div>
 
-
   <!-- Inbox Section -->
   <div id="inbox-section" class="sub-section active">
     <input type="text" id="messageSearch" placeholder="Search messages...">
@@ -481,7 +478,7 @@
     <p><strong>Message:</strong></p>
     <p id="popupBody">Your shift schedule has been updated. Please check the system for details.</p>
     <div class="popup-actions">
-      <button onclick="App.hidePopup('message-popup')">Close</button>
+      <button onclick="SeekYu.hidePopup('message-popup')">Close</button>
     </div>
   </div>
 </div>
@@ -564,7 +561,7 @@
           </table>
         </div>
       </div>
-
+   
       <!-- Popup for Incident Report -->
       <div id="incident-popup" class="popup hidden">
       <div class="popup-content">
@@ -578,6 +575,7 @@
           <p><strong>Persons Involved:</strong> <span id="reportPersons">Unknown Male</span></p>
           <p><strong>Evidence:</strong> <a href="#" id="reportEvidence">View</a></p>
           <div class="popup-actions">
+            <button id="closeIncidentPopup">Close</button>
           </div>
         </div>
       </div>
@@ -585,8 +583,70 @@
   </div>
 
   <script>
-    // Minimal App/SeekYu object to handle UI toggles used in this file.
-    window.App = window.SeekYu = {
+// Set up incident report view buttons
+      document.querySelectorAll('.view-report-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const row = this.closest('tr');
+          const cells = row.querySelectorAll('td');
+          
+          // Extract data from the table row
+          document.getElementById('reportDate').textContent = cells[0].textContent;
+          document.getElementById('reportTime').textContent = cells[1].textContent;
+          document.getElementById('reportGuard').textContent = `${cells[2].textContent} (${cells[3].textContent})`;
+          document.getElementById('reportType').textContent = cells[4].textContent;
+          document.getElementById('reportActions').textContent = cells[5].textContent;
+          document.getElementById('reportLocation').textContent = cells[6].textContent;
+          document.getElementById('reportPersons').textContent = cells[7].textContent;
+          
+          // Set up evidence link
+          const evidenceLink = cells[8].querySelector('a');
+          if (evidenceLink) {
+            document.getElementById('reportEvidence').href = evidenceLink.href;
+            document.getElementById('reportEvidence').textContent = evidenceLink.textContent;
+          }
+          
+          SeekYu.showPopup('incident-popup');
+        });
+      });
+
+      // Set up close button for incident popup
+      const closeIncidentPopup = document.getElementById('closeIncidentPopup');
+      if (closeIncidentPopup) {
+        closeIncidentPopup.addEventListener('click', () => {
+          SeekYu.hidePopup('incident-popup');
+        });
+      }
+
+      // Set up notification dropdown toggle
+      const notifToggle = document.getElementById('notifToggle');
+      const notifList = document.getElementById('notifList');
+      
+      if (notifToggle && notifList) {
+        notifToggle.addEventListener('click', () => {
+          notifList.classList.toggle('hidden');
+        });
+      }
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (notifList && !notifList.classList.contains('hidden') && 
+            !notifToggle.contains(e.target) && !notifList.contains(e.target)) {
+          notifList.classList.add('hidden');
+        }
+      });
+
+      // Set up view all notifications button
+      const viewAllNotifs = document.getElementById('viewAllNotifs');
+      if (viewAllNotifs) {
+        viewAllNotifs.addEventListener('click', () => {
+          App.showSection('notifications');
+          notifList.classList.add('hidden');
+        });
+      }
+    
+
+    // Minimal App object to handle UI toggles used in this file.
+    window.App = {
       showSection(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         const el = document.getElementById(id);
@@ -610,14 +670,12 @@
         const popup = document.getElementById(id);
         if (!popup) return console.warn('Popup not found:', id);
         popup.classList.remove('hidden');
-        popup.style.display = 'flex';
         document.body.style.overflow = 'hidden';
       },
       hidePopup(id) {
         const popup = document.getElementById(id);
         if (!popup) return;
         popup.classList.add('hidden');
-        popup.style.display = 'none';
         document.body.style.overflow = '';
       }
     };
@@ -638,21 +696,6 @@
         document.querySelectorAll(".sub-section").forEach(sec => sec.classList.remove("active"));
         const target = btn.getAttribute("data-target");
         if (target) document.getElementById(target).classList.add("active");
-      });
-    });
-
-    // Incident report view button
-    document.querySelectorAll('.view-report-btn').forEach(btn => {
-      btn.addEventListener('click', function () {
-        // In real app, load report by id. Here we use static example values.
-        document.getElementById('reportDate').textContent = '2025-08-20';
-        document.getElementById('reportTime').textContent = '14:30';
-        document.getElementById('reportGuard').textContent = 'Juan Dela Cruz (SG001)';
-        document.getElementById('reportType').textContent = 'Unauthorized Access';
-        document.getElementById('reportActions').textContent = 'Escorted Individual Off Premises';
-        document.getElementById('reportLocation').textContent = 'ABC Mall - Loading Dock';
-        document.getElementById('reportPersons').textContent = 'Unknown Male';
-        SeekYu.showPopup('report-popup');
       });
     });
 
@@ -684,39 +727,60 @@
         .popup .popup-content { background:#fff; color:#000; max-width:800px; width:90%; padding:20px; border-radius:8px; }
       `;
       document.head.appendChild(style);
-    })();
-
-    document.addEventListener("DOMContentLoaded", () => {
-  if (closeIncidentPopup) {
-    closeIncidentPopup.addEventListener("click", () => {
-      SeekYu.hidePopup("incident-popup");
     });
-  }
-});
+    
+    // Minimal App object to handle UI toggles
+    window.App = {
+      showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+        
+        // If showing notifications section, initialize it
+        if (id === 'notifications') {
+          setTimeout(initNotifications, 10);
+        }
+        
+        // update sidebar active class
+        document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+        const sidebarBtn = Array.from(document.querySelectorAll('.sidebar button')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'"));
+        if (sidebarBtn) sidebarBtn.classList.add('active');
+      },
+      showSubSection(id) {
+        // hide all sub-sections within current section
+        document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+        // update tabs/account buttons
+        document.querySelectorAll('[data-target]').forEach(b => b.classList.remove('active'));
+        const btn = document.querySelector('[data-target="' + id + '"]');
+        if (btn) btn.classList.add('active');
+      },
+      showPopup(id) {
+        const popup = document.getElementById(id);
+        if (!popup) return console.warn('Popup not found:', id);
+        popup.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      },
+      hidePopup(id) {
+        const popup = document.getElementById(id);
+        if (!popup) return;
+        popup.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    };
 
-function setupSearchAndFilter(searchId, filterId, listSelector, cardSelector) {
-    const search = document.getElementById(searchId);
-    const filter = document.getElementById(filterId);
-    const list = document.querySelector(listSelector);
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize notifications if we're on the notifications page
+      if (document.getElementById('notifications')?.classList.contains('active')) {
+        initNotifications();
+      }
+      
+      // Update notification count on load
+      updateNotificationCount();
+    });
 
-    function updateList() {
-      const query = search.value.toLowerCase();
-      const filterVal = filter.value;
-      list.querySelectorAll(cardSelector).forEach(card => {
-        const text = card.innerText.toLowerCase();
-        const status = card.dataset.status;
-        const matchesSearch = text.includes(query);
-        const matchesFilter = filterVal === "all" || status === filterVal;
-        card.style.display = matchesSearch && matchesFilter ? "block" : "none";
-      });
-    }
-
-    search.addEventListener("input", updateList);
-    filter.addEventListener("change", updateList);
-  }
-
-  setupSearchAndFilter("clientSearch", "clientFilter", ".client-list", ".client-card");
-  setupSearchAndFilter("guardSearch", "guardFilter", ".guard-list", ".guard-card");
   </script>
 </body>
 </html>
