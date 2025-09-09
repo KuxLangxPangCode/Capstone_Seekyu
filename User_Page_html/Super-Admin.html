@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeekYu — Admin Dashboard</title>
+  <link rel="stylesheet" href="styles/Admin.css" />
+  <script src="scripts/Messaging.js" defer></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">SeekYu</div>
+      <nav>
+        <ul>
+          <li><button onclick="App.showSection('account-mgmt')" class="active">Account Management</button></li>
+          <li><button onclick="App.showSection('messaging-mgmt')">Messaging</button></li>
+          <li><button onclick="location.href='Index.html'">Logout</button></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Header with notification dropdown -->
+      <div class="dashboard-header">
+        <div>
+          <h1 class="page-title">Admin Dashboard</h1>
+          <p class="muted">Manage accounts, messaging, and notifications.</p>
+        </div>
+
+        <div class="header-actions">
+                      <div class="notification-dropdown">
+              <button id="notifToggle" class="icon-btn" aria-expanded="false">
+                Notifications <span id="notifCount" class="badge">3</span>
+              </button>
+              <div id="notifList" class="dropdown hidden">
+                <ul>
+                  <li><strong>New Application:</strong> Carlos Dela Cruz submitted an application. <span class="time">2m</span></li>
+                  <li><strong>Incident Report:</strong> Unauthorized access reported at ABC Mall. <span class="time">3h</span></li>
+                  <li><strong>Leave Request:</strong> Maria Santos requested emergency leave. <span class="time">1d</span></li>
+                </ul>
+                <div class="dropdown-actions"><a href="Notif-Admin.html" id="viewAllNotifs" class="small-btn">View all</a></div>
+              </div>
+            </div>
+
+          <div class="profile-summary">
+            <img src="https://via.placeholder.com/48" alt="Admin avatar" class="avatar">
+            <div>
+              <div class="name">Admin User</div>
+              <div class="role muted">System Administrator</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Management -->
+      <div id="account-mgmt" class="section active">
+        <h2>Account Management</h2>
+        <button id="createAccountBtn">Create Account</button>
+
+        <table id="accountsTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Password</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Admin User</td>
+              <td>admin@example.com</td>
+              <td>Admin</td>
+              <td>••••••</td>
+              <td>
+                <button class="edit-btn">Edit</button>
+                <button class="password-btn">Change Password</button>
+                <button class="delete-btn">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Messaging Management -->
+      <div id="messaging-mgmt" class="section">
+        <h2>Messaging</h2>
+
+        <div class="sub-nav">
+          <button onclick="App.showSubSection('inbox-section')" class="active">Inbox</button>
+          <button onclick="App.showSubSection('compose-section')">Compose</button>
+        </div>
+
+        <!-- Inbox -->
+        <div id="inbox-section" class="sub-section active">
+          <input type="text" id="messageSearch" placeholder="Search messages...">
+          <table class="message-table" id="messageTable">
+            <thead>
+              <tr>
+                <th>Sender</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Admin</td>
+                <td>Shift Schedule Update</td>
+                <td>2025-08-25</td>
+                <td>
+                  <button class="view-message-btn" data-from="Admin" data-subject="Shift Schedule Update" data-date="2025-08-25" data-body="Your shift schedule has been updated.">View</button>
+                  <button class="delete-message-btn">Delete</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Compose -->
+        <div id="compose-section" class="sub-section">
+          <form id="composeForm" class="compose-form">
+            <label>To:</label>
+            <input type="text" id="recipient" required>
+            <label>Subject:</label>
+            <input type="text" id="subject" required>
+            <label>Message:</label>
+            <textarea id="message" rows="5" required></textarea>
+            <button type="submit">Send Message</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Popups -->
+      <div id="editAccountPopup" class="popup hidden">
+        <div class="popup-content">
+          <h2>Edit Account</h2>
+          <form id="editAccountForm">
+            <label>Name:</label>
+            <input type="text" id="editName" required>
+            <label>Email:</label>
+            <input type="email" id="editEmail" required>
+            <label>Role:</label>
+            <select id="editRole" required>
+              <option>Admin</option>
+              <option>HR</option>
+              <option>Security</option>
+            </select>
+            <button type="submit">Save</button>
+            <button type="button" onclick="SeekYu.hidePopup('editAccountPopup')">Cancel</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="passwordPopup" class="popup hidden">
+        <div class="popup-content">
+          <h2>Change Password</h2>
+          <form id="passwordForm">
+            <label>New Password:</label>
+            <input type="password" id="newPass" required>
+            <label>Confirm Password:</label>
+            <input type="password" id="confirmPass" required>
+            <button type="submit">Update</button>
+            <button type="button" onclick="SeekYu.hidePopup('passwordPopup')">Cancel</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="message-popup" class="popup hidden">
+        <div class="popup-content">
+          <h2>Message Details</h2>
+          <p><strong>From:</strong> <span id="popupSender"></span></p>
+          <p><strong>Subject:</strong> <span id="popupSubject"></span></p>
+          <p><strong>Date:</strong> <span id="popupDate"></span></p>
+          <p><strong>Message:</strong></p>
+          <p id="popupBody"></p>
+          <button onclick="SeekYu.hidePopup('message-popup')">Close</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Popup handler
+    window.SeekYu = {
+      showPopup(id) { document.getElementById(id).classList.remove('hidden'); },
+      hidePopup(id) { document.getElementById(id).classList.add('hidden'); }
+    };
+
+    // Section switcher
+    window.App = {
+      showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
+        const btn = Array.from(document.querySelectorAll('.sidebar button')).find(b => b.getAttribute('onclick')?.includes(id));
+        if (btn) btn.classList.add('active');
+      },
+      showSubSection(id) {
+        document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.sub-nav button').forEach(b => b.classList.remove('active'));
+        const btn = Array.from(document.querySelectorAll('.sub-nav button')).find(b => b.getAttribute('onclick')?.includes(id));
+        if (btn) btn.classList.add('active');
+      }
+    };
+
+    // Notification dropdown
+    const notifToggle = document.getElementById('notifToggle');
+    const notifList = document.getElementById('notifList');
+    notifToggle.addEventListener('click', e => {
+      e.stopPropagation();
+      notifList.classList.toggle('hidden');
+    });
+    document.addEventListener('click', e => {
+      if (!notifList.contains(e.target) && !notifToggle.contains(e.target)) {
+        notifList.classList.add('hidden');
+      }
+    });
+
+    // Message popup
+    document.addEventListener('click', e => {
+      if (e.target.matches('.view-message-btn')) {
+        document.getElementById('popupSender').textContent = e.target.dataset.from;
+        document.getElementById('popupSubject').textContent = e.target.dataset.subject;
+        document.getElementById('popupDate').textContent = e.target.dataset.date;
+        document.getElementById('popupBody').textContent = e.target.dataset.body;
+        SeekYu.showPopup('message-popup');
+      }
+      if (e.target.matches('.delete-message-btn')) {
+        e.target.closest('tr').remove();
+      }
+    });
+
+    // Compose form demo
+    document.getElementById('composeForm').addEventListener('submit', e => {
+      e.preventDefault();
+      alert('Message sent (demo).');
+      e.target.reset();
+      App.showSubSection('inbox-section');
+    });
+
+    // Account management actions
+    document.getElementById('accountsTable').addEventListener('click', e => {
+      const row = e.target.closest('tr');
+      if (e.target.classList.contains('edit-btn')) {
+        document.getElementById('editName').value = row.cells[0].textContent;
+        document.getElementById('editEmail').value = row.cells[1].textContent;
+        document.getElementById('editRole').value = row.cells[2].textContent;
+        SeekYu.showPopup('editAccountPopup');
+      }
+      if (e.target.classList.contains('password-btn')) {
+        SeekYu.showPopup('passwordPopup');
+      }
+      if (e.target.classList.contains('delete-btn')) {
+        if (confirm('Delete this account?')) row.remove();
+      }
+    });
+
+    // Edit account form
+    document.getElementById('editAccountForm').addEventListener('submit', e => {
+      e.preventDefault();
+      alert('Account updated (demo).');
+      SeekYu.hidePopup('editAccountPopup');
+    });
+
+    // Password change
+    document.getElementById('passwordForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const np = document.getElementById('newPass').value;
+      const cp = document.getElementById('confirmPass').value;
+      if (np !== cp) { alert('Passwords do not match!'); return; }
+      alert('Password updated (demo).');
+      SeekYu.hidePopup('passwordPopup');
+    });
+
+    // Message search
+    document.getElementById('messageSearch').addEventListener('keyup', function () {
+      const filter = this.value.toLowerCase();
+      document.querySelectorAll('#messageTable tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
