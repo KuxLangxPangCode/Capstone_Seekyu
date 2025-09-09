@@ -7,16 +7,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* Custom styles */
-    .role-btn {
-      transition: transform 0.2s;
-    }
-    .role-btn:hover {
-      transform: scale(1.05);
-    } 
+    .role-btn { transition: transform 0.15s; }
+    .role-btn:hover { transform: scale(1.03); }
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-    </style>
+  </style>
 </head>
-<body class="h-screen w-screen bg-cover bg-center relative" style="background-image: url('IndexBackground.jpg');">
+<body class="h-screen w-screen bg-cover bg-center relative" style="background-image: url('IndexBackground.jpg'); font-family: Poppins, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;">
 
   <!-- Overlay -->
   <div class="absolute inset-0 bg-black bg-opacity-70 z-0"></div>
@@ -58,281 +54,300 @@
       </div>
     </section>
 
-  <!-- Main Content -->
-  <main class="relative z-10 flex items-center justify-center min-h-screen px-6">
-    <!-- Role Selection Section -->
-    <div id="roleSelection" class="max-w-md w-full bg-gray-800 p-8 rounded-lg shadow-lg">
-      <h2 class="text-3xl font-bold text-center text-white">Welcome to Seekyu</h2>
-      <p class="text-center text-gray-400 mt-2">Select your role to continue</p>
+    <!-- Main Content: Login / Role selection -->
+    <main class="relative z-10 flex items-center justify-center min-h-screen px-6">
+      <div id="roleSelection" class="max-w-md w-full bg-gray-800 p-8 rounded-lg shadow-lg">
+        <h2 class="text-3xl font-bold text-center text-white">Welcome to Seekyu</h2>
+        <p class="text-center text-gray-400 mt-2">Choose a login type to continue. (Each button opens a single login form that accepts multiple related roles.)</p>
 
-      <!-- Role Selection Buttons -->
-      <div class="grid grid-cols-2 gap-4 mt-6">
-        <!-- Admin Roles -->
-        <div class="col-span-2">
-          <h3 class="text-white text-sm font-medium mb-2 flex items-center">
-            <i class="fas fa-crown mr-2 text-yellow-400"></i>Admin Roles
-          </h3>
-          <div class="grid grid-cols-3 gap-2">
-            <button onclick="selectRole('super-admin', 'id')" class="role-btn bg-gradient-to-r from-purple-700 to-purple-500 text-white p-3 rounded-md text-sm font-medium">
-              <i class="fas fa-star text-yellow-300"></i> Super Admin
-            </button>
-            <button onclick="selectRole('hr-admin', 'id')" class="role-btn bg-gradient-to-r from-blue-700 to-blue-500 text-white p-3 rounded-md text-sm font-medium">
-              <i class="fas fa-users"></i> HR Admin
-            </button>
-            <button onclick="selectRole('admin', 'id')" class="role-btn bg-gradient-to-r from-indigo-700 to-indigo-500 text-white p-3 rounded-md text-sm font-medium">
-              <i class="fas fa-user-cog"></i> Admin
-            </button>
+        <!-- Two main merged buttons -->
+        <div class="mt-6 space-y-4">
+          <div>
+            <h3 class="text-sm text-gray-300 mb-2">This login handles:</h3>
+            <p class="text-sm text-gray-400 mb-3">Client, Security Guard, Head Guard, HR Admin</p>
+            <button onclick="selectGroup('clientGroup', event)" class="role-btn w-full bg-gradient-to-r from-teal-600 to-blue-600 text-white p-4 rounded-md text-md font-semibold shadow">Client / Security / Head / HR Login</button>
+          </div>
+
+          <div>
+            <h3 class="text-sm text-gray-300 mb-2">This login handles:</h3>
+            <p class="text-sm text-gray-400 mb-3">Admin, Super Admin</p>
+            <button onclick="selectGroup('adminGroup', event)" class="role-btn w-full bg-gradient-to-r from-purple-700 to-indigo-600 text-white p-4 rounded-md text-md font-semibold shadow">Admin / Super Admin Login</button>
           </div>
         </div>
 
-        <!-- Applicant Button -->
-        <div class="col-span-2 mt-4">
-          <h3 class="text-white text-sm font-medium mb-2 flex items-center">
-            <i class="fas fa-file-alt mr-2 text-green-400"></i>Applicant
-          </h3>
-          <button onclick="selectRole('applicant', 'email')" class="role-btn w-full bg-gradient-to-r from-green-600 to-green-500 text-white p-3 rounded-md text-sm font-medium">
-            <i class="fas fa-user-graduate"></i> Applicant Login
-          </button>
-        </div>
+        <!-- Small helper text -->
+        <p class="mt-4 text-xs text-gray-400">No dropdowns — the form will accept IDs for any of the listed roles. Use standard role prefixes if your organization follows them (e.g., <code>sg.123</code> for a security guard).</p>
 
-        <!-- Security & Client Roles -->
-        <div class="col-span-2 mt-4">
-          <h3 class="text-white text-sm font-medium mb-2 flex items-center">
-            <i class="fas fa-shield-alt mr-2 text-red-400"></i>Security & Client Roles
-          </h3>
-          <div class="grid grid-cols-3 gap-2">
-            <button onclick="selectRole('security-guard', 'id')" class="role-btn bg-gradient-to-r from-red-700 to-red-500 text-white p-3 rounded-md text-sm font-medium">
-              <i class="fas fa-shield-alt"></i> Security Guard
-            </button>
-            <button onclick="selectRole('head-guard', 'id')" class="role-btn bg-gradient-to-r from-orange-700 to-orange-500 text-white p-3 rounded-md text-sm font-medium">
-              <i class="fas fa-user-shield"></i> Head Guard
-            </button>
-            <button onclick="selectRole('client', 'id')" class="role-btn bg-gradient-to-r from-teal-700 to-teal-500 text-white p-3 rounded-md text-sm font-medium">
-              <i class="fas fa-building"></i> Client
-            </button>
+        <div class="mt-4 text-center">
+          <div class="space-y-2">
+            <button onclick="selectGroup('applicantRegister', event)" class="text-sm text-green-400 hover:text-green-300 underline">New here? Start your application</button>
+            <button onclick="selectGroup('applicantLogin', event)" class="w-full bg-green-600 hover:bg-green-500 text-white p-2 rounded-md text-sm font-medium">Applicant Login</button>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Login Form Section (Initially Hidden) -->
-     <section>
-    <div id="loginFormContainer" class="max-w-md w-full bg-gray-800 p-8 rounded-lg shadow-lg hidden">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-white" id="formTitle">Login</h2>
-        <button onclick="goBackToRoleSelection()" class="text-gray-400 hover:text-white">
-          <i class="fas fa-arrow-left"></i> Back
-        </button>
-      </div>
+      <!-- Login Form Section (Initially Hidden) -->
+      <section>
+        <div id="loginFormContainer" class="max-w-md w-full bg-gray-800 p-8 rounded-lg shadow-lg hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-white" id="formTitle">Login</h2>
+            <button onclick="goBackToRoleSelection()" class="text-gray-400 hover:text-white">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+          </div>
+
+          <p class="text-gray-400 mb-2" id="roleDescription">Enter your credentials to access your account</p>
+          <!-- Info showing which roles this form handles -->
+          <p id="multiRoleInfo" class="text-sm text-gray-500 mb-6"></p>
+
+          <!-- Login Form -->
+          <form id="loginForm" class="space-y-4">
+            <input type="hidden" id="selectedRole" value="">
+            <input type="hidden" id="authType" value="">
+
+            <div>
+              <label for="loginId" id="loginIdLabel" class="block text-sm font-medium text-gray-300 mb-1">User ID / Email</label>
+              <input type="text" id="loginId" placeholder="Enter your ID or email" class="w-full rounded-md p-2 bg-gray-700 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+            </div>
+
+            <div>
+              <label for="loginPass" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+              <input type="password" id="loginPass" placeholder="Password" class="w-full rounded-md p-2 bg-gray-700 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <input type="checkbox" id="rememberMe" class="h-4 w-4 text-indigo-500 rounded">
+                <label for="rememberMe" class="ml-2 block text-sm text-gray-300">Remember me</label>
+              </div>
+              <a href="#" class="text-sm text-indigo-400 hover:text-indigo-300">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-2 rounded-md transition duration-300">Log in</button>
+          </form>
+
+          <!-- Hint for applicant dummy login -->
+          <div id="applicantHint" class="hidden mt-4">
+            <p class="text-xs text-gray-400 text-center">
+              Applicant test credentials: <br>
+              Email: <span class="text-indigo-400">celim@example.com</span> <br>
+              Password: <span class="text-indigo-400">1234</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Register Form (for Applicants) -->
+        <div id="registerFormContainer" class="max-w-md w-full bg-gray-800 p-8 rounded-lg shadow-lg hidden mt-6">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-white">Applicant Registration</h2>
+            <button onclick="goBackToRoleSelection()" class="text-gray-400 hover:text-white">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+          </div>
+
+          <form id="registerForm" class="space-y-4">
+            <div>
+              <label for="regFullName" class="block text-sm font-medium text-gray-300 mb-1">Full name</label>
+              <input type="text" id="regFullName" placeholder="Your full name" class="w-full rounded-md p-2 bg-gray-700 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+            </div>
+            <div>
+              <label for="regEmail" class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+              <input type="email" id="regEmail" placeholder="you@example.com" class="w-full rounded-md p-2 bg-gray-700 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+            </div>
+            <div>
+              <label for="regPass" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+              <input type="password" id="regPass" placeholder="Choose a password" class="w-full rounded-md p-2 bg-gray-700 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+            </div>
+            <div>
+              <label for="regPass2" class="block text-sm font-medium text-gray-300 mb-1">Confirm password</label>
+              <input type="password" id="regPass2" placeholder="Confirm password" class="w-full rounded-md p-2 bg-gray-700 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
+            </div>
+
+            <button type="submit" class="w-full bg-green-600 hover:bg-green-500 text-white font-semibold py-2 rounded-md transition duration-300">Create account</button>
+          </form>
+
+          <p class="text-xs text-gray-400 mt-4 text-center">By creating an account you agree to our <a href="#" class="underline text-indigo-400">Terms</a> and <a href="#" class="underline text-indigo-400">Privacy Policy</a>.</p>
+        </div>
+      </section>
+
       
-      <p class="text-gray-400 mb-6" id="roleDescription">Enter your credentials to access your account</p>
 
-      <!-- Login Form -->
-      <form id="loginForm" class="space-y-4">
-        <input type="hidden" id="selectedRole" value="">
-        <input type="hidden" id="authType" value="">
-        
-        <div>
-          <label for="loginId" id="loginIdLabel" class="block text-sm font-medium text-gray-300 mb-1">User ID</label>
-          <input type="text" id="loginId" placeholder="Enter your ID" class="w-full rounded-md p-2 bg-gray-700 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-        </div>
-        
-        <div>
-          <label for="loginPass" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
-          <input type="password" id="loginPass" placeholder="Password" class="w-full rounded-md p-2 bg-gray-700 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none">
-        </div>
-        
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <input type="checkbox" id="rememberMe" class="h-4 w-4 text-indigo-500 rounded">
-            <label for="rememberMe" class="ml-2 block text-sm text-gray-300">Remember me</label>
-          </div>
-          <a href="#" class="text-sm text-indigo-400 hover:text-indigo-300">Forgot password?</a>
-        </div>
-        
-        <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-2 rounded-md transition duration-300">Log in</button>
-      </form>
-
-      <!-- Hint for applicant dummy login -->
-      <div id="applicantHint" class="hidden mt-4">
-        <p class="text-xs text-gray-400 text-center">
-          Applicant test credentials: <br>
-          Email: <span class="text-indigo-400">celim@example.com</span> <br>
-          Password: <span class="text-indigo-400">1234</span>
-        </p>
-      </div>
-    </div>
-</section>
+    </main>
 
   </main>
 
   <script>
-  function showSection(id) {
-    document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-  }
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
 
-  function selectRole(role, authType) {
-      // Remove active class from all buttons
-      document.querySelectorAll('.role-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      
-      // Add active class to the clicked button
-      event.target.classList.add('active');
-      
-      // Set the selected role and auth type
-      document.getElementById('selectedRole').value = role;
-      document.getElementById('authType').value = authType;
-      
-      // Update form title and description based on role
+    // Select a group (merged) instead of individual roles
+    function selectGroup(group, evt) {
+      // Optional visual feedback
+      if (evt && evt.target) {
+        document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+        evt.target.classList.add('active');
+      }
+
       const formTitle = document.getElementById('formTitle');
       const roleDescription = document.getElementById('roleDescription');
+      const multiRoleInfo = document.getElementById('multiRoleInfo');
       const loginIdLabel = document.getElementById('loginIdLabel');
       const loginIdInput = document.getElementById('loginId');
-      
-      switch(role) {
-        case 'super-admin':
-          formTitle.textContent = 'Super Admin Login';
-          roleDescription.textContent = 'Access the super administrator dashboard';
-          loginIdLabel.textContent = 'Admin ID';
-          loginIdInput.placeholder = 'Enter your Admin ID';
-          break;
-        case 'hr-admin':
-          formTitle.textContent = 'HR Admin Login';
-          roleDescription.textContent = 'Manage personnel and recruitment';
-          loginIdLabel.textContent = 'HR Admin ID';
-          loginIdInput.placeholder = 'Enter your HR Admin ID';
-          break;
-        case 'admin':
-          formTitle.textContent = 'Admin Login';
-          roleDescription.textContent = 'Access the administration panel';
-          loginIdLabel.textContent = 'Admin ID';
-          loginIdInput.placeholder = 'Enter your Admin ID';
-          break;
-        case 'applicant':
-          formTitle.textContent = 'Applicant Login';
-          roleDescription.textContent = 'Continue your application process';
-          loginIdLabel.textContent = 'Email';
-          loginIdInput.placeholder = 'Enter your Email';
-          document.getElementById('applicantHint').classList.remove('hidden');
-          break;
-        case 'security-guard':
-          formTitle.textContent = 'Security Guard Login';
-          roleDescription.textContent = 'Access your guard portal';
-          loginIdLabel.textContent = 'Guard ID';
-          loginIdInput.placeholder = 'Enter your Guard ID';
-          break;
-        case 'head-guard':
-          formTitle.textContent = 'Head Guard Login';
-          roleDescription.textContent = 'Manage your security team';
-          loginIdLabel.textContent = 'Head Guard ID';
-          loginIdInput.placeholder = 'Enter your Head Guard ID';
-          break;
-        case 'client':
-          formTitle.textContent = 'Client Login';
-          roleDescription.textContent = 'Access your client dashboard';
-          loginIdLabel.textContent = 'Client ID';
-          loginIdInput.placeholder = 'Enter your Client ID';
-          break;
+
+      document.getElementById('selectedRole').value = group;
+      document.getElementById('authType').value = 'id';
+
+      // hide both form containers first
+      document.getElementById('loginFormContainer').classList.add('hidden');
+      if (document.getElementById('registerFormContainer')) document.getElementById('registerFormContainer').classList.add('hidden');
+
+      if (group === 'clientGroup') {
+        formTitle.textContent = 'Client / Security / Head / HR Login';
+        roleDescription.textContent = 'Use this form to login as Client, Security Guard, Head Guard or HR Admin.';
+        multiRoleInfo.textContent = 'Accepted roles: Client, Security Guard, Head Guard, HR Admin. If your ID uses a prefix, examples: cl.123, sg.123, hg.123, hr.123';
+        loginIdLabel.textContent = 'User ID';
+        loginIdInput.placeholder = 'e.g. sg.123 or cl.456';
+        document.getElementById('loginFormContainer').classList.remove('hidden');
+      } else if (group === 'adminGroup') {
+        formTitle.textContent = 'Admin / Super Admin Login';
+        roleDescription.textContent = 'Use this form to login as Admin or Super Admin.';
+        multiRoleInfo.textContent = 'Accepted roles: Admin, Super Admin. If your ID uses a prefix, examples: ad.123, sa.123';
+        loginIdLabel.textContent = 'Admin ID';
+        loginIdInput.placeholder = 'e.g. ad.001 or sa.001';
+        document.getElementById('loginFormContainer').classList.remove('hidden');
+      } else if (group === 'applicantRegister') {
+        // show register form
+        document.getElementById('registerFormContainer').classList.remove('hidden');
+      } else if (group === 'applicantLogin') {
+        // Applicant login flow (email)
+        formTitle.textContent = 'Applicant Login';
+        roleDescription.textContent = 'Continue your application process';
+        multiRoleInfo.textContent = '';
+        loginIdLabel.textContent = 'Email';
+        loginIdInput.placeholder = 'Enter your Email';
+        document.getElementById('authType').value = 'email';
+        document.getElementById('selectedRole').value = 'applicant';
+        document.getElementById('applicantHint').classList.remove('hidden');
+        document.getElementById('loginFormContainer').classList.remove('hidden');
       }
-      
-      // Hide role selection and show login form
+
       document.getElementById('roleSelection').classList.add('hidden');
-      document.getElementById('loginFormContainer').classList.remove('hidden');
       document.getElementById('loginFormContainer').classList.add('fade-in');
     }
-    
+
     function goBackToRoleSelection() {
-      // Hide login form and show role selection
       document.getElementById('loginFormContainer').classList.add('hidden');
+      if (document.getElementById('registerFormContainer')) document.getElementById('registerFormContainer').classList.add('hidden');
       document.getElementById('roleSelection').classList.remove('hidden');
       document.getElementById('roleSelection').classList.add('fade-in');
-      
-      // Hide applicant hint if it was shown
       document.getElementById('applicantHint').classList.add('hidden');
-      
-      // Clear form fields
       document.getElementById('loginId').value = '';
       document.getElementById('loginPass').value = '';
       document.getElementById('rememberMe').checked = false;
     }
 
-    // Function to convert ID to email format for backend
+    // Detect role from ID prefix if possible
+    function detectRoleFromId(identifier, group) {
+      var id = identifier.toLowerCase();
+      // prefixes -> roles
+      if (id.startsWith('sg.') || id.startsWith('sg-') || id.startsWith('sg')) return 'security-guard';
+      if (id.startsWith('hg.') || id.startsWith('hg-') || id.startsWith('hg')) return 'head-guard';
+      if (id.startsWith('cl.') || id.startsWith('cl-') || id.startsWith('cl')) return 'client';
+      if (id.startsWith('hr.') || id.startsWith('hr-') || id.startsWith('hr')) return 'hr-admin';
+      if (id.startsWith('sa.') || id.startsWith('sa-') || id.startsWith('sa')) return 'super-admin';
+      if (id.startsWith('ad.') || id.startsWith('ad-') || id.startsWith('ad')) return 'admin';
+
+      // fallback by group
+      if (group === 'adminGroup') return 'admin';
+      if (group === 'clientGroup') return 'client';
+      return 'applicant';
+    }
+
     function convertIdToEmail(id, role) {
-      // In a real application, this would likely involve an API call or more complex logic
-      // For demonstration, we'll use a simple conversion
-      const domain = 'seekyu.example.com'; // Example domain
-      
-      // Different role prefixes for email conversion
-      const rolePrefixes = {
-        'super-admin': 'sa',
-        'hr-admin': 'hr',
-        'admin': 'ad',
-        'security-guard': 'sg',
-        'head-guard': 'hg',
-        'client': 'cl'
-      };
-      
-      if (role in rolePrefixes) {
-        return `${rolePrefixes[role]}.${id}@${domain}`;
-      }
-      
-      // For applicant, return as-is (it's already an email)
+      var domain = 'seekyu.example.com';
+      var rolePrefixes = {'super-admin':'sa','hr-admin':'hr','admin':'ad','security-guard':'sg','head-guard':'hg','client':'cl'};
+      if (role in rolePrefixes) return rolePrefixes[role] + '.' + id + '@' + domain;
       return id;
     }
 
-    // Login form submission
-    document.getElementById("loginForm").addEventListener("submit", function(e) {
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const role = document.getElementById("selectedRole").value;
-      const authType = document.getElementById("authType").value;
-      let identifier = document.getElementById("loginId").value.trim();
-      const pass = document.getElementById("loginPass").value.trim();
+      var group = document.getElementById('selectedRole').value;
+      var authType = document.getElementById('authType').value;
+      var identifier = document.getElementById('loginId').value.trim();
+      var pass = document.getElementById('loginPass').value.trim();
 
-      if (!identifier || !pass) {
-        alert("Please enter your credentials.");
+      if (!identifier || !pass) { alert('Please enter your credentials.'); return; }
+
+      // If email input (applicant), use applicant flow
+      if (authType === 'email' || identifier.indexOf('@') !== -1) {
+        // Applicant flow
+        if (identifier === 'celim@example.com' && pass === '1234') {
+          alert('Logging in as applicant');
+          window.location.href = 'Apply-Applicant.html';
+          return;
+        } else {
+          alert('Invalid Applicant credentials. Try: celim@example.com / 1234');
+          return;
+        }
+      }
+
+      // detect specific role within the selected group using ID prefixes
+      var role = detectRoleFromId(identifier, group);
+      var emailForBackend = convertIdToEmail(identifier, role.replace(/\s+/g, '-'));
+      console.log('Detected role: ' + role + ' — email for backend: ' + emailForBackend);
+
+      // Route based on detected role
+      if (role === 'super-admin' || role === 'admin') {
+        alert('Logging in as ' + role + ' with ID: ' + identifier);
+        window.location.href = 'Admin-Dashboard.html';
         return;
       }
 
-      // Convert ID to email for backend if needed (for non-applicant roles)
-      let emailForBackend = identifier;
-      if (authType === 'id') {
-        emailForBackend = convertIdToEmail(identifier, role);
-        console.log(`Converted ID ${identifier} to email: ${emailForBackend} for backend`);
+      if (role === 'security-guard' || role === 'head-guard') {
+        alert('Logging in as ' + role + ' with ID: ' + identifier);
+        window.location.href = 'Guard-Dashboard.html';
+        return;
       }
 
-      // For demo purposes, we'll just show what would be sent to the backend
-      console.log(`Would send to backend: ${emailForBackend}, ${pass}`);
+      if (role === 'client') {
+        alert('Logging in as client with ID: ' + identifier);
+        window.location.href = 'Client-Dashboard.html';
+        return;
+      }
 
-      // Admin roles
-      if (['super-admin', 'hr-admin', 'admin'].includes(role)) {
-        alert(`Logging in as ${role} with ID: ${identifier}\nEmail for backend: ${emailForBackend}`);
-        window.location.href = "Admin-Dashboard.html";
-      } 
-      // Security guard roles
-      else if (['security-guard', 'head-guard'].includes(role)) {
-        alert(`Logging in as ${role} with ID: ${identifier}\nEmail for backend: ${emailForBackend}`);
-        window.location.href = "Guard-Dashboard.html";
+      if (role === 'hr-admin') {
+        alert('Logging in as HR Admin with ID: ' + identifier);
+        window.location.href = 'Admin-Dashboard.html';
+        return;
       }
-      // Client role
-      else if (role === 'client') {
-        alert(`Logging in as ${role} with ID: ${identifier}\nEmail for backend: ${emailForBackend}`);
-        window.location.href = "Client-Dashboard.html";
-      }
-      // Applicant role
-      else if (role === 'applicant') {
-        if (identifier === "celim@example.com" && pass === "1234") {
-          alert(`Logging in as ${role} with email: ${identifier}`);
-          window.location.href = "Apply-Applicant.html";
-        } else {
-          alert("Invalid Applicant credentials. Try: celim@example.com / 1234");
-        }
-      }
+
+      // Default
+      alert('Login processed. Redirecting...');
     });
 
-</script>
+    // Register form submission
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var name = document.getElementById('regFullName').value.trim();
+      var email = document.getElementById('regEmail').value.trim();
+      var p1 = document.getElementById('regPass').value;
+      var p2 = document.getElementById('regPass2').value;
 
+      if (!name || !email || !p1 || !p2) { alert('Please fill all fields.'); return; }
+      if (p1 !== p2) { alert('Passwords do not match.'); return; }
+
+      // For demo: just log and redirect to application page or a 'check your email' placeholder
+      console.log('Registering applicant: ' + name + ', ' + email);
+      alert('Account created. You can now login. Redirecting to applicant login...');
+      goBackToRoleSelection();
+      // Open applicant login form after registration
+      selectGroup('applicantLogin');
+    });
+  </script>
 
 </body>
 </html>
