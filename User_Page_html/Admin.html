@@ -294,22 +294,32 @@
           <h2>Accounts List</h2>
           <table>
             <thead>
-              <tr>
-                <th>Name</th>
-                <th>Account ID</th>
-                <th>Role</th>
-                <th>Date Created</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="accountTableBody">
-              <tr>
-                <td>Juan Dela Cruz</td>
-                <td>AC-001</td>
-                <td>Client</td>
-                <td>2025-08-14</td>
-                <td><button class="delete-btn">Delete</button></td>
-              </tr>
+              <!-- in thead -->
+<tr>
+  <th>Name</th>
+  <th>Account ID</th>
+  <th>Role</th>
+  <th>Date Created</th>
+  <th>Password</th> <!-- new -->
+  <th>Action</th>
+</tr>
+
+<!-- example tbody row -->
+<tr data-account-id="AC-001" data-email="juan@example.com">
+  <td class="col-name">Juan Dela Cruz</td>
+  <td class="col-id">AC-001</td>
+  <td class="col-role">Client</td>
+  <td class="col-date">2025-08-14</td>
+  <td class="col-pass">•••••••</td> <!-- new -->
+  <td class="col-actions">
+    <div class="actions">
+      <button class="edit-account-btn small-btn">Edit</button>
+      <button class="change-pass-btn small-btn">Change Password</button>
+      <button class="delete-btn small-btn">Delete</button>
+    </div>
+  </td>
+</tr>
+
             </tbody>
           </table>
         </div>
@@ -561,7 +571,61 @@
           </table>
         </div>
       </div>
-   
+   <!-- Edit account popup -->
+<div id="edit-account-popup" class="popup hidden">
+  <div class="popup-content">
+    <h2>Edit Account</h2>
+    <form id="editAccountForm">
+      <input type="hidden" id="editAccountId">
+      <div class="form-row">
+        <label for="editName">Name</label>
+        <input id="editName" type="text" required>
+      </div>
+      <div class="form-row">
+        <label for="editEmail">Email</label>
+        <input id="editEmail" type="email" required>
+      </div>
+      <div class="form-row">
+        <label for="editRole">Role</label>
+        <select id="editRole">
+          <option>Applicant</option>
+          <option>Client</option>
+          <option>Security Guard</option>
+          <option>HR Admin</option>
+          <option>Admin</option>
+          <option>Super Admin</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <button type="button" onclick="SeekYu.hidePopup('edit-account-popup')" class="small-btn">Cancel</button>
+        <button type="submit" class="primary-btn">Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Change password popup -->
+<div id="change-pass-popup" class="popup hidden">
+  <div class="popup-content">
+    <h2>Change Password</h2>
+    <form id="changePassForm">
+      <input type="hidden" id="passAccountId">
+      <div class="form-row">
+        <label for="newPass">New password</label>
+        <input id="newPass" type="password" required>
+      </div>
+      <div class="form-row">
+        <label for="newPass2">Confirm password</label>
+        <input id="newPass2" type="password" required>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <button type="button" onclick="SeekYu.hidePopup('change-pass-popup')" class="small-btn">Cancel</button>
+        <button type="submit" class="primary-btn">Update Password</button>
+      </div>
+    </form>
+  </div>
+</div>
+
       <!-- Popup for Incident Report -->
       <div id="incident-popup" class="popup hidden">
       <div class="popup-content">
@@ -780,8 +844,166 @@
       // Update notification count on load
       updateNotificationCount();
     });
+// --- begin accounts handlers ---
+(function(){
+  // Ensure SeekYu popup helpers exist
+  window.SeekYu = window.SeekYu || {};
+  SeekYu.showPopup = SeekYu.showPopup || function(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  };
+  SeekYu.hidePopup = SeekYu.hidePopup || function(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+    document.body.style.overflow = '';
+  };
+
+  function findRowByAccountId(id) {
+    return document.querySelector('#accountTableBody tr[data-account-id="' + id + '"]');
+  }
+
+  // Click delegation for edit / change pass / delete
+  document.addEventListener('click', function(e) {
+    if (e.target.matches('.edit-account-btn')) {
+      const row = e.target.closest('tr');
+      const accountId = row.getAttribute('data-account-id');
+      const name = row.querySelector('.col-name').textContent.trim();
+      const role = row.querySelector('.col-role').textContent.trim();
+      const email = row.dataset.email || '';
+
+      document.getElementById('editAccountId').value = accountId;
+      document.getElementById('editName').value = name;
+      document.getElementById('editRole').value = role;
+      document.getElementById('editEmail').value = email;
+
+      SeekYu.showPopup('edit-account-popup');
+    }
+
+    if (e.target.matches('.change-pass-btn')) {
+      const row = e.target.closest('tr');
+      const accountId = row.getAttribute('data-account-id');
+      document.getElementById('passAccountId').value = accountId;
+      document.getElementById('newPass').value = '';
+      document.getElementById('newPass2').value = '';
+      SeekYu.showPopup('change-pass-popup');
+    }
+
+    if (e.target.matches('.delete-btn')) {
+      const row = e.target.closest('tr');
+      const accountId = row.getAttribute('data-account-id');
+      if (confirm('Delete account ' + accountId + '? This action cannot be undone.')) {
+        row.remove();
+      }
+    }
+  });
+
+  // Save edits
+  const editForm = document.getElementById('editAccountForm');
+  if (editForm) {
+    editForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const id = document.getElementById('editAccountId').value;
+      const row = findRowByAccountId(id);
+      if (!row) return alert('Row not found');
+      row.querySelector('.col-name').textContent = document.getElementById('editName').value.trim();
+      row.querySelector('.col-role').textContent = document.getElementById('editRole').value;
+      row.dataset.email = document.getElementById('editEmail').value.trim();
+      SeekYu.hidePopup('edit-account-popup');
+      alert('Account updated. (Demo — persist on server in production.)');
+    });
+  }
+
+  // Change password
+  const passForm = document.getElementById('changePassForm');
+  if (passForm) {
+    passForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const id = document.getElementById('passAccountId').value;
+      const p1 = document.getElementById('newPass').value;
+      const p2 = document.getElementById('newPass2').value;
+      if (p1 !== p2) return alert('Passwords do not match');
+      if (p1.length < 4) return alert('Password too short');
+
+      const row = findRowByAccountId(id);
+      if (row) {
+        row.querySelector('.col-pass').textContent = '•••••••';
+        row.querySelector('.col-pass').classList.add('updated');
+      }
+      SeekYu.hidePopup('change-pass-popup');
+      alert('Password updated. (Demo — send to server in production.)');
+    });
+  }
+
+  // Demo: create account forms append rows
+  const createClientForm = document.getElementById('createClientForm');
+  if (createClientForm) {
+    createClientForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = this.name.value.trim();
+      const email = this.email.value.trim();
+      // generate demo id
+      const id = 'AC-' + Math.floor(Math.random()*900 + 100);
+      const tbody = document.getElementById('accountTableBody');
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-account-id', id);
+      tr.dataset.email = email;
+      tr.innerHTML = `
+        <td class="col-name">${name}</td>
+        <td class="col-id">${id}</td>
+        <td class="col-role">Client</td>
+        <td class="col-date">${new Date().toISOString().split('T')[0]}</td>
+        <td class="col-pass">•••••••</td>
+        <td class="col-actions">
+          <div class="actions">
+            <button class="edit-account-btn small-btn">Edit</button>
+            <button class="change-pass-btn small-btn">Change Password</button>
+            <button class="delete-btn small-btn">Delete</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+      alert('Account created (demo).');
+      this.reset();
+      // switch to view tab if you use App.showSubSection
+      if (window.App && App.showSubSection) App.showSubSection('view-accounts');
+    });
+  }
+
+  const createGuardForm = document.getElementById('createGuardForm');
+  if (createGuardForm) {
+    createGuardForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = this.name.value.trim();
+      const email = this.email.value.trim();
+      const id = 'SG-' + Math.floor(Math.random()*900 + 100);
+      const tbody = document.getElementById('accountTableBody');
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-account-id', id);
+      tr.dataset.email = email;
+      tr.innerHTML = `
+        <td class="col-name">${name}</td>
+        <td class="col-id">${id}</td>
+        <td class="col-role">Security Guard</td>
+        <td class="col-date">${new Date().toISOString().split('T')[0]}</td>
+        <td class="col-pass">•••••••</td>
+        <td class="col-actions">
+          <div class="actions">
+            <button class="edit-account-btn small-btn">Edit</button>
+            <button class="change-pass-btn small-btn">Change Password</button>
+            <button class="delete-btn small-btn">Delete</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+      alert('Guard account created (demo).');
+      this.reset();
+      if (window.App && App.showSubSection) App.showSubSection('view-accounts');
+    });
+  }
+})(); 
+// --- end accounts handlers ---
 
   </script>
 </body>
 </html>
-
