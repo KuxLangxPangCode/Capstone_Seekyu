@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeekYu Admin Dashboard</title>
+  <link rel="stylesheet" href="styles/Admin.css" />
+  
+  <script src="scripts/Messaging.js" defer></script>
+  <script src="scripts/KPI.js" defer></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">SeekYu</div>
+      <nav>
+        <ul>
+          <li><button onclick="App.showSection('dashboard')" class="active">Dashboard</button></li>
+          <li><button onclick="App.showSection('recruiting-mgmt')">Recruitment Management</button></li>
+          <li><button onclick="App.showSection('accounts')">Account Management</button></li>
+          <li><button onclick="App.showSection('client-mgmt')">Client Management</button></li>
+          <li><button onclick="App.showSection('guard-mgmt')">Security Guard Management</button></li>
+          <li><button onclick="App.showSection('messaging-mgmt')">Send Message</button></li>
+          <li><button onclick="App.showSection('kpi')">KPI Evaluation</button></li>
+          <li><button onclick="App.showSection('leave-requests')">Leave Requests</button></li>
+          <li><button onclick="App.showSection('incident-reports')">Incident Reports</button></li>
+          <li><button onclick="location.href='Index.html'">Logout</button></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Dashboard -->
+      <div id="dashboard" class="section active">
+        <div class="dashboard-header">
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p class="muted">Overview of system activity, guards, and pending actions.</p>
+          </div>
+
+          <div class="header-actions">
+            <div class="notification-dropdown">
+              <button id="notifToggle" class="icon-btn" aria-expanded="false">
+                Notifications <span id="notifCount" class="badge">3</span>
+              </button>
+              <div id="notifList" class="dropdown hidden">
+                <ul>
+                  <li><strong>New Application:</strong> Carlos Dela Cruz submitted an application. <span class="time">2m</span></li>
+                  <li><strong>Incident Report:</strong> Unauthorized access reported at ABC Mall. <span class="time">3h</span></li>
+                  <li><strong>Leave Request:</strong> Maria Santos requested emergency leave. <span class="time">1d</span></li>
+                </ul>
+                <div class="dropdown-actions"><a href="Notif-Admin.html" id="viewAllNotifs" class="small-btn">View all</a></div>
+              </div>
+            </div>
+
+            <div class="profile-summary">
+              <img src="https://via.placeholder.com/48" alt="Admin avatar" class="avatar">
+              <div>
+                <div class="name">Admin User</div>
+                <div class="role muted">System Administrator</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard layout -->
+        <div class="dashboard-layout">
+          <div class="dashboard-main">
+
+            <!-- Guard Tracking -->
+            <section class="guard-tracking card">
+              <h2>Security Guard Tracking</h2>
+              <p class="muted">Monitor deployments, attendance, absences and lateness in real-time.</p>
+              <div class="dshbrdtracking-grid">
+                <div class="dshbrdtracking-list">
+                  <h3>Guards Overview</h3>
+                  <table class="compact">
+                    <thead>
+                      <tr><th>Name</th><th>ID</th><th>Area</th><th>Status</th><th>Last Seen</th></tr>
+                    </thead>
+                    <tbody id="dshbrdguardTableBody">
+                      <tr><td>Juan Dela Cruz</td><td>SG001</td><td>ABC Mall</td><td><span class="status present">Present</span></td><td>10:42</td></tr>
+                      <tr><td>Maria Santos</td><td>SG045</td><td>Towerville</td><td><span class="status on-leave">On Leave</span></td><td>—</td></tr>
+                      <tr><td>Ramon Villanueva</td><td>SG078</td><td>Client A HQ</td><td><span class="status late">Late</span></td><td>09:35</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="tracking-stats">
+                  <h3>Attendance Summary</h3>
+                  <div class="stat-row"><span>Present</span><strong id="statPresent">98</strong></div>
+                  <div class="stat-row"><span>Absent</span><strong id="statAbsent">6</strong></div>
+                  <div class="stat-row"><span>Late</span><strong id="statLate">20</strong></div>
+                  <div class="stat-row"><span>On Leave</span><strong id="statOnLeave">6</strong></div>
+
+                  <h4>Recent Alerts</h4>
+                  <ul id="recentAlerts" class="alerts-list">
+                    <li>SG078 — Late arrival (09:35)</li>
+                    <li>SG034 — Absent (No check-in)</li>
+                    <li>Incident reported near ABC Mall loading dock</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <!-- Applications -->
+            <section class="dashboard-applications card">
+              <h2>Recent Applications</h2>
+              <p class="muted">Latest job applications requiring review.</p>
+              <div class="scrollable-content">
+                <!-- Application items go here -->
+              </div>
+            </section>
+
+            <!-- KPI Monitoring -->
+            <section class="dshbrdcard kpi-tracking card">
+              <h3>KPI Monitoring</h3>
+              <div class="dshbrdkpi-grid">
+                <div class="dshbrdkpi-card">
+                  <h4>Attendance</h4>
+                  <p>95%</p>
+                </div>
+                <div class="dshbrdkpi-card">
+                  <h4>Punctuality</h4>
+                  <p>88%</p>
+                </div>
+                <div class="dshbrdkpi-card">
+                  <h4>Performance</h4>
+                  <p>92%</p>
+                </div>
+                <div class="dshbrdkpi-card">
+                  <h4>Training & Skills</h4>
+                  <p>92%</p>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Recruitment Management -->
+      <div id="recruiting-mgmt" class="section">
+        <h1>Online Recruitment Management</h1>
+        <p>Manage applications submitted by job seekers.</p>
+        <input type="text" id="recruitSearch" placeholder="Search applicants...">
+
+        <table id="recruitTable">
+          <thead>
+            <tr>
+              <th>Applicant Name</th>
+              <th>Applicant ID</th>
+              <th>Position Applied</th>
+              <th>Contact No.</th>
+              <th>Email</th>
+              <th>Resume</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Carlos Dela Cruz</td>
+              <td>AP-001</td>
+              <td>Security Guard</td>
+              <td>09179998888</td>
+              <td>carlos.cruz@email.com</td>
+              <td><a href="resumes/carlos.pdf" target="_blank">View</a></td>
+              <td>Pending</td>
+              <td>
+                <button class="accept-btn">Accept</button>
+                <button class="reject-btn">Reject</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Josefina Ramos</td>
+              <td>AP-002</td>
+              <td>Client</td>
+              <td>09172223333</td>
+              <td>josefina.ramos@email.com</td>
+              <td><a href="resumes/josefina.pdf" target="_blank">View</a></td>
+              <td>Pending</td>
+              <td>
+                <button class="accept-btn">Accept</button>
+                <button class="reject-btn">Reject</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+<!-- KPI -->
+<div id="kpi" class="section">
+  <h1>KPI Evaluation</h1>
+  <p>Evaluate performance metrics of your guards.</p>
+
+  <!-- KPI Summary Cards -->
+  <div class="kpi-cards">
+    <div class="kpi-card">
+      <div class="kpi-title">Average Attendance</div>
+      <div class="kpi-value">92%</div>
+      <div class="progress"><i style="width:92%"></i></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Average Punctuality</div>
+      <div class="kpi-value">88%</div>
+      <div class="progress"><i style="width:88%"></i></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Overall Performance</div>
+      <div class="kpi-value">4.3 / 5</div>
+      <div class="progress"><i style="width:86%"></i></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Training Completion</div>
+      <div class="kpi-value">95%</div>
+      <div class="progress"><i style="width:95%"></i></div>
+    </div>
+  </div>
+
+  <!-- KPI Ratings Table -->
+  <h2>General KPI Ratings Overview</h2>
+  <div class="kpi-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Excellent</th>
+          <th>Good</th>
+          <th>Average</th>
+          <th>Poor</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Attendance</td><td>65%</td><td>20%</td><td>10%</td><td>5%</td></tr>
+        <tr><td>Punctuality</td><td>58%</td><td>25%</td><td>12%</td><td>5%</td></tr>
+        <tr><td>Performance</td><td>70%</td><td>18%</td><td>8%</td><td>4%</td></tr>
+        <tr><td>Training & Skills</td><td>80%</td><td>15%</td><td>4%</td><td>1%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- KPI Chart -->
+  <div class="kpi-chart">
+    <canvas id="kpiChart"></canvas>
+  </div>
+
+  <!-- Guard Performance List -->
+  <h2>Guard Performance Rankings</h2>
+  <div class="kpi-controls">
+    <input type="text" id="guardSearch" placeholder="Search guard by name...">
+    <select id="performanceFilter">
+      <option value="all">Show All</option>
+      <option value="high">Highest Rated</option>
+      <option value="low">Lowest Rated</option>
+    </select>
+  </div>
+
+  <div class="kpi-guard-list">
+    <table id="guardTable">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Guard Name</th>
+          <th>Attendance</th>
+          <th>Punctuality</th>
+          <th>Performance</th>
+          <th>Training</th>
+          <th>Overall</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Juan Dela Cruz</td><td>95%</td><td>90%</td><td>4.8</td><td>100%</td><td>94%</td></tr>
+        <tr><td>2</td><td>Pedro Santos</td><td>92%</td><td>88%</td><td>4.5</td><td>95%</td><td>90%</td></tr>
+        <tr><td>3</td><td>Mark Reyes</td><td>88%</td><td>85%</td><td>4.2</td><td>92%</td><td>87%</td></tr>
+        <tr><td>4</td><td>Carlos Cruz</td><td>80%</td><td>78%</td><td>3.9</td><td>85%</td><td>81%</td></tr>
+        <tr><td>5</td><td>Ramon Lopez</td><td>75%</td><td>70%</td><td>3.5</td><td>80%</td><td>75%</td></tr>
+      </tbody>
+    </table>
+  </div> 
+</div>
+
+      <!-- Account Management -->
+      <div id="accounts" class="section">
+        <h1>Account Management</h1>
+        <div class="account-actions">
+          <button class="account-btn active" data-target="view-accounts">View Accounts</button>
+          <button class="account-btn" data-target="create-account">Create Account</button>
+        </div>
+
+        <div id="view-accounts" class="sub-section active">
+          <h2>Accounts List</h2>
+          <table>
+            <thead>
+              <!-- in thead -->
+<tr>
+  <th>Name</th>
+  <th>Account ID</th>
+  <th>Role</th>
+  <th>Date Created</th>
+  <th>Password</th> <!-- new -->
+  <th>Action</th>
+</tr>
+
+<!-- example tbody row -->
+<tr data-account-id="AC-001" data-email="juan@example.com">
+  <td class="col-name">Juan Dela Cruz</td>
+  <td class="col-id">AC-001</td>
+  <td class="col-role">Client</td>
+  <td class="col-date">2025-08-14</td>
+  <td class="col-pass">•••••••</td> <!-- new -->
+  <td class="col-actions">
+    <div class="actions">
+      <button class="edit-account-btn small-btn">Edit</button>
+      <button class="change-pass-btn small-btn">Change Password</button>
+      <button class="delete-btn small-btn">Delete</button>
+    </div>
+  </td>
+</tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <div id="create-account" class="sub-section">
+          <h2>Create New Account</h2>
+          <div class="form-container">
+            <div class="form-block">
+              <h3>Create Client Account</h3>
+              <form method="POST" action="backend/create_account.php">
+                <input type="hidden" name="role" value="Client">
+                <label>Name:</label><input type="text" name="name" required>
+                <label>Email:</label><input type="email" name="email" required>
+                <label>Username:</label><input type="text" name="username" required>
+                <label>Password:</label><input type="password" name="password" required>
+                <button type="submit" class="btn">Create Client</button>
+              </form>
+            </div>
+            <div class="form-block">
+              <h3>Create Security Guard Account</h3>
+              <form method="POST" action="backend/create_account.php">
+                <input type="hidden" name="role" value="Security Guard">
+                <label>Name:</label><input type="text" name="name" required>
+                <label>Email:</label><input type="email" name="email" required>
+                <label>Username:</label><input type="text" name="username" required>
+                <label>Password:</label><input type="password" name="password" required>
+                <button type="submit" class="btn">Create Guard</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Client Management -->
+<div id="client-mgmt" class="section">
+  <h1>Client Management</h1>
+  <p>View and manage client information and job postings.</p>
+
+  <!-- Search + Filter -->
+  <div class="toolbar">
+    <input type="text" id="clientSearch" placeholder="Search clients...">
+    <select id="clientFilter">
+      <option value="all">All</option>
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+    </select>
+  </div>
+
+  <div class="client-list">
+    <a href="Client-Profile.html" class="client-card" data-status="active">
+      <h2>ABC Corporation</h2>
+      <p><strong>Contact:</strong> Juan Dela Cruz</p>
+      <p><strong>Email:</strong> abc.corp@email.com</p>
+      <p><strong>Job Posting:</strong> 5 Guards for Night Shift</p>
+    </a>
+
+    <a href="Client-Profile.html" class="client-card" data-status="inactive">
+      <h2>XYZ Mall</h2>
+      <p><strong>Contact:</strong> Maria Santos</p>
+      <p><strong>Email:</strong> xyz.mall@email.com</p>
+      <p><strong>Job Posting:</strong> 8 Guards for Parking Security</p>
+    </a>
+  </div>
+</div>
+
+<!-- Security Guard Management -->
+<div id="guard-mgmt" class="section">
+  <h1>Security Guard Management</h1>
+  <p>Manage security guard records and assignments.</p>
+
+  <!-- Search + Filter -->
+  <div class="toolbar">
+    <input type="text" id="guardSearch" placeholder="Search guards...">
+    <select id="guardFilter">
+      <option value="all">All</option>
+      <option value="active">Active</option>
+      <option value="onleave">On Leave</option>
+    </select>
+  </div>
+
+  <div class="guard-list">
+    <a href="Guard-Profile.html" class="guard-card" data-status="active">
+      <h2>Ramon Reyes</h2>
+      <p><strong>Status:</strong> Active</p>
+      <p><strong>Deployment:</strong> ABC Corporation – Night Shift</p>
+    </a>
+
+    <a href="Guard-Profile.html" class="guard-card" data-status="onleave">
+      <h2>Josefina Cruz</h2>
+      <p><strong>Status:</strong> On Leave</p>
+      <p><strong>Deployment:</strong> XYZ Mall – Parking Security</p>
+    </a>
+  </div>
+</div>
+
+<!-- Messaging Management -->
+<div id="messaging-mgmt" class="section">
+  <h1>Messaging</h1>
+
+  <!-- Sub-navigation -->
+  <div class="sub-nav">
+  <button id="inboxBtn">Inbox</button>
+  <button id="composeBtn">Compose</button>
+</div>
+
+  <!-- Inbox Section -->
+  <div id="inbox-section" class="sub-section active">
+    <input type="text" id="messageSearch" placeholder="Search messages...">
+
+    <table class="message-table" id="messageTable">
+      <thead>
+        <tr>
+          <th>Sender</th>
+          <th>Subject</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-id="1">
+          <td>Admin</td>
+          <td>Shift Schedule Update</td>
+          <td>2025-08-25</td>
+          <td>
+            <button class="view-message-btn" data-from="Admin" data-subject="Shift Schedule Update" data-date="2025-08-25" data-body="Your shift schedule has been updated. Please check the system for details.">View</button>
+            <button class="delete-message-btn">Delete</button>
+          </td>
+        </tr>
+        <tr data-id="2">
+          <td>Client A</td>
+          <td>Incident Feedback</td>
+          <td>2025-08-22</td>
+          <td>
+            <button class="view-message-btn" data-from="Client A" data-subject="Incident Feedback" data-date="2025-08-22" data-body="Feedback regarding the incident you reported.">View</button>
+            <button class="delete-message-btn">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Compose Section -->
+  <div id="compose-section" class="sub-section">
+    <form id="composeForm" class="compose-form">
+      <label for="recipient">To:</label>
+      <input type="text" id="recipient" name="recipient" placeholder="Enter recipient name" required>
+
+      <label for="subject">Subject:</label>
+      <input type="text" id="subject" name="subject" placeholder="Enter subject" required>
+
+      <label for="message">Message:</label>
+      <textarea id="message" name="message" rows="5" placeholder="Write your message..." required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</div>
+
+<!-- Popup for Viewing Message -->
+<div id="message-popup" class="popup hidden">
+  <div class="popup-content">
+    <h2>Message Details</h2>
+    <p><strong>From:</strong> <span id="popupSender">Admin</span></p>
+    <p><strong>Subject:</strong> <span id="popupSubject">Shift Schedule Update</span></p>
+    <p><strong>Date:</strong> <span id="popupDate">2025-08-25</span></p>
+    <p><strong>Message:</strong></p>
+    <p id="popupBody">Your shift schedule has been updated. Please check the system for details.</p>
+    <div class="popup-actions">
+      <button onclick="SeekYu.hidePopup('message-popup')">Close</button>
+    </div>
+  </div>
+</div>
+
+      <!-- Incident Reports -->
+      <div id="incident-reports" class="section">
+        <h1>Incident Reports</h1>
+        <input type="text" id="incidentSearch" placeholder="Search incident reports...">
+
+        <div class="scrollable-content">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Guard Name</th>
+                <th>Guard ID</th>
+                <th>Type of Incident</th>
+                <th>Actions Taken</th>
+                <th>Location</th>
+                <th>Persons Involved</th>
+                <th>Evidence</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2025-08-20</td>
+                <td>14:30</td>
+                <td>Juan Dela Cruz</td>
+                <td>SG001</td>
+                <td>Unauthorized Access</td>
+                <td>Escorted Individual Off Premises</td>
+                <td>ABC Mall - Loading Dock</td>
+                <td>Unknown Male</td>
+                <td><a href="#" class="view-evidence">View Image</a></td>
+                <td><button class="view-report-btn" data-report-id="r1">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Leave Requests -->
+      <div id="leave-requests" class="section">
+        <h1>Leave Requests</h1>
+        <input type="text" id="leaveSearch" placeholder="Search leave requests...">
+
+        <div class="scrollable-content">
+          <table>
+            <thead>
+              <tr>
+                <th>Request ID</th>
+                <th>Guard Name</th>
+                <th>Guard ID</th>
+                <th>Type</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>LR-001</td>
+                <td>Maria Santos</td>
+                <td>SG045</td>
+                <td>Emergency Leave</td>
+                <td>2025-09-01</td>
+                <td>2025-09-03</td>
+                <td>Family emergency</td>
+                <td>Pending</td>
+                <td>
+                  <button class="accept-btn">Approve</button>
+                  <button class="reject-btn">Reject</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+   <!-- Edit account popup -->
+<div id="edit-account-popup" class="popup hidden">
+  <div class="popup-content">
+    <h2>Edit Account</h2>
+    <form id="editAccountForm">
+      <input type="hidden" id="editAccountId">
+      <div class="form-row">
+        <label for="editName">Name</label>
+        <input id="editName" type="text" required>
+      </div>
+      <div class="form-row">
+        <label for="editEmail">Email</label>
+        <input id="editEmail" type="email" required>
+      </div>
+      <div class="form-row">
+        <label for="editRole">Role</label>
+        <select id="editRole">
+          <option>Super Admin</option>
+          <option>Client</option>
+          <option>Security Guard</option>
+          <option>HR Admin</option>
+          <option>Admin</option>
+          <option>Super Admin</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <button type="button" onclick="SeekYu.hidePopup('edit-account-popup')" class="small-btn">Cancel</button>
+        <button type="submit" class="primary-btn">Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Change password popup -->
+<div id="change-pass-popup" class="popup hidden">
+  <div class="popup-content">
+    <h2>Change Password</h2>
+    <form id="changePassForm">
+      <input type="hidden" id="passAccountId">
+      <div class="form-row">
+        <label for="newPass">New password</label>
+        <input id="newPass" type="password" required>
+      </div>
+      <div class="form-row">
+        <label for="newPass2">Confirm password</label>
+        <input id="newPass2" type="password" required>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <button type="button" onclick="SeekYu.hidePopup('change-pass-popup')" class="small-btn">Cancel</button>
+        <button type="submit" class="primary-btn">Update Password</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+      <!-- Popup for Incident Report -->
+      <div id="incident-popup" class="popup hidden">
+      <div class="popup-content">
+          <h2>Incident Report Details</h2>
+          <p><strong>Date:</strong> <span id="reportDate">2025-08-20</span></p>
+          <p><strong>Time:</strong> <span id="reportTime">14:30</span></p>
+          <p><strong>Guard:</strong> <span id="reportGuard">Juan Dela Cruz (SG001)</span></p>
+          <p><strong>Type of Incident:</strong> <span id="reportType">Unauthorized Access</span></p>
+          <p><strong>Actions Taken:</strong> <span id="reportActions">Escorted Individual Off Premises</span></p>
+          <p><strong>Location:</strong> <span id="reportLocation">ABC Mall - Loading Dock</span></p>
+          <p><strong>Persons Involved:</strong> <span id="reportPersons">Unknown Male</span></p>
+          <p><strong>Evidence:</strong> <a href="#" id="reportEvidence">View</a></p>
+          <div class="popup-actions">
+            <button id="closeIncidentPopup">Close</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+// Set up incident report view buttons
+      document.querySelectorAll('.view-report-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const row = this.closest('tr');
+          const cells = row.querySelectorAll('td');
+          
+          // Extract data from the table row
+          document.getElementById('reportDate').textContent = cells[0].textContent;
+          document.getElementById('reportTime').textContent = cells[1].textContent;
+          document.getElementById('reportGuard').textContent = `${cells[2].textContent} (${cells[3].textContent})`;
+          document.getElementById('reportType').textContent = cells[4].textContent;
+          document.getElementById('reportActions').textContent = cells[5].textContent;
+          document.getElementById('reportLocation').textContent = cells[6].textContent;
+          document.getElementById('reportPersons').textContent = cells[7].textContent;
+          
+          // Set up evidence link
+          const evidenceLink = cells[8].querySelector('a');
+          if (evidenceLink) {
+            document.getElementById('reportEvidence').href = evidenceLink.href;
+            document.getElementById('reportEvidence').textContent = evidenceLink.textContent;
+          }
+          
+          SeekYu.showPopup('incident-popup');
+        });
+      });
+
+      // Set up close button for incident popup
+      const closeIncidentPopup = document.getElementById('closeIncidentPopup');
+      if (closeIncidentPopup) {
+        closeIncidentPopup.addEventListener('click', () => {
+          SeekYu.hidePopup('incident-popup');
+        });
+      }
+
+      // Set up notification dropdown toggle
+      const notifToggle = document.getElementById('notifToggle');
+      const notifList = document.getElementById('notifList');
+      
+      if (notifToggle && notifList) {
+        notifToggle.addEventListener('click', () => {
+          notifList.classList.toggle('hidden');
+        });
+      }
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (notifList && !notifList.classList.contains('hidden') && 
+            !notifToggle.contains(e.target) && !notifList.contains(e.target)) {
+          notifList.classList.add('hidden');
+        }
+      });
+
+      // Set up view all notifications button
+      const viewAllNotifs = document.getElementById('viewAllNotifs');
+      if (viewAllNotifs) {
+        viewAllNotifs.addEventListener('click', () => {
+          App.showSection('notifications');
+          notifList.classList.add('hidden');
+        });
+      }
+    
+
+    // Minimal App object to handle UI toggles used in this file.
+    window.App = {
+      showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+        // update sidebar active class
+        document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+        const sidebarBtn = Array.from(document.querySelectorAll('.sidebar button')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'"));
+        if (sidebarBtn) sidebarBtn.classList.add('active');
+      },
+      showSubSection(id) {
+        // hide all sub-sections within current section
+        document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+        // update tabs/account buttons
+        document.querySelectorAll('[data-target]').forEach(b => b.classList.remove('active'));
+        const btn = document.querySelector('[data-target="' + id + '"]');
+        if (btn) btn.classList.add('active');
+      },
+      showPopup(id) {
+        const popup = document.getElementById(id);
+        if (!popup) return console.warn('Popup not found:', id);
+        popup.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      },
+      hidePopup(id) {
+        const popup = document.getElementById(id);
+        if (!popup) return;
+        popup.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    };
+
+    // Sidebar active toggle (for buttons without inline onclick)
+    document.querySelectorAll('.sidebar button').forEach(button => {
+      button.addEventListener('click', function () {
+        document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Account subsection toggle
+    document.querySelectorAll(".account-actions [data-target]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".account-actions [data-target]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        document.querySelectorAll(".sub-section").forEach(sec => sec.classList.remove("active"));
+        const target = btn.getAttribute("data-target");
+        if (target) document.getElementById(target).classList.add("active");
+      });
+    });
+
+    // Incident search
+    document.getElementById('incidentSearch')?.addEventListener('keyup', function () {
+      const filter = this.value.toLowerCase();
+      document.querySelectorAll('#incident-reports table tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+      });
+    });
+
+    // Leave requests search
+    document.getElementById('leaveSearch')?.addEventListener('keyup', function () {
+      const filter = this.value.toLowerCase();
+      document.querySelectorAll('#leave-requests table tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+      });
+    });
+
+    // Basic CSS fallback for .popup (if author CSS is missing)
+    (function ensurePopupStyles() {
+      const styleId = 'seekyu-helper-styles';
+      if (document.getElementById(styleId)) return;
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        .popup.hidden { display: none; }
+        .popup { position: fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); z-index:9999; }
+        .popup .popup-content { background:#fff; color:#000; max-width:800px; width:90%; padding:20px; border-radius:8px; }
+      `;
+      document.head.appendChild(style);
+    });
+    
+    // Minimal App object to handle UI toggles
+    window.App = {
+      showSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+        
+        // If showing notifications section, initialize it
+        if (id === 'notifications') {
+          setTimeout(initNotifications, 10);
+        }
+        
+        // update sidebar active class
+        document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
+        const sidebarBtn = Array.from(document.querySelectorAll('.sidebar button')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'"));
+        if (sidebarBtn) sidebarBtn.classList.add('active');
+      },
+      showSubSection(id) {
+        // hide all sub-sections within current section
+        document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+        // update tabs/account buttons
+        document.querySelectorAll('[data-target]').forEach(b => b.classList.remove('active'));
+        const btn = document.querySelector('[data-target="' + id + '"]');
+        if (btn) btn.classList.add('active');
+      },
+      showPopup(id) {
+        const popup = document.getElementById(id);
+        if (!popup) return console.warn('Popup not found:', id);
+        popup.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      },
+      hidePopup(id) {
+        const popup = document.getElementById(id);
+        if (!popup) return;
+        popup.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    };
+
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize notifications if we're on the notifications page
+      if (document.getElementById('notifications')?.classList.contains('active')) {
+        initNotifications();
+      }
+      
+      // Update notification count on load
+      updateNotificationCount();
+    });
+// --- begin accounts handlers ---
+(function(){
+  // Ensure SeekYu popup helpers exist
+  window.SeekYu = window.SeekYu || {};
+  SeekYu.showPopup = SeekYu.showPopup || function(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  };
+  SeekYu.hidePopup = SeekYu.hidePopup || function(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+    document.body.style.overflow = '';
+  };
+
+  function findRowByAccountId(id) {
+    return document.querySelector('#accountTableBody tr[data-account-id="' + id + '"]');
+  }
+
+  // Click delegation for edit / change pass / delete
+  document.addEventListener('click', function(e) {
+    if (e.target.matches('.edit-account-btn')) {
+      const row = e.target.closest('tr');
+      const accountId = row.getAttribute('data-account-id');
+      const name = row.querySelector('.col-name').textContent.trim();
+      const role = row.querySelector('.col-role').textContent.trim();
+      const email = row.dataset.email || '';
+
+      document.getElementById('editAccountId').value = accountId;
+      document.getElementById('editName').value = name;
+      document.getElementById('editRole').value = role;
+      document.getElementById('editEmail').value = email;
+
+      SeekYu.showPopup('edit-account-popup');
+    }
+
+    if (e.target.matches('.change-pass-btn')) {
+      const row = e.target.closest('tr');
+      const accountId = row.getAttribute('data-account-id');
+      document.getElementById('passAccountId').value = accountId;
+      document.getElementById('newPass').value = '';
+      document.getElementById('newPass2').value = '';
+      SeekYu.showPopup('change-pass-popup');
+    }
+
+    if (e.target.matches('.delete-btn')) {
+      const row = e.target.closest('tr');
+      const accountId = row.getAttribute('data-account-id');
+      if (confirm('Delete account ' + accountId + '? This action cannot be undone.')) {
+        row.remove();
+      }
+    }
+  });
+
+  // Save edits
+  const editForm = document.getElementById('editAccountForm');
+  if (editForm) {
+    editForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const id = document.getElementById('editAccountId').value;
+      const row = findRowByAccountId(id);
+      if (!row) return alert('Row not found');
+      row.querySelector('.col-name').textContent = document.getElementById('editName').value.trim();
+      row.querySelector('.col-role').textContent = document.getElementById('editRole').value;
+      row.dataset.email = document.getElementById('editEmail').value.trim();
+      SeekYu.hidePopup('edit-account-popup');
+      alert('Account updated. (Demo — persist on server in production.)');
+    });
+  }
+
+  // Change password
+  const passForm = document.getElementById('changePassForm');
+  if (passForm) {
+    passForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const id = document.getElementById('passAccountId').value;
+      const p1 = document.getElementById('newPass').value;
+      const p2 = document.getElementById('newPass2').value;
+      if (p1 !== p2) return alert('Passwords do not match');
+      if (p1.length < 4) return alert('Password too short');
+
+      const row = findRowByAccountId(id);
+      if (row) {
+        row.querySelector('.col-pass').textContent = '•••••••';
+        row.querySelector('.col-pass').classList.add('updated');
+      }
+      SeekYu.hidePopup('change-pass-popup');
+      alert('Password updated. (Demo — send to server in production.)');
+    });
+  }
+
+  // Demo: create account forms append rows
+  const createClientForm = document.getElementById('createClientForm');
+  if (createClientForm) {
+    createClientForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = this.name.value.trim();
+      const email = this.email.value.trim();
+      // generate demo id
+      const id = 'AC-' + Math.floor(Math.random()*900 + 100);
+      const tbody = document.getElementById('accountTableBody');
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-account-id', id);
+      tr.dataset.email = email;
+      tr.innerHTML = `
+        <td class="col-name">${name}</td>
+        <td class="col-id">${id}</td>
+        <td class="col-role">Client</td>
+        <td class="col-date">${new Date().toISOString().split('T')[0]}</td>
+        <td class="col-pass">•••••••</td>
+        <td class="col-actions">
+          <div class="actions">
+            <button class="edit-account-btn small-btn">Edit</button>
+            <button class="change-pass-btn small-btn">Change Password</button>
+            <button class="delete-btn small-btn">Delete</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+      alert('Account created (demo).');
+      this.reset();
+      // switch to view tab if you use App.showSubSection
+      if (window.App && App.showSubSection) App.showSubSection('view-accounts');
+    });
+  }
+
+  const createGuardForm = document.getElementById('createGuardForm');
+  if (createGuardForm) {
+    createGuardForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = this.name.value.trim();
+      const email = this.email.value.trim();
+      const id = 'SG-' + Math.floor(Math.random()*900 + 100);
+      const tbody = document.getElementById('accountTableBody');
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-account-id', id);
+      tr.dataset.email = email;
+      tr.innerHTML = `
+        <td class="col-name">${name}</td>
+        <td class="col-id">${id}</td>
+        <td class="col-role">Security Guard</td>
+        <td class="col-date">${new Date().toISOString().split('T')[0]}</td>
+        <td class="col-pass">•••••••</td>
+        <td class="col-actions">
+          <div class="actions">
+            <button class="edit-account-btn small-btn">Edit</button>
+            <button class="change-pass-btn small-btn">Change Password</button>
+            <button class="delete-btn small-btn">Delete</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+      alert('Guard account created (demo).');
+      this.reset();
+      if (window.App && App.showSubSection) App.showSubSection('view-accounts');
+    });
+  }
+})(); 
+// --- end accounts handlers ---
+
+  </script>
+</body>
+</html>
