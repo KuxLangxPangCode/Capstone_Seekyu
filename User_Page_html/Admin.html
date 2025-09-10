@@ -18,7 +18,6 @@
         <ul>
           <li><button onclick="App.showSection('dashboard')" class="active">Dashboard</button></li>
           <li><button onclick="App.showSection('recruiting-mgmt')">Recruitment Management</button></li>
-          <li><button onclick="App.showSection('accounts')">Account Management</button></li>
           <li><button onclick="App.showSection('client-mgmt')">Client Management</button></li>
           <li><button onclick="App.showSection('guard-mgmt')">Security Guard Management</button></li>
           <li><button onclick="App.showSection('messaging-mgmt')">Send Message</button></li>
@@ -34,324 +33,134 @@
     <main>
       <!-- Dashboard -->
       <div id="dashboard" class="section active">
-        <div class="dashboard-header">
-          <div>
-            <h1>Admin Dashboard</h1>
-            <p class="muted">Overview of system activity, guards, and pending actions.</p>
-          </div>
+  <div class="dashboard-header">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p class="muted">Overview of system activity, guards, and pending actions.</p>
+    </div>
 
-          <div class="header-actions">
-            <div class="notification-dropdown">
-              <button id="notifToggle" class="icon-btn" aria-expanded="false">
-                Notifications <span id="notifCount" class="badge">3</span>
-              </button>
-              <div id="notifList" class="dropdown hidden">
-                <ul>
-                  <li><strong>New Application:</strong> Carlos Dela Cruz submitted an application. <span class="time">2m</span></li>
-                  <li><strong>Incident Report:</strong> Unauthorized access reported at ABC Mall. <span class="time">3h</span></li>
-                  <li><strong>Leave Request:</strong> Maria Santos requested emergency leave. <span class="time">1d</span></li>
-                </ul>
-                <div class="dropdown-actions"><a href="Notif-Admin.html" id="viewAllNotifs" class="small-btn">View all</a></div>
-              </div>
-            </div>
-
-            <div class="profile-summary">
-              <img src="https://via.placeholder.com/48" alt="Admin avatar" class="avatar">
-              <div>
-                <div class="name">Admin User</div>
-                <div class="role muted">System Administrator</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Dashboard layout -->
-        <div class="dashboard-layout">
-          <div class="dashboard-main">
-
-            <!-- Guard Tracking -->
-            <section class="guard-tracking card">
-              <h2>Security Guard Tracking</h2>
-              <p class="muted">Monitor deployments, attendance, absences and lateness in real-time.</p>
-              <div class="dshbrdtracking-grid">
-                <div class="dshbrdtracking-list">
-                  <h3>Guards Overview</h3>
-                  <table class="compact">
-                    <thead>
-                      <tr><th>Name</th><th>ID</th><th>Area</th><th>Status</th><th>Last Seen</th></tr>
-                    </thead>
-                    <tbody id="dshbrdguardTableBody">
-                      <tr><td>Juan Dela Cruz</td><td>SG001</td><td>ABC Mall</td><td><span class="status present">Present</span></td><td>10:42</td></tr>
-                      <tr><td>Maria Santos</td><td>SG045</td><td>Towerville</td><td><span class="status on-leave">On Leave</span></td><td>—</td></tr>
-                      <tr><td>Ramon Villanueva</td><td>SG078</td><td>Client A HQ</td><td><span class="status late">Late</span></td><td>09:35</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div class="tracking-stats">
-                  <h3>Attendance Summary</h3>
-                  <div class="stat-row"><span>Present</span><strong id="statPresent">98</strong></div>
-                  <div class="stat-row"><span>Absent</span><strong id="statAbsent">6</strong></div>
-                  <div class="stat-row"><span>Late</span><strong id="statLate">20</strong></div>
-                  <div class="stat-row"><span>On Leave</span><strong id="statOnLeave">6</strong></div>
-
-                  <h4>Recent Alerts</h4>
-                  <ul id="recentAlerts" class="alerts-list">
-                    <li>SG078 — Late arrival (09:35)</li>
-                    <li>SG034 — Absent (No check-in)</li>
-                    <li>Incident reported near ABC Mall loading dock</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            <!-- Applications -->
-            <section class="dashboard-applications card">
-              <h2>Recent Applications</h2>
-              <p class="muted">Latest job applications requiring review.</p>
-              <div class="scrollable-content">
-                <!-- Application items go here -->
-              </div>
-            </section>
-
-            <!-- KPI Monitoring -->
-            <section class="dshbrdcard kpi-tracking card">
-              <h3>KPI Monitoring</h3>
-              <div class="dshbrdkpi-grid">
-                <div class="dshbrdkpi-card">
-                  <h4>Attendance</h4>
-                  <p>95%</p>
-                </div>
-                <div class="dshbrdkpi-card">
-                  <h4>Punctuality</h4>
-                  <p>88%</p>
-                </div>
-                <div class="dshbrdkpi-card">
-                  <h4>Performance</h4>
-                  <p>92%</p>
-                </div>
-                <div class="dshbrdkpi-card">
-                  <h4>Training & Skills</h4>
-                  <p>92%</p>
-                </div>
-              </div>
-            </section>
-
-          </div>
+    <div class="header-actions">
+      <div class="notification-dropdown">
+        <button id="notifToggle" class="icon-btn" aria-expanded="false">
+          Notifications <span id="notifCount" class="badge">3</span>
+        </button>
+        <div id="notifList" class="dropdown hidden">
+          <ul>
+            <li><strong>New Application:</strong> Carlos Dela Cruz submitted an application. <span class="time">2m</span></li>
+            <li><strong>Incident Report:</strong> Unauthorized access reported at ABC Mall. <span class="time">3h</span></li>
+            <li><strong>Leave Request:</strong> Maria Santos requested emergency leave. <span class="time">1d</span></li>
+          </ul>
+          <div class="dropdown-actions"><a href="Notif-Admin.html" id="viewAllNotifs" class="small-btn">View all</a></div>
         </div>
       </div>
 
-      <!-- Recruitment Management -->
-      <div id="recruiting-mgmt" class="section">
-        <h1>Online Recruitment Management</h1>
-        <p>Manage applications submitted by job seekers.</p>
-        <input type="text" id="recruitSearch" placeholder="Search applicants...">
-
-        <table id="recruitTable">
-          <thead>
-            <tr>
-              <th>Applicant Name</th>
-              <th>Applicant ID</th>
-              <th>Position Applied</th>
-              <th>Contact No.</th>
-              <th>Email</th>
-              <th>Resume</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Carlos Dela Cruz</td>
-              <td>AP-001</td>
-              <td>Security Guard</td>
-              <td>09179998888</td>
-              <td>carlos.cruz@email.com</td>
-              <td><a href="resumes/carlos.pdf" target="_blank">View</a></td>
-              <td>Pending</td>
-              <td>
-                <button class="accept-btn">Accept</button>
-                <button class="reject-btn">Reject</button>
-              </td>
-            </tr>
-            <tr>
-              <td>Josefina Ramos</td>
-              <td>AP-002</td>
-              <td>Client</td>
-              <td>09172223333</td>
-              <td>josefina.ramos@email.com</td>
-              <td><a href="resumes/josefina.pdf" target="_blank">View</a></td>
-              <td>Pending</td>
-              <td>
-                <button class="accept-btn">Accept</button>
-                <button class="reject-btn">Reject</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="profile-summary">
+        <img src="https://via.placeholder.com/48" alt="Admin avatar" class="avatar">
+        <div>
+          <div class="name">Admin User</div>
+          <div class="role muted">System Administrator</div>
+        </div>
       </div>
-
-<!-- KPI -->
-<div id="kpi" class="section">
-  <h1>KPI Evaluation</h1>
-  <p>Evaluate performance metrics of your guards.</p>
-
-  <!-- KPI Summary Cards -->
-  <div class="kpi-cards">
-    <div class="kpi-card">
-      <div class="kpi-title">Average Attendance</div>
-      <div class="kpi-value">92%</div>
-      <div class="progress"><i style="width:92%"></i></div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Average Punctuality</div>
-      <div class="kpi-value">88%</div>
-      <div class="progress"><i style="width:88%"></i></div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Overall Performance</div>
-      <div class="kpi-value">4.3 / 5</div>
-      <div class="progress"><i style="width:86%"></i></div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-title">Training Completion</div>
-      <div class="kpi-value">95%</div>
-      <div class="progress"><i style="width:95%"></i></div>
     </div>
   </div>
 
-  <!-- KPI Ratings Table -->
-  <h2>General KPI Ratings Overview</h2>
-  <div class="kpi-table">
-    <table>
-      <thead>
-        <tr>
-          <th>Category</th>
-          <th>Excellent</th>
-          <th>Good</th>
-          <th>Average</th>
-          <th>Poor</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>Attendance</td><td>65%</td><td>20%</td><td>10%</td><td>5%</td></tr>
-        <tr><td>Punctuality</td><td>58%</td><td>25%</td><td>12%</td><td>5%</td></tr>
-        <tr><td>Performance</td><td>70%</td><td>18%</td><td>8%</td><td>4%</td></tr>
-        <tr><td>Training & Skills</td><td>80%</td><td>15%</td><td>4%</td><td>1%</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <!-- Dashboard layout -->
+  <div class="dashboard-layout">
+    <div class="dashboard-main">
 
-  <!-- KPI Chart -->
-  <div class="kpi-chart">
-    <canvas id="kpiChart"></canvas>
-  </div>
+      <!-- Guard Tracking (address + client) -->
+      <section class="guard-tracking card">
+        <h2>Security Guard Tracking</h2>
+        <p class="muted">Monitor deployments, attendance, absences and lateness in real-time.</p>
 
-  <!-- Guard Performance List -->
-  <h2>Guard Performance Rankings</h2>
-  <div class="kpi-controls">
-    <input type="text" id="guardSearch" placeholder="Search guard by name...">
-    <select id="performanceFilter">
-      <option value="all">Show All</option>
-      <option value="high">Highest Rated</option>
-      <option value="low">Lowest Rated</option>
-    </select>
-  </div>
+        <div class="dshbrdtracking-grid">
+          <div class="dshbrdtracking-list">
+            <h3>Guards Overview</h3>
+            <table class="compact">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>ID</th>
+                  <th>Deployment Address</th>
+                  <th>Client</th>
+                  <th>Status</th>
+                  <th>Last Seen</th>
+                </tr>
+              </thead>
+              <tbody id="dshbrdguardTableBody">
+                <!-- Example rows: replace with server data or let the script populate -->
+                <tr data-status="present" data-address="123 Main St, Business City" data-client="Acme Corp - Site Alpha">
+                  <td>Juan Dela Cruz</td>
+                  <td>SG001</td>
+                  <td>123 Main St, Business City</td>
+                  <td>Acme Corp - Site Alpha</td>
+                  <td><span class="status present">Present</span></td>
+                  <td data-original-lastseen="10:42">10:42</td>
+                </tr>
+                <tr data-status="leave" data-address="Towerville Graceville, San Jose del Monte" data-client="MJL Security - Client B" data-leave-from="2025-09-01" data-leave-to="2025-09-03">
+                  <td>Maria Santos</td>
+                  <td>SG045</td>
+                  <td>Towerville Graceville, San Jose del Monte</td>
+                  <td>MJL Security - Client B</td>
+                  <td><span class="status on-leave">On Leave</span></td>
+                  <td>—</td>
+                </tr>
+                <tr data-status="late" data-address="Mall Annex, Lot 5" data-client="Acme Corp - Site Beta">
+                  <td>Ramon Villanueva</td>
+                  <td>SG078</td>
+                  <td>Mall Annex, Lot 5</td>
+                  <td>Acme Corp - Site Beta</td>
+                  <td><span class="status late">Late</span></td>
+                  <td data-original-lastseen="09:35">09:35</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-  <div class="kpi-guard-list">
-    <table id="guardTable">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Guard Name</th>
-          <th>Attendance</th>
-          <th>Punctuality</th>
-          <th>Performance</th>
-          <th>Training</th>
-          <th>Overall</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>1</td><td>Juan Dela Cruz</td><td>95%</td><td>90%</td><td>4.8</td><td>100%</td><td>94%</td></tr>
-        <tr><td>2</td><td>Pedro Santos</td><td>92%</td><td>88%</td><td>4.5</td><td>95%</td><td>90%</td></tr>
-        <tr><td>3</td><td>Mark Reyes</td><td>88%</td><td>85%</td><td>4.2</td><td>92%</td><td>87%</td></tr>
-        <tr><td>4</td><td>Carlos Cruz</td><td>80%</td><td>78%</td><td>3.9</td><td>85%</td><td>81%</td></tr>
-        <tr><td>5</td><td>Ramon Lopez</td><td>75%</td><td>70%</td><td>3.5</td><td>80%</td><td>75%</td></tr>
-      </tbody>
-    </table>
-  </div> 
+          <div class="tracking-stats">
+            <h3>Attendance Summary</h3>
+            <div class="stat-row"><span>Present</span><strong id="statPresent">0</strong></div>
+            <div class="stat-row"><span>Absent</span><strong id="statAbsent">0</strong></div>
+            <div class="stat-row"><span>Late</span><strong id="statLate">0</strong></div>
+            <div class="stat-row"><span>On Leave</span><strong id="statOnLeave">0</strong></div>
+
+            <h4>Deployment Distribution</h4>
+            <div id="dshbrdDeployment" style="max-height:160px;overflow:auto;margin-bottom:10px">
+              <table style="width:100%">
+                <tbody id="dshbrdDeploymentBody">
+                  <!-- populated by script -->
+                </tbody>
+              </table>
+            </div>
+
+            <h4>Recent Alerts</h4>
+            <ul id="recentAlerts" class="alerts-list">
+              <!-- populated by script -->
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- other dashboard cards (apps, KPI) remain unchanged -->
+      <section class="dashboard-applications card">
+        <h2>Recent Applications</h2>
+        <p class="muted">Latest job applications requiring review.</p>
+        <div class="scrollable-content"></div>
+      </section>
+
+      <section class="dshbrdcard kpi-tracking card">
+        <h3>KPI Monitoring</h3>
+        <div class="dshbrdkpi-grid">
+          <div class="dshbrdkpi-card"><h4>Attendance</h4><p>95%</p></div>
+          <div class="dshbrdkpi-card"><h4>Punctuality</h4><p>88%</p></div>
+          <div class="dshbrdkpi-card"><h4>Performance</h4><p>92%</p></div>
+          <div class="dshbrdkpi-card"><h4>Training & Skills</h4><p>92%</p></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
 </div>
-
-      <!-- Account Management -->
-      <div id="accounts" class="section">
-        <h1>Account Management</h1>
-        <div class="account-actions">
-          <button class="account-btn active" data-target="view-accounts">View Accounts</button>
-          <button class="account-btn" data-target="create-account">Create Account</button>
-        </div>
-
-        <div id="view-accounts" class="sub-section active">
-          <h2>Accounts List</h2>
-          <table>
-            <thead>
-              <!-- in thead -->
-<tr>
-  <th>Name</th>
-  <th>Account ID</th>
-  <th>Role</th>
-  <th>Date Created</th>
-  <th>Password</th> <!-- new -->
-  <th>Action</th>
-</tr>
-
-<!-- example tbody row -->
-<tr data-account-id="AC-001" data-email="juan@example.com">
-  <td class="col-name">Juan Dela Cruz</td>
-  <td class="col-id">AC-001</td>
-  <td class="col-role">Client</td>
-  <td class="col-date">2025-08-14</td>
-  <td class="col-pass">•••••••</td> <!-- new -->
-  <td class="col-actions">
-    <div class="actions">
-      <button class="edit-account-btn small-btn">Edit</button>
-      <button class="change-pass-btn small-btn">Change Password</button>
-      <button class="delete-btn small-btn">Delete</button>
-    </div>
-  </td>
-</tr>
-
-            </tbody>
-          </table>
-        </div>
-
-        <div id="create-account" class="sub-section">
-          <h2>Create New Account</h2>
-          <div class="form-container">
-            <div class="form-block">
-              <h3>Create Client Account</h3>
-              <form method="POST" action="backend/create_account.php">
-                <input type="hidden" name="role" value="Client">
-                <label>Name:</label><input type="text" name="name" required>
-                <label>Email:</label><input type="email" name="email" required>
-                <label>Username:</label><input type="text" name="username" required>
-                <label>Password:</label><input type="password" name="password" required>
-                <button type="submit" class="btn">Create Client</button>
-              </form>
-            </div>
-            <div class="form-block">
-              <h3>Create Security Guard Account</h3>
-              <form method="POST" action="backend/create_account.php">
-                <input type="hidden" name="role" value="Security Guard">
-                <label>Name:</label><input type="text" name="name" required>
-                <label>Email:</label><input type="email" name="email" required>
-                <label>Username:</label><input type="text" name="username" required>
-                <label>Password:</label><input type="password" name="password" required>
-                <button type="submit" class="btn">Create Guard</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <!-- Client Management -->
 <div id="client-mgmt" class="section">
@@ -845,167 +654,270 @@
       // Update notification count on load
       updateNotificationCount();
     });
-// --- begin accounts handlers ---
-(function(){
-  // Ensure SeekYu popup helpers exist
-  window.SeekYu = window.SeekYu || {};
-  SeekYu.showPopup = SeekYu.showPopup || function(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  };
-  SeekYu.hidePopup = SeekYu.hidePopup || function(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-    document.body.style.overflow = '';
-  };
 
-  function findRowByAccountId(id) {
-    return document.querySelector('#accountTableBody tr[data-account-id="' + id + '"]');
+
+// --- begin dashboard status update handlers ---
+(function () {
+  // Helpers
+  function normalizeId(id) { return String(id || '').trim().toUpperCase(); }
+
+  function findDashboardGuardRowById(id) {
+    id = normalizeId(id);
+    const rows = Array.from(document.querySelectorAll('#dshbrdguardTableBody tr'));
+    return rows.find(r => normalizeId((r.cells[1] && r.cells[1].textContent) || '') === id) || null;
+  }
+  function findAnyGuardRowsById(id) {
+    id = normalizeId(id);
+    const selectors = [
+      '#dshbrdguardTableBody tr',
+      '#guardsTable tbody tr',
+      '#guardTable tbody tr',
+      '#guardTable tr',
+      '#guard-mgmt .guard-card'
+    ];
+    const matches = [];
+    selectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        // table row case
+        if (el.tagName === 'TR') {
+          const cellId = (el.cells[1] && el.cells[1].textContent) || '';
+          if (normalizeId(cellId) === id) matches.push(el);
+        } else { // card / link case (.guard-card)
+          const cardId = el.getAttribute('data-guard-id') || el.getAttribute('data-id') || '';
+          if (normalizeId(cardId) === id) matches.push(el);
+        }
+      });
+    });
+    return matches;
   }
 
-  // Click delegation for edit / change pass / delete
-  document.addEventListener('click', function(e) {
-    if (e.target.matches('.edit-account-btn')) {
-      const row = e.target.closest('tr');
-      const accountId = row.getAttribute('data-account-id');
-      const name = row.querySelector('.col-name').textContent.trim();
-      const role = row.querySelector('.col-role').textContent.trim();
-      const email = row.dataset.email || '';
+  // Update status on a single table row (dashboard row)
+  function setRowStatusForDisplay(row, status) {
+    if (!row) return;
+    // dashboard row assumed cells: name, id, area/address/client, status, lastseen (or similar)
+    // try to find a status cell: prefer 3rd or 4th cell depending on table
+    // For dshbrdguardTableBody: columns are Name|ID|Area|Status|Last Seen
+    // For guardsTable: Name|ID|Area|Status|Action
+    // For guardTable: Rank|Name|... may differ; we will try to find a 'status' cell by searching cells text
+    const statusText = (status === 'leave' || status === 'onleave' || status === 'on-leave') ? 'On Leave' :
+                       status === 'present' ? 'Present' :
+                       status === 'late' ? 'Late' :
+                       status === 'absent' ? 'Absent' : status;
 
-      document.getElementById('editAccountId').value = accountId;
-      document.getElementById('editName').value = name;
-      document.getElementById('editRole').value = role;
-      document.getElementById('editEmail').value = email;
+    // set dataset.status for consistency
+    row.dataset.status = (status === 'onleave' ? 'leave' : status);
 
-      SeekYu.showPopup('edit-account-popup');
-    }
-
-    if (e.target.matches('.change-pass-btn')) {
-      const row = e.target.closest('tr');
-      const accountId = row.getAttribute('data-account-id');
-      document.getElementById('passAccountId').value = accountId;
-      document.getElementById('newPass').value = '';
-      document.getElementById('newPass2').value = '';
-      SeekYu.showPopup('change-pass-popup');
-    }
-
-    if (e.target.matches('.delete-btn')) {
-      const row = e.target.closest('tr');
-      const accountId = row.getAttribute('data-account-id');
-      if (confirm('Delete account ' + accountId + '? This action cannot be undone.')) {
-        row.remove();
+    // If it's a TR with cells:
+    if (row.tagName === 'TR' && row.cells && row.cells.length) {
+      // find a cell that looks like a status cell (contains Present/On Leave/Late)
+      let statusCell = Array.from(row.cells).find(c => /present|on leave|late|absent/i.test(c.textContent));
+      if (!statusCell) {
+        // fallback: assume 3rd or 4th cell is status
+        statusCell = row.cells[3] || row.cells[2] || row.cells[row.cells.length - 2];
       }
+      if (statusCell) {
+        statusCell.innerHTML = '<span class="status ' + statusText.toLowerCase().replace(/\s+/g,'-') + '">' + statusText + '</span>';
+      }
+      // For dashboard table, clear last seen
+      if (row.parentElement && row.parentElement.id === 'dshbrdguardTableBody') {
+        const lastSeenCell = row.cells[row.cells.length - 1];
+        if (lastSeenCell) lastSeenCell.textContent = (status === 'leave') ? '—' : lastSeenCell.getAttribute('data-original-lastseen') || lastSeenCell.textContent || '—';
+      }
+    } else {
+      // card/link element: set data-status attr & class
+      row.setAttribute('data-status', status === 'onleave' ? 'onleave' : status);
+      if (status === 'onleave') row.classList.add('on-leave'); else row.classList.remove('on-leave');
+    }
+  }
+
+  // Compute dashboard stats from dshbrdguardTableBody
+  function computeDashboardStats() {
+    const rows = Array.from(document.querySelectorAll('#dshbrdguardTableBody tr'));
+    let present = 0, absent = 0, late = 0, onleave = 0;
+    rows.forEach(r => {
+      if (r.style.display === 'none') return;
+      const status = (r.dataset.status || r.querySelector('.status')?.textContent || '').toLowerCase();
+      if (status.includes('present')) present++;
+      else if (status.includes('late')) late++;
+      else if (status.includes('leave') || status.includes('on leave') || status.includes('on-leave') || status.includes('onleave')) onleave++;
+      else if (status.includes('absent')) absent++;
+      else {
+        // treat unknown as present by default? keep as absent 0
+      }
+    });
+    const elPresent = document.getElementById('statPresent');
+    const elAbsent = document.getElementById('statAbsent');
+    const elLate = document.getElementById('statLate');
+    const elOnLeave = document.getElementById('statOnLeave');
+    if (elPresent) elPresent.textContent = present;
+    if (elAbsent) elAbsent.textContent = absent;
+    if (elLate) elLate.textContent = late;
+    if (elOnLeave) elOnLeave.textContent = onleave;
+  }
+
+  // Mark guard on leave across the dashboard & other lists
+  function markGuardOnLeave(guardId, fromDate, toDate, reason) {
+    const id = normalizeId(guardId);
+    // Update dashboard row(s)
+    const dRow = findDashboardGuardRowById(id);
+    if (dRow) {
+      dRow.dataset.leaveFrom = fromDate || '';
+      dRow.dataset.leaveTo = toDate || '';
+      setRowStatusForDisplay(dRow, 'leave');
+      // store leave metadata on row
+    }
+    // Update other lists (guardsTable, guardTable, cards)
+    const others = findAnyGuardRowsById(id);
+    others.forEach(el => {
+      if (el.tagName === 'TR') {
+        el.dataset.leaveFrom = fromDate || '';
+        el.dataset.leaveTo = toDate || '';
+        setRowStatusForDisplay(el, 'leave');
+      } else {
+        el.setAttribute('data-status', 'onleave');
+        el.dataset.leaveFrom = fromDate || '';
+        el.dataset.leaveTo = toDate || '';
+        el.classList.add('on-leave');
+      }
+    });
+
+    // disable attendance controls for this guard if any popup buttons exist
+    // Try to detect popup buttons tied to this guard (by gdId)
+    const gdIdEl = document.getElementById('gdId');
+    if (gdIdEl && normalizeId(gdIdEl.textContent) === id) {
+      ['markPresentBtn','markLateBtn','markLeaveBtn'].forEach(btnId => {
+        const b = document.getElementById(btnId);
+        if (b) b.disabled = true;
+      });
+    }
+
+    computeDashboardStats();
+  }
+
+  // Clear leave (set present)
+  function clearGuardLeave(guardId) {
+    const id = normalizeId(guardId);
+    const dRow = findDashboardGuardRowById(id);
+    if (dRow) {
+      delete dRow.dataset.leaveFrom;
+      delete dRow.dataset.leaveTo;
+      setRowStatusForDisplay(dRow, 'present');
+    }
+    const others = findAnyGuardRowsById(id);
+    others.forEach(el => {
+      if (el.tagName === 'TR') {
+        delete el.dataset.leaveFrom;
+        delete el.dataset.leaveTo;
+        setRowStatusForDisplay(el, 'present');
+      } else {
+        el.setAttribute('data-status', 'active');
+        el.classList.remove('on-leave');
+      }
+    });
+    // re-enable popup attendance if open for this guard
+    const gdIdEl = document.getElementById('gdId');
+    if (gdIdEl && normalizeId(gdIdEl.textContent) === id) {
+      ['markPresentBtn','markLateBtn','markLeaveBtn'].forEach(btnId => {
+        const b = document.getElementById(btnId);
+        if (b) b.disabled = false;
+      });
+    }
+    computeDashboardStats();
+  }
+
+  // Read guard id/from/to from a leave-requests table row
+  function readLeaveRowData(row) {
+    const cells = Array.from(row.querySelectorAll('td'));
+    const requestId = cells[0]?.textContent?.trim() || '';
+    const guardName = cells[1]?.textContent?.trim() || '';
+    const guardId = cells[2]?.textContent?.trim() || '';
+    const from = cells[4]?.textContent?.trim() || '';
+    const to = cells[5]?.textContent?.trim() || '';
+    const reason = cells[6]?.textContent?.trim() || '';
+    return { requestId, guardName, guardId, from, to, reason, row };
+  }
+
+  // Event delegation for Approve/Reject on your Leave Requests table
+  document.addEventListener('click', function (e) {
+    // approve buttons (class names in your HTML: .accept-btn)
+    if (e.target.matches('#leave-requests .accept-btn, #leave-requests .approve-leave, .approve-leave, .accept-btn')) {
+      const btn = e.target;
+      const tr = btn.closest('tr');
+      if (!tr) return;
+      const info = readLeaveRowData(tr);
+      // mark as Approved in UI
+      const statusCell = tr.querySelector('.leave-status') || tr.cells[7];
+      if (statusCell) statusCell.textContent = 'Approved';
+      // disable both action buttons in this row
+      Array.from(tr.querySelectorAll('button')).forEach(b => b.disabled = true);
+      // Mark the guard ON LEAVE across dashboard
+      markGuardOnLeave(info.guardId, info.from, info.to, info.reason);
+
+      // optional: send to server to persist approval (uncomment & adapt)
+      // fetch('/api/leaves/approve', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({requestId: info.requestId, guardId: info.guardId, from: info.from, to: info.to}) });
+    }
+
+    // reject buttons
+    if (e.target.matches('#leave-requests .reject-btn, #leave-requests .reject-leave, .reject-leave, .reject-btn')) {
+      const btn = e.target;
+      const tr = btn.closest('tr');
+      if (!tr) return;
+      const info = readLeaveRowData(tr);
+      const statusCell = tr.querySelector('.leave-status') || tr.cells[7];
+      if (statusCell) statusCell.textContent = 'Rejected';
+      Array.from(tr.querySelectorAll('button')).forEach(b => b.disabled = true);
+
+      // clear any on-leave state for guard
+      clearGuardLeave(info.guardId);
+
+      // optional: persist to server
+      // fetch('/api/leaves/reject', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({requestId: info.requestId, guardId: info.guardId}) });
     }
   });
 
-  // Save edits
-  const editForm = document.getElementById('editAccountForm');
-  if (editForm) {
-    editForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const id = document.getElementById('editAccountId').value;
-      const row = findRowByAccountId(id);
-      if (!row) return alert('Row not found');
-      row.querySelector('.col-name').textContent = document.getElementById('editName').value.trim();
-      row.querySelector('.col-role').textContent = document.getElementById('editRole').value;
-      row.dataset.email = document.getElementById('editEmail').value.trim();
-      SeekYu.hidePopup('edit-account-popup');
-      alert('Account updated. (Demo — persist on server in production.)');
+  // Auto-clear leaves whose 'to' date has passed (search all tables for dataset.leaveTo)
+  function revertExpiredLeaves() {
+    const selectors = ['#dshbrdguardTableBody tr', '#guardsTable tbody tr', '#guardTable tbody tr'];
+    const now = new Date();
+    const processed = new Set();
+    selectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(tr => {
+        const to = tr.dataset.leaveTo || tr.getAttribute('data-leave-to') || '';
+        if (!to) return;
+        const toDate = new Date(to);
+        if (isNaN(toDate)) return;
+        const endOfTo = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate(), 23,59,59);
+        const idCell = tr.cells && tr.cells[1] ? tr.cells[1].textContent.trim() : '';
+        const id = normalizeId(idCell);
+        if (!id) return;
+        if (now > endOfTo && !processed.has(id)) {
+          clearGuardLeave(id);
+          processed.add(id);
+        }
+      });
     });
   }
 
-  // Change password
-  const passForm = document.getElementById('changePassForm');
-  if (passForm) {
-    passForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const id = document.getElementById('passAccountId').value;
-      const p1 = document.getElementById('newPass').value;
-      const p2 = document.getElementById('newPass2').value;
-      if (p1 !== p2) return alert('Passwords do not match');
-      if (p1.length < 4) return alert('Password too short');
-
-      const row = findRowByAccountId(id);
-      if (row) {
-        row.querySelector('.col-pass').textContent = '•••••••';
-        row.querySelector('.col-pass').classList.add('updated');
-      }
-      SeekYu.hidePopup('change-pass-popup');
-      alert('Password updated. (Demo — send to server in production.)');
+  // Run on load and daily
+  document.addEventListener('DOMContentLoaded', function () {
+    // store original last-seen texts to restore later if you want
+    document.querySelectorAll('#dshbrdguardTableBody tr').forEach(tr => {
+      const lastCell = tr.cells[tr.cells.length - 1];
+      if (lastCell && !lastCell.getAttribute('data-original-lastseen')) lastCell.setAttribute('data-original-lastseen', lastCell.textContent.trim());
     });
-  }
+    computeDashboardStats();
+    revertExpiredLeaves();
+    // daily check
+    setInterval(revertExpiredLeaves, 24 * 3600 * 1000);
+  });
 
-  // Demo: create account forms append rows
-  const createClientForm = document.getElementById('createClientForm');
-  if (createClientForm) {
-    createClientForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = this.name.value.trim();
-      const email = this.email.value.trim();
-      // generate demo id
-      const id = 'AC-' + Math.floor(Math.random()*900 + 100);
-      const tbody = document.getElementById('accountTableBody');
-      const tr = document.createElement('tr');
-      tr.setAttribute('data-account-id', id);
-      tr.dataset.email = email;
-      tr.innerHTML = `
-        <td class="col-name">${name}</td>
-        <td class="col-id">${id}</td>
-        <td class="col-role">Client</td>
-        <td class="col-date">${new Date().toISOString().split('T')[0]}</td>
-        <td class="col-pass">•••••••</td>
-        <td class="col-actions">
-          <div class="actions">
-            <button class="edit-account-btn small-btn">Edit</button>
-            <button class="change-pass-btn small-btn">Change Password</button>
-            <button class="delete-btn small-btn">Delete</button>
-          </div>
-        </td>
-      `;
-      tbody.appendChild(tr);
-      alert('Account created (demo).');
-      this.reset();
-      // switch to view tab if you use App.showSubSection
-      if (window.App && App.showSubSection) App.showSubSection('view-accounts');
-    });
-  }
-
-  const createGuardForm = document.getElementById('createGuardForm');
-  if (createGuardForm) {
-    createGuardForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      const name = this.name.value.trim();
-      const email = this.email.value.trim();
-      const id = 'SG-' + Math.floor(Math.random()*900 + 100);
-      const tbody = document.getElementById('accountTableBody');
-      const tr = document.createElement('tr');
-      tr.setAttribute('data-account-id', id);
-      tr.dataset.email = email;
-      tr.innerHTML = `
-        <td class="col-name">${name}</td>
-        <td class="col-id">${id}</td>
-        <td class="col-role">Security Guard</td>
-        <td class="col-date">${new Date().toISOString().split('T')[0]}</td>
-        <td class="col-pass">•••••••</td>
-        <td class="col-actions">
-          <div class="actions">
-            <button class="edit-account-btn small-btn">Edit</button>
-            <button class="change-pass-btn small-btn">Change Password</button>
-            <button class="delete-btn small-btn">Delete</button>
-          </div>
-        </td>
-      `;
-      tbody.appendChild(tr);
-      alert('Guard account created (demo).');
-      this.reset();
-      if (window.App && App.showSubSection) App.showSubSection('view-accounts');
-    });
-  }
-})(); 
-// --- end accounts handlers ---
-
+  // expose functions if you want to call them from other scripts/pages
+  window.DashboardGuard = {
+    markGuardOnLeave: function (id, from, to, reason) { markGuardOnLeave(id, from, to, reason); },
+    clearGuardLeave: function (id) { clearGuardLeave(id); },
+    computeStats: computeDashboardStats
+  };
+})();
   </script>
 </body>
 </html>
-
