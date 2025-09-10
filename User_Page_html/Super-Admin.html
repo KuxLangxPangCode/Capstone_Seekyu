@@ -15,6 +15,7 @@
       <nav>
         <ul>
           <li><button onclick="App.showSection('account-mgmt')" class="active">Account Management</button></li>
+                    <li><button onclick="App.showSection('guard-tracking')">Guard Tracking</button></li>
           <li><button onclick="App.showSection('messaging-mgmt')">Messaging</button></li>
           <li><button onclick="location.href='Index.html'">Logout</button></li>
         </ul>
@@ -86,6 +87,101 @@
         </table>
       </div>
 
+      <!-- ===== Guard Tracking (Address-based) ===== -->
+<div id="guard-tracking" class="section">
+  <h2>Security Guard Tracking — Deployment Address</h2>
+
+  <div class="stats-row" style="display:flex;gap:12px;margin:12px 0 18px;">
+    <div style="flex:1;padding:12px;border-radius:8px;background:var(--card-bg)"><div class="muted">Total Guards</div><div id="totalGuards" style="font-weight:700;font-size:1.35rem">0</div></div>
+    <div style="flex:1;padding:12px;border-radius:8px;background:var(--card-bg)"><div class="muted">Present</div><div id="presentGuards" style="font-weight:700;font-size:1.35rem">0</div></div>
+    <div style="flex:1;padding:12px;border-radius:8px;background:var(--card-bg)"><div class="muted">Late</div><div id="lateGuards" style="font-weight:700;font-size:1.35rem">0</div></div>
+    <div style="flex:1;padding:12px;border-radius:8px;background:var(--card-bg)"><div class="muted">On Leave</div><div id="leaveGuards" style="font-weight:700;font-size:1.35rem">0</div></div>
+  </div>
+
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+    <input id="guardFilter" placeholder="Filter by name, id, deployment address, client or status..." style="flex:1;padding:8px;border-radius:6px;background:var(--light);border:1px solid var(--border);color:inherit;">
+    <button id="refreshGuards" class="small-btn" style="padding:8px 12px;border-radius:6px;">Refresh</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;">
+    <div>
+      <table id="guardsTable" style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">Name</th>
+            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">ID</th>
+            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">Deployment Address</th>
+            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">Client</th>
+            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">Status</th>
+            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Example rows - replace/emit these from backend -->
+          <tr data-status="present" data-address="123 Main St, Business City" data-client="Acme Corp - Site Alpha">
+            <td style="padding:8px">Juan Dela Cruz</td>
+            <td style="padding:8px">G-001</td>
+            <td style="padding:8px">123 Main St, Business City</td>
+            <td style="padding:8px">Acme Corp - Site Alpha</td>
+            <td style="padding:8px"><span class="badge">Present</span></td>
+            <td style="padding:8px"><button class="view-guard-btn small-btn" data-name="Juan Dela Cruz" data-id="G-001" data-address="123 Main St, Business City" data-client="Acme Corp - Site Alpha" data-status="Present">View</button></td>
+          </tr>
+          <tr data-status="late" data-address="Towerville Graceville, San Jose del Monte" data-client="MJL Security - Client B">
+            <td style="padding:8px">Maria Santos</td>
+            <td style="padding:8px">SG045</td>
+            <td style="padding:8px">Towerville Graceville, San Jose del Monte</td>
+            <td style="padding:8px">MJL Security - Client B</td>
+            <td style="padding:8px"><span class="badge" style="background:#b45309">Late</span></td>
+            <td style="padding:8px"><button class="view-guard-btn small-btn" data-name="Maria Santos" data-id="SG045" data-address="Towerville Graceville, San Jose del Monte" data-client="MJL Security - Client B" data-status="Late">View</button></td>
+          </tr>
+          <tr data-status="leave" data-address="Mall Annex, Lot 5" data-client="Acme Corp - Site Beta" data-leave-from="2025-09-01" data-leave-to="2025-09-03">
+            <td style="padding:8px">Ramon Lopez</td>
+            <td style="padding:8px">G-003</td>
+            <td style="padding:8px">Mall Annex, Lot 5</td>
+            <td style="padding:8px">Acme Corp - Site Beta</td>
+            <td style="padding:8px"><span class="badge" style="background:#6b7280">On Leave</span></td>
+            <td style="padding:8px"><button class="view-guard-btn small-btn" data-name="Ramon Lopez" data-id="G-003" data-address="Mall Annex, Lot 5" data-client="Acme Corp - Site Beta" data-status="On Leave">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <aside style="background:var(--card-bg);padding:12px;border-radius:8px;">
+      <h3 style="margin-top:0">Deployment Locations</h3>
+      <table id="deploymentDistribution" style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr><th style="text-align:left;padding:6px;border-bottom:1px solid var(--divider-color)">Address</th><th style="text-align:right;padding:6px;border-bottom:1px solid var(--divider-color)">Guards</th></tr>
+        </thead>
+        <tbody>
+          <!-- populated by JS -->
+        </tbody>
+      </table>
+
+      <div style="margin-top:12px;">
+        <button id="exportGuardReport" class="small-btn" style="width:100%;padding:8px;border-radius:6px;">Export Report (CSV)</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Guard details popup -->
+  <div id="guardDetailsPopup" class="popup hidden">
+    <div class="popup-content">
+      <h2>Guard Details</h2>
+      <p><strong>Name:</strong> <span id="gdName"></span></p>
+      <p><strong>ID:</strong> <span id="gdId"></span></p>
+      <p><strong>Deployment Address:</strong> <span id="gdAddress"></span></p>
+      <p><strong>Client:</strong> <span id="gdClient"></span></p>
+      <p><strong>Status:</strong> <span id="gdStatus"></span></p>
+      <div style="margin-top:10px;">
+        <button id="markPresentBtn" class="small-btn">Mark Present</button>
+        <button id="markLateBtn" class="small-btn">Mark Late</button>
+        <button id="markLeaveBtn" class="small-btn">Mark On Leave</button>
+        <button onclick="SeekYu.hidePopup('guardDetailsPopup')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
       <!-- Messaging Management -->
       <div id="messaging-mgmt" class="section">
         <h2>Messaging</h2>
@@ -146,7 +242,7 @@
             <input type="email" id="editEmail" required>
             <label>Role:</label>
             <select id="editRole" required>
-          <option>Super Admin</option>
+                        <option>Super Admin</option>
           <option>Client</option>
           <option>Security Guard</option>
           <optio>Head Guard</option>
@@ -289,7 +385,215 @@
         row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
       });
     });
+
+(function () {
+  const guardsTable = document.getElementById('guardsTable');
+  const totalEl = document.getElementById('totalGuards');
+  const presentEl = document.getElementById('presentGuards');
+  const lateEl = document.getElementById('lateGuards');
+  const leaveEl = document.getElementById('leaveGuards');
+  const deploymentTbody = document.querySelector('#deploymentDistribution tbody');
+  const filterInput = document.getElementById('guardFilter');
+
+  function computeStats() {
+    const rows = Array.from(guardsTable.querySelectorAll('tbody tr'));
+    let total = 0, present = 0, late = 0, onleave = 0;
+    const addrCounts = {};
+    rows.forEach(r => {
+      if (r.style.display === 'none') return;
+      total++;
+      const status = (r.dataset.status || '').toLowerCase();
+      if (status === 'present') present++;
+      else if (status === 'late') late++;
+      else if (status === 'leave' || status === 'on leave') onleave++;
+      const addr = (r.dataset.address || '').trim() || 'Unassigned';
+      addrCounts[addr] = (addrCounts[addr] || 0) + 1;
+    });
+
+    totalEl.textContent = total;
+    presentEl.textContent = present;
+    lateEl.textContent = late;
+    leaveEl.textContent = onleave;
+
+    // populate deploymentDistribution
+    deploymentTbody.innerHTML = '';
+    Object.keys(addrCounts).sort().forEach(addr => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td style="padding:6px">' + addr + '</td><td style="padding:6px;text-align:right">' + addrCounts[addr] + '</td>';
+      deploymentTbody.appendChild(tr);
+    });
+    if (Object.keys(addrCounts).length === 0) {
+      deploymentTbody.innerHTML = '<tr><td colspan="2" style="padding:6px">No data</td></tr>';
+    }
+  }
+
+  // initial compute
+  computeStats();
+
+  // refresh button
+  document.getElementById('refreshGuards').addEventListener('click', computeStats);
+
+  // filter
+  filterInput.addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    guardsTable.querySelectorAll('tbody tr').forEach(r => {
+      r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+    computeStats();
+  });
+
+  // view details delegation
+  guardsTable.addEventListener('click', function (e) {
+    if (e.target.matches('.view-guard-btn')) {
+      const btn = e.target;
+      document.getElementById('gdName').textContent = btn.dataset.name || '';
+      document.getElementById('gdId').textContent = btn.dataset.id || '';
+      document.getElementById('gdAddress').textContent = btn.dataset.address || '';
+      document.getElementById('gdClient').textContent = btn.dataset.client || '';
+      // reflect current status from row if available
+      const row = findGuardRowById(btn.dataset.id);
+      const statusText = row ? (row.dataset.status === 'leave' ? 'On Leave' : capitalize(row.dataset.status)) : btn.dataset.status;
+      document.getElementById('gdStatus').textContent = statusText || '';
+      // disable attendance if on leave
+      const isLeave = row && (row.dataset.status || '').toLowerCase() === 'leave';
+      disablePopupAttendance(isLeave);
+      SeekYu.showPopup('guardDetailsPopup');
+    }
+  });
+
+  // helper to find row by id
+  function findGuardRowById(id) {
+    if (!id) return null;
+    return Array.from(guardsTable.querySelectorAll('tbody tr')).find(r => {
+      return r.cells[1] && r.cells[1].textContent.trim().toUpperCase() === String(id).trim().toUpperCase();
+    });
+  }
+
+  function capitalize(s) { if (!s) return ''; return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  // status updater
+  function updateRowStatus(id, status) {
+    const row = findGuardRowById(id);
+    if (!row) return;
+    row.dataset.status = status.toLowerCase();
+    row.cells[4].innerHTML = '<span class="badge">' + (status === 'leave' ? 'On Leave' : capitalize(status)) + '</span>';
+    computeStats();
+  }
+
+  // popup buttons - prevent if on leave
+  function disablePopupAttendance(disabled) {
+    const mp = document.getElementById('markPresentBtn');
+    const ml = document.getElementById('markLateBtn');
+    const mleave = document.getElementById('markLeaveBtn');
+    if (mp) mp.disabled = !!disabled;
+    if (ml) ml.disabled = !!disabled;
+    if (mleave) mleave.disabled = !!disabled;
+  }
+
+  document.getElementById('markPresentBtn').addEventListener('click', function () {
+    const id = document.getElementById('gdId').textContent.trim();
+    const row = findGuardRowById(id);
+    if (row && (row.dataset.status || '').toLowerCase() === 'leave') { alert('This guard is currently on leave — attendance actions are disabled.'); return; }
+    updateRowStatus(id, 'present');
+    document.getElementById('gdStatus').textContent = 'Present';
+  });
+  document.getElementById('markLateBtn').addEventListener('click', function () {
+    const id = document.getElementById('gdId').textContent.trim();
+    const row = findGuardRowById(id);
+    if (row && (row.dataset.status || '').toLowerCase() === 'leave') { alert('This guard is currently on leave — attendance actions are disabled.'); return; }
+    updateRowStatus(id, 'late');
+    document.getElementById('gdStatus').textContent = 'Late';
+  });
+  document.getElementById('markLeaveBtn').addEventListener('click', function () {
+    const id = document.getElementById('gdId').textContent.trim();
+    // mark manual leave starting today
+    const from = (new Date()).toISOString().slice(0,10);
+    markGuardOnLeaveById(id, from, from, 'Manual leave (popup)');
+  });
+
+  // mark on leave / clear leave (exposed via GuardTracking object so other scripts can call)
+  function markGuardOnLeaveById(id, fromDate, toDate, reason) {
+    const row = findGuardRowById(id);
+    if (!row) return;
+    row.dataset.status = 'leave';
+    if (fromDate) row.dataset.leaveFrom = fromDate;
+    if (toDate) row.dataset.leaveTo = toDate;
+    if (reason) row.dataset.leaveReason = reason;
+    row.cells[4].innerHTML = '<span class="badge">On Leave</span>';
+    row.classList.add('on-leave');
+    // if popup open for same guard, update
+    if (document.getElementById('gdId') && document.getElementById('gdId').textContent.trim().toUpperCase() === id.trim().toUpperCase()) {
+      document.getElementById('gdStatus').textContent = 'On Leave';
+      disablePopupAttendance(true);
+    }
+    computeStats();
+  }
+  function clearGuardLeaveById(id) {
+    const row = findGuardRowById(id);
+    if (!row) return;
+    row.dataset.status = 'present';
+    delete row.dataset.leaveFrom;
+    delete row.dataset.leaveTo;
+    delete row.dataset.leaveReason;
+    row.cells[4].innerHTML = '<span class="badge">Present</span>';
+    row.classList.remove('on-leave');
+    if (document.getElementById('gdId') && document.getElementById('gdId').textContent.trim().toUpperCase() === id.trim().toUpperCase()) {
+      document.getElementById('gdStatus').textContent = 'Present';
+      disablePopupAttendance(false);
+    }
+    computeStats();
+  }
+
+  // expose to other scripts/pages (so your Leave Requests handler can call this)
+  window.GuardTracking = { markGuardOnLeaveById, clearGuardLeaveById };
+
+  // export CSV includes address and client
+  document.getElementById('exportGuardReport').addEventListener('click', function () {
+    const rows = Array.from(guardsTable.querySelectorAll('tbody tr')).map(r => {
+      return [
+        r.cells[0].textContent.trim(),
+        r.cells[1].textContent.trim(),
+        r.cells[2].textContent.trim(), // address
+        r.cells[3].textContent.trim(), // client
+        r.dataset.status || ''
+      ].map(v => '"' + v.replace(/"/g, '""') + '"').join(',');
+    });
+    const csv = 'Name,ID,Deployment Address,Client,Status\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'guard-report.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // clear leaves when to-date passes (run on load and daily)
+  function revertExpiredLeaves() {
+    const rows = Array.from(guardsTable.querySelectorAll('tbody tr'));
+    const now = new Date();
+    rows.forEach(r => {
+      const to = r.dataset.leaveTo;
+      if (!to) return;
+      const toDate = new Date(to);
+      if (isNaN(toDate)) return;
+      const endOfTo = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate(), 23,59,59);
+      if (now > endOfTo) {
+        const id = r.cells[1].textContent.trim();
+        clearGuardLeaveById(id);
+      }
+    });
+  }
+  revertExpiredLeaves();
+  setInterval(revertExpiredLeaves, 24 * 3600 * 1000);
+
+  // recompute when the section becomes active
+  const originalShowSection = App.showSection;
+  App.showSection = function (id) {
+    originalShowSection(id);
+    if (id === 'guard-tracking') setTimeout(computeStats, 50);
+  };
+})();
   </script>
 </body>
 </html>
-
