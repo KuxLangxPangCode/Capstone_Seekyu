@@ -1,599 +1,1316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeekYu — Admin Dashboard</title>
-  <link rel="stylesheet" href="styles/Admin.css" />
-  <script src="scripts/Messaging.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeekYu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar-item.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .sidebar-item.active:hover {
+            background-color: #2563eb;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+    </style>
 </head>
-<body>
-  <div class="app-container">
+<body class="bg-gray-100 min-h-screen flex">
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="logo">SeekYu</div>
-      <nav>
-        <ul>
-          <li><button onclick="App.showSection('account-mgmt')" class="active">Account Management</button></li>
-                    <li><button onclick="App.showSection('guard-tracking')">Guard Tracking</button></li>
-          <li><button onclick="App.showSection('messaging-mgmt')">Messaging</button></li>
-          <li><button onclick="location.href='Index.html'">Logout</button></li>
-        </ul>
-      </nav>
-    </aside>
+    <div class="sidebar bg-gray-800 text-white w-64 min-h-screen flex flex-col">
+        <!-- Logo -->
+        <div class="p-5 border-b border-gray-700 flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-shield-alt text-blue-400 text-2xl mr-3"></i>
+                <span class="text-xl font-semibold">SeekYu</span>
+            </div>
+            <button id="sidebar-toggle" class="text-gray-400 hover:text-white lg:hidden" title="Close sidebar menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4">
+            <div class="px-4 space-y-1">
+                <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Main Menu</div>
+                
+                <button onclick="showSection('dashboard')" class="sidebar-item active w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-home mr-3 text-lg text-blue-400"></i>
+                    <span>Dashboard</span>
+                </button>
+                
+                <button onclick="showSection('accounts')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-user-cog mr-3 text-lg text-purple-400"></i>
+                    <span>Account Management</span>
+                </button>    
+                
+                <button onclick="showSection('messaging-mgmt')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-comment mr-3 text-lg text-indigo-400"></i>
+                    <span>Send Message</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
+                </button> 
+            </div>
+            
+
+            <div class="px-4 space-y-1 mt-8">
+                <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Reports & Analytics</div>
+
+                <button onclick="showSection('notification')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-exclamation-circle mr-3 text-lg text-yellow-400"></i>
+                    <span>Notifications</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">1</span>
+
+                    <button onclick="showSection('user-activity')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-comment mr-3 text-lg text-indigo-400"></i>
+                    <span>View User Activity</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Logout Button -->
+        <div class="p-4 border-t border-gray-700">
+            <button onclick="location.href='Index.html'" class="w-full flex items-center justify-center px-4 py-3 text-gray-200 hover:bg-red-700 hover:text-white rounded-lg bg-red-600">
+                <i class="fas fa-sign-out-alt mr-3"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+    
+
+
 
     <!-- Main Content -->
-    <main>
-      <!-- Header with notification dropdown -->
-      <div class="dashboard-header">
-        <div>
-          <h1 class="page-title">Super Admin</h1>
-          <p class="muted">Manage accounts, messaging, and notifications.</p>
-        </div>
-
-        <div class="header-actions">
-                      <div class="notification-dropdown">
-              <button id="notifToggle" class="icon-btn" aria-expanded="false">
-                Notifications <span id="notifCount" class="badge">3</span>
-              </button>
-              <div id="notifList" class="dropdown hidden">
-                <ul>
-                  <li><strong>New Application:</strong> Carlos Dela Cruz submitted an application. <span class="time">2m</span></li>
-                  <li><strong>Incident Report:</strong> Unauthorized access reported at ABC Mall. <span class="time">3h</span></li>
-                  <li><strong>Leave Request:</strong> Maria Santos requested emergency leave. <span class="time">1d</span></li>
-                </ul>
-                <div class="dropdown-actions"><a href="Notif-Admin.html" id="viewAllNotifs" class="small-btn">View all</a></div>
-              </div>
+    <div class="flex-1 flex flex-col">
+        <!-- Mobile Header -->
+        <div class="bg-white shadow-sm p-4 flex items-center justify-between lg:hidden">
+            <button id="mobile-sidebar-toggle" class="text-gray-600 hover:text-gray-900" title="Open sidebar menu">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <h1 class="text-xl font-semibold">Dashboard</h1>
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                    <i class="fas fa-user text-gray-600"></i>
+                </div>
             </div>
-
-          <div class="profile-summary">
-            <img src="https://via.placeholder.com/48" alt="Admin avatar" class="avatar">
-            <div>
-              <div class="name">Admin User</div>
-              <div class="role muted">System Administrator</div>
-            </div>
-          </div>
         </div>
+        
+        <!-- Content Sections -->
+        <div class="p-6 flex-1">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h1 class="text-2xl font-bold text-gray-800 mb-2">Super Admin Management Dashboard</h1>
+                    <p class="text-gray-600 mb-6">Welcome to your security management portal. Monitor and manage all security operations from here.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-blue-100 text-blue-600">
+                                    <i class="fas fa-user-shield text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h2 class="text-lg font-semibold text-gray-800">245</h2>
+                                    <p class="text-sm text-gray-600">Active Guards</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-green-100 text-green-600">
+                                    <i class="fas fa-building text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h2 class="text-lg font-semibold text-gray-800">38</h2>
+                                    <p class="text-sm text-gray-600">Active Clients</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-lg bg-purple-100 text-purple-600">
+                                    <i class="fas fa-clipboard-list text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h2 class="text-lg font-semibold text-gray-800">12</h2>
+                                    <p class="text-sm text-gray-600">Pending Requests</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 bg-white rounded-lg shadow-sm p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
+                    <div class="border-t border-gray-100 pt-4">
+                        <div class="flex items-start mb-4">
+                            <div class="bg-blue-100 p-2 rounded-full">
+                                <i class="fas fa-user-plus text-blue-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-800"><span class="font-medium">John Doe</span> registered as a new security guard</p>
+                                <p class="text-sm text-gray-500">2 hours ago</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other Sections (initially hidden) -->
+            
+            
+            <!-- ACCOUNTS MANAGEMENT - Replace existing #accounts block with this -->
+<div id="accounts" class="content-section">
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Account Management</h1>
+      <div class="flex gap-2">
+        <button id="accountsTabCreate" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Create Account</button>
+        <button id="accountsTabView" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">View Accounts</button>
+        <button id="accountsTabRemoved" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">Removed Accounts</button>
       </div>
-
-      <!-- Account Management -->
-      <div id="account-mgmt" class="section active">
-        <h2>Account Management</h2>
-        <button id="createAccountBtn">Create Account</button>
-
-        <table id="accountsTable">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Password</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Admin User</td>
-              <td>admin@example.com</td>
-              <td>Admin</td>
-              <td>••••••</td>
-              <td>
-                <button class="edit-btn">Edit</button>
-                <button class="password-btn">Change Password</button>
-                <button class="delete-btn">Delete</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- ===== Guard Tracking (Address-based) ===== -->
-<div id="guard-tracking" class="section">
-  <h2>Security Guard Tracking — Deployment Address</h2>
-
-  <div class="stats-row" style="display:flex;gap:12px;margin:12px 0 18px;">
-    <div style="flex:1;padding:12px;border-radius:8px;background:var(--card-bg)"><div class="muted">Total Guards</div><div id="totalGuards" style="font-weight:700;font-size:1.35rem">0</div></div>
-    <div style="flex:1;padding:12px;border-radius:8px;background:var(--card-bg)"><div class="muted">Present</div><div id="presentGuards" style="font-weight:700;font-size:1.35rem">0</div></div>
-    <div style="flex:1;padding:12px;border-radius:8px;background:var(--card-bg)"><div class="muted">Late</div><div id="lateGuards" style="font-weight:700;font-size:1.35rem">0</div></div>
-    <div style="flex:1;padding:12px;border-radius:8px;background:var(--card-bg)"><div class="muted">On Leave</div><div id="leaveGuards" style="font-weight:700;font-size:1.35rem">0</div></div>
-  </div>
-
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-    <input id="guardFilter" placeholder="Filter by name, id, deployment address, client or status..." style="flex:1;padding:8px;border-radius:6px;background:var(--light);border:1px solid var(--border);color:inherit;">
-    <button id="refreshGuards" class="small-btn" style="padding:8px 12px;border-radius:6px;">Refresh</button>
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;">
-    <div>
-      <table id="guardsTable" style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr>
-            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">Name</th>
-            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">ID</th>
-            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">Deployment Address</th>
-            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">Client</th>
-            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">Status</th>
-            <th style="text-align:left;padding:10px;border-bottom:1px solid var(--divider-color)">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Example rows - replace/emit these from backend -->
-          <tr data-status="present" data-address="123 Main St, Business City" data-client="Acme Corp - Site Alpha">
-            <td style="padding:8px">Juan Dela Cruz</td>
-            <td style="padding:8px">G-001</td>
-            <td style="padding:8px">123 Main St, Business City</td>
-            <td style="padding:8px">Acme Corp - Site Alpha</td>
-            <td style="padding:8px"><span class="badge">Present</span></td>
-            <td style="padding:8px"><button class="view-guard-btn small-btn" data-name="Juan Dela Cruz" data-id="G-001" data-address="123 Main St, Business City" data-client="Acme Corp - Site Alpha" data-status="Present">View</button></td>
-          </tr>
-          <tr data-status="late" data-address="Towerville Graceville, San Jose del Monte" data-client="MJL Security - Client B">
-            <td style="padding:8px">Maria Santos</td>
-            <td style="padding:8px">SG045</td>
-            <td style="padding:8px">Towerville Graceville, San Jose del Monte</td>
-            <td style="padding:8px">MJL Security - Client B</td>
-            <td style="padding:8px"><span class="badge" style="background:#b45309">Late</span></td>
-            <td style="padding:8px"><button class="view-guard-btn small-btn" data-name="Maria Santos" data-id="SG045" data-address="Towerville Graceville, San Jose del Monte" data-client="MJL Security - Client B" data-status="Late">View</button></td>
-          </tr>
-          <tr data-status="leave" data-address="Mall Annex, Lot 5" data-client="Acme Corp - Site Beta" data-leave-from="2025-09-01" data-leave-to="2025-09-03">
-            <td style="padding:8px">Ramon Lopez</td>
-            <td style="padding:8px">G-003</td>
-            <td style="padding:8px">Mall Annex, Lot 5</td>
-            <td style="padding:8px">Acme Corp - Site Beta</td>
-            <td style="padding:8px"><span class="badge" style="background:#6b7280">On Leave</span></td>
-            <td style="padding:8px"><button class="view-guard-btn small-btn" data-name="Ramon Lopez" data-id="G-003" data-address="Mall Annex, Lot 5" data-client="Acme Corp - Site Beta" data-status="On Leave">View</button></td>
-          </tr>
-        </tbody>
-      </table>
     </div>
 
-    <aside style="background:var(--card-bg);padding:12px;border-radius:8px;">
-      <h3 style="margin-top:0">Deployment Locations</h3>
-      <table id="deploymentDistribution" style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr><th style="text-align:left;padding:6px;border-bottom:1px solid var(--divider-color)">Address</th><th style="text-align:right;padding:6px;border-bottom:1px solid var(--divider-color)">Guards</th></tr>
-        </thead>
-        <tbody>
-          <!-- populated by JS -->
-        </tbody>
-      </table>
+    <!-- Create Account -->
+    <div id="create-account-section" class="">
+      <form id="createAccountForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-slate-600">Full Name</label>
+          <input id="fullName" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600">Username</label>
+          <input id="username" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600">Role</label>
+          <select id="role" class="w-full px-3 py-2 rounded border bg-slate-50" required>
+            <option value="">Select role</option>
+            <option>Super Admin</option>
+            <option>Admin</option>
+            <option>HR</option>
+            <option>Security Guard</option>
+            <option>Head Guard</option>
+            <option>Client</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600">Password</label>
+          <input id="password" type="password" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+        </div>
 
-      <div style="margin-top:12px;">
-        <button id="exportGuardReport" class="small-btn" style="width:100%;padding:8px;border-radius:6px;">Export Report (CSV)</button>
+        <div class="md:col-span-2 flex gap-2 mt-2">
+          <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Create Account</button>
+          <button type="button" id="resetCreate" class="px-4 py-2 rounded bg-slate-200">Reset</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- View Accounts -->
+    <div id="view-accounts-section" class="hidden mt-6">
+      <div class="flex items-center gap-3 mb-4">
+        <input id="accountsSearch" placeholder="Search by name, username or role..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+        <button id="refreshAccounts" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
       </div>
-    </aside>
+
+      <div class="overflow-x-auto bg-white rounded border">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50 text-left text-slate-600">
+            <tr>
+              <th class="py-3 px-3">Name</th>
+              <th class="py-3 px-3">Username</th>
+              <th class="py-3 px-3">Role</th>
+              <th class="py-3 px-3">Created</th>
+              <th class="py-3 px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="accountsTable" class="divide-y"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Removed Accounts -->
+    <div id="removed-accounts-section" class="hidden mt-6">
+      <div class="flex items-center gap-3 mb-4">
+        <input id="removedSearch" placeholder="Search removed accounts..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+      </div>
+
+      <div class="overflow-x-auto bg-white rounded border">
+        <table class="min-w-full text-sm">
+<thead class="bg-slate-50 text-left text-slate-600">
+  <tr>
+    <th class="py-3 px-3">Login ID</th>
+    <th class="py-3 px-3">Name</th>
+    <th class="py-3 px-3">Username</th>
+    <th class="py-3 px-3">Role</th>
+    <th class="py-3 px-3">Created</th>
+    <th class="py-3 px-3">Actions</th>
+  </tr>
+</thead>
+          <tbody id="removedAccountsTable" class="divide-y"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
-  <!-- Guard details popup -->
-  <div id="guardDetailsPopup" class="popup hidden">
-    <div class="popup-content">
-      <h2>Guard Details</h2>
-      <p><strong>Name:</strong> <span id="gdName"></span></p>
-      <p><strong>ID:</strong> <span id="gdId"></span></p>
-      <p><strong>Deployment Address:</strong> <span id="gdAddress"></span></p>
-      <p><strong>Client:</strong> <span id="gdClient"></span></p>
-      <p><strong>Status:</strong> <span id="gdStatus"></span></p>
-      <div style="margin-top:10px;">
-        <button id="markPresentBtn" class="small-btn">Mark Present</button>
-        <button id="markLateBtn" class="small-btn">Mark Late</button>
-        <button id="markLeaveBtn" class="small-btn">Mark On Leave</button>
-        <button onclick="SeekYu.hidePopup('guardDetailsPopup')">Close</button>
+  <!-- Edit Account Modal -->
+  <div id="editAccountModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+    <div class="bg-white rounded-lg max-w-lg w-full p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold">Edit Account</h3>
+        <button id="closeEditModal" class="text-slate-500">✕</button>
       </div>
+
+      <form id="editAccountForm" class="space-y-3">
+        <input type="hidden" id="editId" />
+        <div>
+          <label class="block text-sm text-slate-600">Full Name</label>
+          <input id="editFullName" class="w-full px-3 py-2 rounded border bg-slate-50" />
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600">Username</label>
+          <input id="editUsername" class="w-full px-3 py-2 rounded border bg-slate-50" />
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600">Role</label>
+          <select id="editRole" class="w-full px-3 py-2 rounded border bg-slate-50">
+            <option>Super Admin</option>
+            <option>Admin</option>
+            <option>HR</option>
+            <option>Security Guard</option>
+            <option>Head Guard</option>
+            <option>Client</option>
+          </select>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-3">
+          <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Save Changes</button>
+          <button type="button" id="cancelEdit" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div id="changePasswordModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+    <div class="bg-white rounded-lg max-w-md w-full p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-lg font-semibold">Change Password</h3>
+        <button id="closePassModal" class="text-slate-500">✕</button>
+      </div>
+
+      <form id="changePasswordForm" class="space-y-3">
+        <input type="hidden" id="passUserId" />
+        <div>
+          <label class="block text-sm text-slate-600">New Password</label>
+          <input id="newPassword" type="password" class="w-full px-3 py-2 rounded border bg-slate-50" />
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600">Confirm Password</label>
+          <input id="confirmNewPassword" type="password" class="w-full px-3 py-2 rounded border bg-slate-50" />
+        </div>
+
+        <div class="flex justify-end gap-2 mt-3">
+          <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Change Password</button>
+          <button type="button" id="cancelPass" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
 
-      <!-- Messaging Management -->
-      <div id="messaging-mgmt" class="section">
-        <h2>Messaging</h2>
 
-        <div class="sub-nav">
-          <button onclick="App.showSubSection('inbox-section')" class="active">Inbox</button>
-          <button onclick="App.showSubSection('compose-section')">Compose</button>
+            <!-- USER ACTIVITY (replace existing #user-activity block) -->
+<div id="user-activity" class="content-section">
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">View User Activity</h1>
+        <p class="text-gray-600">Audit trail of user actions: logins, logouts, password attempts, profile changes, etc.</p>
+      </div>
+      <div class="flex gap-2 items-center">
+        <button id="activityExport" class="px-3 py-2 rounded bg-slate-100 border">Export (JSON)</button>
+        <button id="activityRefresh" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+      </div>
+    </div>
+
+    <!-- filters -->
+    <div class="flex flex-wrap gap-3 mb-4">
+      <input id="activitySearch" type="text" placeholder="Search (user, id, ip, details...)" class="flex-1 min-w-[220px] px-3 py-2 rounded border bg-slate-50" />
+      <select id="activityRole" class="px-3 py-2 rounded border bg-slate-50">
+        <option value="">All Roles</option>
+        <option>Super Admin</option>
+        <option>Admin</option>
+        <option>HR</option>
+        <option>Client</option>
+        <option>Applicant</option>
+        <option>Security Guard</option>
+        <option>Head Guard</option>
+      </select>
+      <select id="activityUser" class="px-3 py-2 rounded border bg-slate-50">
+        <option value="">All Users</option>
+      </select>
+      <select id="activityType" class="px-3 py-2 rounded border bg-slate-50">
+        <option value="">All Types</option>
+        <option>Login</option>
+        <option>Logout</option>
+        <option>Failed Login</option>
+        <option>Password Change Attempt</option>
+        <option>Password Changed</option>
+        <option>Edit Profile</option>
+        <option>Other</option>
+      </select>
+      <input id="activityFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+      <input id="activityTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+    </div>
+
+    <!-- table -->
+    <div class="overflow-x-auto bg-white rounded border">
+      <table class="min-w-full text-sm">
+        <thead class="bg-slate-50 text-left text-slate-600">
+          <tr>
+            <th class="py-3 px-3">Time</th>
+            <th class="py-3 px-3">User</th>
+            <th class="py-3 px-3">Role</th>
+            <th class="py-3 px-3">Event</th>
+            <th class="py-3 px-3">Source</th>
+            <th class="py-3 px-3">Details</th>
+            <th class="py-3 px-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="activityTable" class="divide-y"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Activity Details Modal -->
+<div id="activityModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white rounded-lg max-w-3xl w-full p-5 overflow-y-auto max-h-[90vh]">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Activity Details</h2>
+      <button id="closeActivityModal" class="text-slate-500">✕</button>
+    </div>
+    <div id="activityDetails" class="text-sm text-slate-700 space-y-3"></div>
+    <div class="mt-4 flex justify-end gap-2">
+      <button id="activityDeleteBtn" class="px-3 py-2 rounded bg-red-600 text-white">Delete</button>
+      <button id="activityCloseBtn" class="px-3 py-2 rounded bg-slate-200">Close</button>
+    </div>
+  </div>
+</div>
+
+            <!-- Messaging Section -->
+<div id="messaging-mgmt" class="content-section">
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Messaging Management</h1>
+
+    <!-- Sub-navigation -->
+    <div class="mt-4">
+      <div class="flex gap-2 mb-4">
+        <button id="inboxBtn" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Inbox</button>
+        <button id="composeBtn" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">Compose</button>
+      </div>
+
+      <!-- Inbox Section -->
+      <div id="inbox-section" class="bg-white rounded-lg shadow-sm p-4">
+        <div class="flex items-center gap-3 mb-4">
+          <input type="text" id="messageSearch" placeholder="Search messages..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+          <button id="refreshBtn" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
         </div>
 
-        <!-- Inbox -->
-        <div id="inbox-section" class="sub-section active">
-          <input type="text" id="messageSearch" placeholder="Search messages...">
-          <table class="message-table" id="messageTable">
-            <thead>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="text-left text-slate-500">
               <tr>
-                <th>Sender</th>
-                <th>Subject</th>
-                <th>Date</th>
-                <th>Action</th>
+                <th class="py-2">Sender</th>
+                <th class="py-2">Subject</th>
+                <th class="py-2">Date</th>
+                <th class="py-2">Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="messageTable" class="divide-y">
+              <!-- Example row -->
               <tr>
-                <td>Admin</td>
-                <td>Shift Schedule Update</td>
-                <td>2025-08-25</td>
-                <td>
-                  <button class="view-message-btn" data-from="Admin" data-subject="Shift Schedule Update" data-date="2025-08-25" data-body="Your shift schedule has been updated.">View</button>
-                  <button class="delete-message-btn">Delete</button>
+                <td class="py-2">Admin</td>
+                <td class="py-2">Welcome to SeekYu</td>
+                <td class="py-2">2025-09-13</td>
+                <td class="py-2">
+                  <button class="viewBtn text-blue-600 hover:underline" 
+                    data-sender="Admin" 
+                    data-recipient="You" 
+                    data-subject="Welcome to SeekYu" 
+                    data-date="2025-09-13" 
+                    data-body="This is a sample welcome message.">View</button>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-
-        <!-- Compose -->
-        <div id="compose-section" class="sub-section">
-          <form id="composeForm" class="compose-form">
-            <label>To:</label>
-            <input type="text" id="recipient" required>
-            <label>Subject:</label>
-            <input type="text" id="subject" required>
-            <label>Message:</label>
-            <textarea id="message" rows="5" required></textarea>
-            <button type="submit">Send Message</button>
-          </form>
-        </div>
       </div>
 
-      <!-- Popups -->
-      <div id="editAccountPopup" class="popup hidden">
-        <div class="popup-content">
-          <h2>Edit Account</h2>
-          <form id="editAccountForm">
-            <label>Name:</label>
-            <input type="text" id="editName" required>
-            <label>Email:</label>
-            <input type="email" id="editEmail" required>
-            <label>Role:</label>
-            <select id="editRole" required>
-                        <option>Super Admin</option>
-          <option>Client</option>
-          <option>Security Guard</option>
-          <optio>Head Guard</option>
-          <option>HR Admin</option>
-          <option>Admin</option>
-          <option>Super Admin</option>
-            </select>
-            <button type="submit">Save</button>
-            <button type="button" onclick="SeekYu.hidePopup('editAccountPopup')">Cancel</button>
-          </form>
-        </div>
-      </div>
+      <!-- Compose Section -->
+      <div id="compose-section" class="hidden bg-white rounded-lg shadow-sm p-4 mt-4">
+        <form id="composeForm" class="space-y-3">
+          <div>
+            <label class="block text-sm text-slate-600">To:</label>
+            <input type="text" id="recipient" name="recipient" required class="w-full px-3 py-2 rounded border bg-slate-50" />
+          </div>
 
-      <div id="passwordPopup" class="popup hidden">
-        <div class="popup-content">
-          <h2>Change Password</h2>
-          <form id="passwordForm">
-            <label>New Password:</label>
-            <input type="password" id="newPass" required>
-            <label>Confirm Password:</label>
-            <input type="password" id="confirmPass" required>
-            <button type="submit">Update</button>
-            <button type="button" onclick="SeekYu.hidePopup('passwordPopup')">Cancel</button>
-          </form>
-        </div>
-      </div>
+          <div>
+            <label class="block text-sm text-slate-600">Subject:</label>
+            <input type="text" id="subject" name="subject" required class="w-full px-3 py-2 rounded border bg-slate-50" />
+          </div>
 
-      <div id="message-popup" class="popup hidden">
-        <div class="popup-content">
-          <h2>Message Details</h2>
-          <p><strong>From:</strong> <span id="popupSender"></span></p>
-          <p><strong>Subject:</strong> <span id="popupSubject"></span></p>
-          <p><strong>Date:</strong> <span id="popupDate"></span></p>
-          <p><strong>Message:</strong></p>
-          <p id="popupBody"></p>
-          <button onclick="SeekYu.hidePopup('message-popup')">Close</button>
-        </div>
+          <div>
+            <label class="block text-sm text-slate-600">Message:</label>
+            <textarea id="message" name="message" rows="5" required class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+          </div>
+
+          <div class="flex gap-2">
+            <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Send Message</button>
+            <button type="button" id="cancelCompose" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
+          </div>
+        </form>
       </div>
-    </main>
+    </div>
   </div>
+</div>
 
-  <script>
-    // Popup handler
-    window.SeekYu = {
-      showPopup(id) { document.getElementById(id).classList.remove('hidden'); },
-      hidePopup(id) { document.getElementById(id).classList.add('hidden'); }
-    };
+<!-- Popup for Viewing Message -->
+<div id="message-popup" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white rounded-lg max-w-lg w-full p-5">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Message Details</h2>
+      <button id="closePopup" class="text-slate-500 hover:text-slate-800">✕</button>
+    </div>
 
-    // Section switcher
-    window.App = {
-      showSection(id) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
-        const btn = Array.from(document.querySelectorAll('.sidebar button')).find(b => b.getAttribute('onclick')?.includes(id));
-        if (btn) btn.classList.add('active');
-      },
-      showSubSection(id) {
-        document.querySelectorAll('.sub-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.querySelectorAll('.sub-nav button').forEach(b => b.classList.remove('active'));
-        const btn = Array.from(document.querySelectorAll('.sub-nav button')).find(b => b.getAttribute('onclick')?.includes(id));
-        if (btn) btn.classList.add('active');
-      }
-    };
+    <p class="text-sm"><strong>From:</strong> <span id="popupSender">-</span></p>
+    <p class="text-sm"><strong>To:</strong> <span id="popupRecipient">-</span></p>
+    <p class="text-sm"><strong>Subject:</strong> <span id="popupSubject">-</span></p>
+    <p class="text-sm"><strong>Date:</strong> <span id="popupDate">-</span></p>
 
-    // Notification dropdown
-    const notifToggle = document.getElementById('notifToggle');
-    const notifList = document.getElementById('notifList');
-    notifToggle.addEventListener('click', e => {
-      e.stopPropagation();
-      notifList.classList.toggle('hidden');
+    <div class="mt-3">
+      <p id="popupBody" class="whitespace-pre-wrap text-sm text-slate-700"></p>
+    </div>
+
+    <div class="mt-4 flex gap-2 justify-end">
+      <button id="replyBtn" class="px-3 py-2 rounded bg-emerald-600 text-white">Reply</button>
+      <button id="deleteBtn" class="px-3 py-2 rounded bg-red-600 text-white">Delete</button>
+      <button id="closePopup2" class="px-3 py-2 rounded bg-slate-200">Close</button>
+    </div>
+  </div>
+</div>
+
+            <!-- Notification Section -->  
+            <div id="notification" class="content-section">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h1 class="text-2xl font-bold text-gray-800 mb-6">Notifications</h1>
+                    <p class="text-gray-600">Manage system notifications and alerts.</p>
+                </div>
+            </div>
+            <!-- Add other sections similarly -->
+            
+        </div>
+    </div>
+<!-- Popup Modal -->
+<div id="popup-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
+    <div class="p-6">
+      <h3 class="text-xl font-semibold text-gray-800" id="popup-title">Popup Title</h3>
+      <p class="text-gray-600 mt-2" id="popup-content">This is the popup content. You can put any information here.</p>
+    </div>
+    <div class="flex justify-end p-6 border-t border-gray-200">
+      <button id="close-popup" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
+    </div>
+  </div>
+</div>
+<!-- Replace your existing <script>...</script> with this block -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Sidebar mobile toggle (kept similar to your original)
+  const mobileToggle = document.getElementById('mobile-sidebar-toggle');
+  mobileToggle?.addEventListener('click', function() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('-ml-64');
+    sidebar.classList.toggle('ml-0');
+    const toggleIcon = document.querySelector('#sidebar-toggle i');
+    if (sidebar.classList.contains('-ml-64')) {
+      toggleIcon.classList.remove('fa-times'); toggleIcon.classList.add('fa-bars');
+    } else {
+      toggleIcon.classList.remove('fa-bars'); toggleIcon.classList.add('fa-times');
+    }
+  });
+
+  // --- Section switching (keeps your showSection logic but safer) ---
+  window.showSection = function(sectionId, clickedBtn = null) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+    const target = document.getElementById(sectionId);
+    if (target) target.classList.add('active');
+
+    // mark button active if provided
+    if (clickedBtn) clickedBtn.classList.add('active');
+
+    if (window.innerWidth < 1024) {
+      document.querySelector('.sidebar')?.classList.add('-ml-64');
+      const icon = document.querySelector('#sidebar-toggle i');
+      if (icon) { icon.classList.remove('fa-times'); icon.classList.add('fa-bars'); }
+    }
+  };
+
+}); // <-- Add this closing brace for document.addEventListener
+// --- Messaging Section Logic ---
+  // If sidebar buttons use inline onclick (your layout), ensure the Messaging button opens inbox first
+  const messagingSidebarBtn = Array.from(document.querySelectorAll('button')).find(b => b.getAttribute('onclick')?.includes("showSection('messaging-mgmt')"));
+  if (messagingSidebarBtn) {
+    messagingSidebarBtn.addEventListener('click', function (ev) {
+      // use the safer showSection, and pass the clicked button to be marked active
+      showSection('messaging-mgmt', messagingSidebarBtn);
+      showInbox();
     });
-    document.addEventListener('click', e => {
-      if (!notifList.contains(e.target) && !notifToggle.contains(e.target)) {
-        notifList.classList.add('hidden');
-      }
-    });
+  }
 
-    // Message popup
-    document.addEventListener('click', e => {
-      if (e.target.matches('.view-message-btn')) {
-        document.getElementById('popupSender').textContent = e.target.dataset.from;
-        document.getElementById('popupSubject').textContent = e.target.dataset.subject;
-        document.getElementById('popupDate').textContent = e.target.dataset.date;
-        document.getElementById('popupBody').textContent = e.target.dataset.body;
-        SeekYu.showPopup('message-popup');
-      }
-      if (e.target.matches('.delete-message-btn')) {
-        e.target.closest('tr').remove();
-      }
-    });
+  // --- Messaging UI elements ---
+  const inboxBtn = document.getElementById('inboxBtn');
+  const composeBtn = document.getElementById('composeBtn');
+  const inboxSection = document.getElementById('inbox-section');
+  const composeSection = document.getElementById('compose-section');
+  const cancelCompose = document.getElementById('cancelCompose');
+  const composeForm = document.getElementById('composeForm');
+  const messageTable = document.getElementById('messageTable');
+  const messagePopup = document.getElementById('message-popup');
+  const popupSender = document.getElementById('popupSender');
+  const popupRecipient = document.getElementById('popupRecipient');
+  const popupSubject = document.getElementById('popupSubject');
+  const popupDate = document.getElementById('popupDate');
+  const popupBody = document.getElementById('popupBody');
+  const replyBtn = document.getElementById('replyBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const closePopupBtns = [document.getElementById('closePopup'), document.getElementById('closePopup2')];
 
-    // Compose form demo
-    document.getElementById('composeForm').addEventListener('submit', e => {
-      e.preventDefault();
-      alert('Message sent (demo).');
-      e.target.reset();
-      App.showSubSection('inbox-section');
-    });
+  // In-memory messages store for frontend demo (id increments)
+  let messages = [
+    {
+      id: 1,
+      sender: 'Admin',
+      recipient: 'You',
+      subject: 'Welcome to SeekYu',
+      date: '2025-09-13',
+      body: 'This is a sample welcome message.'
+    }
+  ];
+  let nextMessageId = 2;
+  let currentViewedMessageId = null; // id of message currently shown in popup
 
-    // Account management actions
-    document.getElementById('accountsTable').addEventListener('click', e => {
-      const row = e.target.closest('tr');
-      if (e.target.classList.contains('edit-btn')) {
-        document.getElementById('editName').value = row.cells[0].textContent;
-        document.getElementById('editEmail').value = row.cells[1].textContent;
-        document.getElementById('editRole').value = row.cells[2].textContent;
-        SeekYu.showPopup('editAccountPopup');
-      }
-      if (e.target.classList.contains('password-btn')) {
-        SeekYu.showPopup('passwordPopup');
-      }
-      if (e.target.classList.contains('delete-btn')) {
-        if (confirm('Delete this account?')) row.remove();
-      }
-    });
-
-    // Edit account form
-    document.getElementById('editAccountForm').addEventListener('submit', e => {
-      e.preventDefault();
-      alert('Account updated (demo).');
-      SeekYu.hidePopup('editAccountPopup');
-    });
-
-    // Password change
-    document.getElementById('passwordForm').addEventListener('submit', e => {
-      e.preventDefault();
-      const np = document.getElementById('newPass').value;
-      const cp = document.getElementById('confirmPass').value;
-      if (np !== cp) { alert('Passwords do not match!'); return; }
-      alert('Password updated (demo).');
-      SeekYu.hidePopup('passwordPopup');
-    });
-
-    // Message search
-    document.getElementById('messageSearch').addEventListener('keyup', function () {
-      const filter = this.value.toLowerCase();
-      document.querySelectorAll('#messageTable tbody tr').forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
-      });
-    });
-
-(function () {
-  const guardsTable = document.getElementById('guardsTable');
-  const totalEl = document.getElementById('totalGuards');
-  const presentEl = document.getElementById('presentGuards');
-  const lateEl = document.getElementById('lateGuards');
-  const leaveEl = document.getElementById('leaveGuards');
-  const deploymentTbody = document.querySelector('#deploymentDistribution tbody');
-  const filterInput = document.getElementById('guardFilter');
-
-  function computeStats() {
-    const rows = Array.from(guardsTable.querySelectorAll('tbody tr'));
-    let total = 0, present = 0, late = 0, onleave = 0;
-    const addrCounts = {};
-    rows.forEach(r => {
-      if (r.style.display === 'none') return;
-      total++;
-      const status = (r.dataset.status || '').toLowerCase();
-      if (status === 'present') present++;
-      else if (status === 'late') late++;
-      else if (status === 'leave' || status === 'on leave') onleave++;
-      const addr = (r.dataset.address || '').trim() || 'Unassigned';
-      addrCounts[addr] = (addrCounts[addr] || 0) + 1;
-    });
-
-    totalEl.textContent = total;
-    presentEl.textContent = present;
-    lateEl.textContent = late;
-    leaveEl.textContent = onleave;
-
-    // populate deploymentDistribution
-    deploymentTbody.innerHTML = '';
-    Object.keys(addrCounts).sort().forEach(addr => {
+  function renderInbox() {
+    messageTable.innerHTML = '';
+    for (const msg of messages.slice().reverse()) { // show newest first
       const tr = document.createElement('tr');
-      tr.innerHTML = '<td style="padding:6px">' + addr + '</td><td style="padding:6px;text-align:right">' + addrCounts[addr] + '</td>';
-      deploymentTbody.appendChild(tr);
-    });
-    if (Object.keys(addrCounts).length === 0) {
-      deploymentTbody.innerHTML = '<tr><td colspan="2" style="padding:6px">No data</td></tr>';
+      tr.innerHTML = `
+        <td class="py-2">${escapeHtml(msg.sender)}</td>
+        <td class="py-2">${escapeHtml(msg.subject)}</td>
+        <td class="py-2">${escapeHtml(msg.date)}</td>
+        <td class="py-2">
+          <button class="viewBtn text-blue-600 hover:underline" data-id="${msg.id}">View</button>
+          <button class="delInlineBtn ml-3 text-red-600 hover:underline" data-id="${msg.id}">Delete</button>
+        </td>`;
+      messageTable.appendChild(tr);
     }
   }
 
-  // initial compute
-  computeStats();
-
-  // refresh button
-  document.getElementById('refreshGuards').addEventListener('click', computeStats);
-
-  // filter
-  filterInput.addEventListener('input', function () {
-    const q = this.value.toLowerCase();
-    guardsTable.querySelectorAll('tbody tr').forEach(r => {
-      r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
-    });
-    computeStats();
-  });
-
-  // view details delegation
-  guardsTable.addEventListener('click', function (e) {
-    if (e.target.matches('.view-guard-btn')) {
-      const btn = e.target;
-      document.getElementById('gdName').textContent = btn.dataset.name || '';
-      document.getElementById('gdId').textContent = btn.dataset.id || '';
-      document.getElementById('gdAddress').textContent = btn.dataset.address || '';
-      document.getElementById('gdClient').textContent = btn.dataset.client || '';
-      // reflect current status from row if available
-      const row = findGuardRowById(btn.dataset.id);
-      const statusText = row ? (row.dataset.status === 'leave' ? 'On Leave' : capitalize(row.dataset.status)) : btn.dataset.status;
-      document.getElementById('gdStatus').textContent = statusText || '';
-      // disable attendance if on leave
-      const isLeave = row && (row.dataset.status || '').toLowerCase() === 'leave';
-      disablePopupAttendance(isLeave);
-      SeekYu.showPopup('guardDetailsPopup');
-    }
-  });
-
-  // helper to find row by id
-  function findGuardRowById(id) {
-    if (!id) return null;
-    return Array.from(guardsTable.querySelectorAll('tbody tr')).find(r => {
-      return r.cells[1] && r.cells[1].textContent.trim().toUpperCase() === String(id).trim().toUpperCase();
+  // Simple HTML escape
+  function escapeHtml(s) {
+    if (!s && s !== 0) return '';
+    return String(s).replace(/[&<>"'`=\/]/g, function(ch) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch];
     });
   }
 
-  function capitalize(s) { if (!s) return ''; return s.charAt(0).toUpperCase() + s.slice(1); }
-
-  // status updater
-  function updateRowStatus(id, status) {
-    const row = findGuardRowById(id);
-    if (!row) return;
-    row.dataset.status = status.toLowerCase();
-    row.cells[4].innerHTML = '<span class="badge">' + (status === 'leave' ? 'On Leave' : capitalize(status)) + '</span>';
-    computeStats();
+  // Inbox/Compose toggles
+  function showInbox() {
+    inboxSection.classList.remove('hidden');
+    composeSection.classList.add('hidden');
+    inboxBtn.classList.add('bg-indigo-600','text-white');
+    inboxBtn.classList.remove('bg-slate-200','text-gray-800');
+    composeBtn.classList.remove('bg-indigo-600','text-white');
+    composeBtn.classList.add('bg-slate-200','text-gray-800');
   }
-
-  // popup buttons - prevent if on leave
-  function disablePopupAttendance(disabled) {
-    const mp = document.getElementById('markPresentBtn');
-    const ml = document.getElementById('markLateBtn');
-    const mleave = document.getElementById('markLeaveBtn');
-    if (mp) mp.disabled = !!disabled;
-    if (ml) ml.disabled = !!disabled;
-    if (mleave) mleave.disabled = !!disabled;
+  function showCompose() {
+    composeSection.classList.remove('hidden');
+    inboxSection.classList.add('hidden');
+    composeBtn.classList.add('bg-indigo-600','text-white');
+    composeBtn.classList.remove('bg-slate-200','text-gray-800');
+    inboxBtn.classList.remove('bg-indigo-600','text-white');
+    inboxBtn.classList.add('bg-slate-200','text-gray-800');
   }
+  inboxBtn?.addEventListener('click', showInbox);
+  composeBtn?.addEventListener('click', showCompose);
+  cancelCompose?.addEventListener('click', showInbox);
 
-  document.getElementById('markPresentBtn').addEventListener('click', function () {
-    const id = document.getElementById('gdId').textContent.trim();
-    const row = findGuardRowById(id);
-    if (row && (row.dataset.status || '').toLowerCase() === 'leave') { alert('This guard is currently on leave — attendance actions are disabled.'); return; }
-    updateRowStatus(id, 'present');
-    document.getElementById('gdStatus').textContent = 'Present';
-  });
-  document.getElementById('markLateBtn').addEventListener('click', function () {
-    const id = document.getElementById('gdId').textContent.trim();
-    const row = findGuardRowById(id);
-    if (row && (row.dataset.status || '').toLowerCase() === 'leave') { alert('This guard is currently on leave — attendance actions are disabled.'); return; }
-    updateRowStatus(id, 'late');
-    document.getElementById('gdStatus').textContent = 'Late';
-  });
-  document.getElementById('markLeaveBtn').addEventListener('click', function () {
-    const id = document.getElementById('gdId').textContent.trim();
-    // mark manual leave starting today
-    const from = (new Date()).toISOString().slice(0,10);
-    markGuardOnLeaveById(id, from, from, 'Manual leave (popup)');
-  });
-
-  // mark on leave / clear leave (exposed via GuardTracking object so other scripts can call)
-  function markGuardOnLeaveById(id, fromDate, toDate, reason) {
-    const row = findGuardRowById(id);
-    if (!row) return;
-    row.dataset.status = 'leave';
-    if (fromDate) row.dataset.leaveFrom = fromDate;
-    if (toDate) row.dataset.leaveTo = toDate;
-    if (reason) row.dataset.leaveReason = reason;
-    row.cells[4].innerHTML = '<span class="badge">On Leave</span>';
-    row.classList.add('on-leave');
-    // if popup open for same guard, update
-    if (document.getElementById('gdId') && document.getElementById('gdId').textContent.trim().toUpperCase() === id.trim().toUpperCase()) {
-      document.getElementById('gdStatus').textContent = 'On Leave';
-      disablePopupAttendance(true);
+  // Open a message in popup (delegated)
+  document.addEventListener('click', function(e) {
+    // view inline from table
+    if (e.target && e.target.classList.contains('viewBtn')) {
+      const id = Number(e.target.dataset.id);
+      const msg = messages.find(m => m.id === id);
+      if (!msg) return;
+      currentViewedMessageId = id;
+      popupSender.textContent = msg.sender;
+      popupRecipient.textContent = msg.recipient;
+      popupSubject.textContent = msg.subject;
+      popupDate.textContent = msg.date;
+      popupBody.textContent = msg.body;
+      messagePopup.classList.remove('hidden');
     }
-    computeStats();
-  }
-  function clearGuardLeaveById(id) {
-    const row = findGuardRowById(id);
-    if (!row) return;
-    row.dataset.status = 'present';
-    delete row.dataset.leaveFrom;
-    delete row.dataset.leaveTo;
-    delete row.dataset.leaveReason;
-    row.cells[4].innerHTML = '<span class="badge">Present</span>';
-    row.classList.remove('on-leave');
-    if (document.getElementById('gdId') && document.getElementById('gdId').textContent.trim().toUpperCase() === id.trim().toUpperCase()) {
-      document.getElementById('gdStatus').textContent = 'Present';
-      disablePopupAttendance(false);
+
+    // inline delete button in table (asks confirm)
+    if (e.target && e.target.classList.contains('delInlineBtn')) {
+      const id = Number(e.target.dataset.id);
+      if (!confirm('Delete this message?')) return;
+      messages = messages.filter(m => m.id !== id);
+      renderInbox();
+      // if deleted message is currently open in popup, close popup
+      if (currentViewedMessageId === id) {
+        currentViewedMessageId = null;
+        messagePopup.classList.add('hidden');
+      }
     }
-    computeStats();
-  }
+  });
 
-  // expose to other scripts/pages (so your Leave Requests handler can call this)
-  window.GuardTracking = { markGuardOnLeaveById, clearGuardLeaveById };
+  // Reply button: prefill compose form and open compose
+  replyBtn?.addEventListener('click', function() {
+    if (!currentViewedMessageId) return;
+    const msg = messages.find(m => m.id === currentViewedMessageId);
+    if (!msg) return;
+    // open messaging section and compose
+    showSection('messaging-mgmt');
+    showCompose();
 
-  // export CSV includes address and client
-  document.getElementById('exportGuardReport').addEventListener('click', function () {
-    const rows = Array.from(guardsTable.querySelectorAll('tbody tr')).map(r => {
-      return [
-        r.cells[0].textContent.trim(),
-        r.cells[1].textContent.trim(),
-        r.cells[2].textContent.trim(), // address
-        r.cells[3].textContent.trim(), // client
-        r.dataset.status || ''
-      ].map(v => '"' + v.replace(/"/g, '""') + '"').join(',');
+    // prefill
+    const recipientInput = document.getElementById('recipient');
+    const subjectInput = document.getElementById('subject');
+    const bodyTextarea = document.getElementById('message');
+
+    if (recipientInput) recipientInput.value = msg.sender || '';
+    if (subjectInput) {
+      // if subject already starts with Re:, keep it
+      subjectInput.value = msg.subject && !/^Re:/i.test(msg.subject) ? `Re: ${msg.subject}` : msg.subject || '';
+    }
+    if (bodyTextarea) {
+      bodyTextarea.value = `\n\n--- Original Message ---\nFrom: ${msg.sender}\nDate: ${msg.date}\nSubject: ${msg.subject}\n\n${msg.body}`;
+      bodyTextarea.focus();
+      // put cursor at start of textarea for user to type reply
+      bodyTextarea.setSelectionRange(0, 0);
+    }
+
+    // close popup after replying to reduce UI noise
+    messagePopup.classList.add('hidden');
+  });
+
+  // Delete button (from popup) - removes the message and closes popup
+  deleteBtn?.addEventListener('click', function() {
+    if (!currentViewedMessageId) return;
+    if (!confirm('Delete this message? This cannot be undone in this demo.')) return;
+    messages = messages.filter(m => m.id !== currentViewedMessageId);
+    currentViewedMessageId = null;
+    messagePopup.classList.add('hidden');
+    renderInbox();
+  });
+
+  // Close popup buttons
+  closePopupBtns.forEach(btn => btn?.addEventListener('click', function(){ messagePopup.classList.add('hidden'); currentViewedMessageId = null; }));
+
+  // Clicking outside popup content closes it
+  messagePopup?.addEventListener('click', function(e) {
+    if (e.target === messagePopup) {
+      messagePopup.classList.add('hidden');
+      currentViewedMessageId = null;
+    }
+  });
+
+  // Compose handler (frontend-only simulation)
+  composeForm?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const recipient = document.getElementById('recipient').value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const body = document.getElementById('message').value.trim();
+    if (!recipient || !subject || !body) {
+      alert('Please fill out all fields.');
+      return;
+    }
+    const newMsg = {
+      id: nextMessageId++,
+      sender: 'You', // outgoing: from current user
+      recipient,
+      subject,
+      date: new Date().toISOString().split('T')[0],
+      body
+    };
+    // For demo, add to messages store (so it appears in inbox)
+    messages.push(newMsg);
+    renderInbox();
+    // Reset form and show inbox
+    composeForm.reset();
+    showInbox();
+    alert('Message sent (demo mode). In a real app this would call your backend API.');
+  });
+
+  // initial render: show inbox first
+  renderInbox();
+  showInbox();
+
+  // Utility: refresh button (just re-render here)
+  document.getElementById('refreshBtn')?.addEventListener('click', function(){ renderInbox(); });
+
+  // Search (very basic filter by subject/sender)
+  document.getElementById('messageSearch')?.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    const rows = messageTable.querySelectorAll('tr');
+    rows.forEach(r => {
+      const txt = r.textContent.toLowerCase();
+      r.style.display = txt.includes(q) ? '' : 'none';
     });
-    const csv = 'Name,ID,Deployment Address,Client,Status\n' + rows.join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  });
+
+
+// accounts management logic
+(function(){
+  // Elements (same IDs as in the HTML you already have)
+  const createForm = document.getElementById('createAccountForm');
+  const accountsTable = document.getElementById('accountsTable');
+  const removedTable = document.getElementById('removedAccountsTable');
+  const accountsSearch = document.getElementById('accountsSearch');
+  const removedSearch = document.getElementById('removedSearch');
+  const refreshAccounts = document.getElementById('refreshAccounts');
+
+  const editModal = document.getElementById('editAccountModal');
+  const editForm = document.getElementById('editAccountForm');
+  const closeEditModal = document.getElementById('closeEditModal');
+  const cancelEdit = document.getElementById('cancelEdit');
+
+  const passModal = document.getElementById('changePasswordModal');
+  const passForm = document.getElementById('changePasswordForm');
+  const closePassModal = document.getElementById('closePassModal');
+  const cancelPass = document.getElementById('cancelPass');
+
+  const tabCreate = document.getElementById('accountsTabCreate');
+  const tabView = document.getElementById('accountsTabView');
+  const tabRemoved = document.getElementById('accountsTabRemoved');
+  const createSection = document.getElementById('create-account-section');
+  const viewSection = document.getElementById('view-accounts-section');
+  const removedSection = document.getElementById('removed-accounts-section');
+  const resetCreate = document.getElementById('resetCreate');
+
+  // In-memory stores
+  // account object shape:
+  // { id: number, accountId: 'ADM-0001', fullName, username, role, password, createdAt }
+  let accounts = [
+    { id: 1, accountId: 'ADM-0001', fullName: 'Jane Admin', username: 'jane.admin', role: 'Admin', password: 'admin123', createdAt: '2025-09-13' }
+  ];
+  let removedAccounts = []; // { id, accountId, fullName, username, role, password, createdAt, removedAt }
+  let nextAccountId = 2;
+
+  // mapping for prefixes
+  const rolePrefixes = {
+    'Admin': 'ADM',
+    'HR': 'HR',
+    'Security Guard': 'SG',
+    'Head Guard': 'HG',
+    'Client': 'CL'
+  };
+
+  // utils
+  function today() { return new Date().toISOString().split('T')[0]; }
+  function padNum(n, size=4) { return String(n).padStart(size,'0'); }
+  function genAccountId(role, seq) {
+    const pref = rolePrefixes[role] || 'USR';
+    return `${pref}-${padNum(seq)}`;
+  }
+  function escapeHtml(s){ if (!s && s !== 0) return ''; return String(s).replace(/[&<>"'`=\/]/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch]; }); }
+
+  // Render functions
+  function renderAccounts(filter = '') {
+    accountsTable.innerHTML = '';
+    const rows = accounts.filter(a => {
+      const q = filter.toLowerCase();
+      return !q || (a.accountId + ' ' + a.fullName + ' ' + a.username + ' ' + a.role).toLowerCase().includes(q);
+    });
+
+    if (rows.length === 0) {
+      accountsTable.innerHTML = '<tr><td class="py-4 px-3 text-slate-500" colspan="6">No accounts found.</td></tr>';
+      return;
+    }
+
+    for (const a of rows) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="py-3 px-3 font-mono text-sm">${escapeHtml(a.accountId)}</td>
+        <td class="py-3 px-3">${escapeHtml(a.fullName)}</td>
+        <td class="py-3 px-3">${escapeHtml(a.username)}</td>
+        <td class="py-3 px-3">${escapeHtml(a.role)}</td>
+        <td class="py-3 px-3">${escapeHtml(a.createdAt)}</td>
+        <td class="py-3 px-3">
+          <button class="editBtn text-indigo-600 hover:underline" data-id="${a.id}">Edit</button>
+          <button class="passBtn ml-3 text-sky-600 hover:underline" data-id="${a.id}">Change Password</button>
+          <button class="removeBtn ml-3 text-red-600 hover:underline" data-id="${a.id}">Remove</button>
+        </td>
+      `;
+      accountsTable.appendChild(tr);
+    }
+  }
+
+  function renderRemovedAccounts(filter = '') {
+    removedTable.innerHTML = '';
+    const rows = removedAccounts.filter(a => {
+      const q = filter.toLowerCase();
+      return !q || (a.accountId + ' ' + a.fullName + ' ' + a.username + ' ' + a.role).toLowerCase().includes(q);
+    });
+
+    if (rows.length === 0) {
+      removedTable.innerHTML = '<tr><td class="py-4 px-3 text-slate-500" colspan="6">No removed accounts.</td></tr>';
+      return;
+    }
+
+    for (const a of rows) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="py-3 px-3 font-mono text-sm">${escapeHtml(a.accountId)}</td>
+        <td class="py-3 px-3">${escapeHtml(a.fullName)}</td>
+        <td class="py-3 px-3">${escapeHtml(a.username)}</td>
+        <td class="py-3 px-3">${escapeHtml(a.role)}</td>
+        <td class="py-3 px-3">${escapeHtml(a.removedAt)}</td>
+        <td class="py-3 px-3">
+          <button class="restoreBtn text-emerald-600 hover:underline" data-id="${a.id}">Restore</button>
+          <button class="permaDelBtn ml-3 text-red-700 hover:underline" data-id="${a.id}">Permanently Delete</button>
+        </td>
+      `;
+      removedTable.appendChild(tr);
+    }
+  }
+
+  // Initial render
+  renderAccounts();
+  renderRemovedAccounts();
+
+  // TAB handlers
+  function activateTab(tab) {
+    [tabCreate, tabView, tabRemoved].forEach(t => t.classList.remove('bg-indigo-600','text-white'));
+    [tabCreate, tabView, tabRemoved].forEach(t => t.classList.add('bg-slate-200','text-gray-800'));
+    tab.classList.remove('bg-slate-200','text-gray-800');
+    tab.classList.add('bg-indigo-600','text-white');
+
+    createSection.classList.add('hidden');
+    viewSection.classList.add('hidden');
+    removedSection.classList.add('hidden');
+
+    if (tab === tabCreate) createSection.classList.remove('hidden');
+    if (tab === tabView) viewSection.classList.remove('hidden');
+    if (tab === tabRemoved) removedSection.classList.remove('hidden');
+  }
+
+  tabCreate.addEventListener('click', () => activateTab(tabCreate));
+  tabView.addEventListener('click', () => activateTab(tabView));
+  tabRemoved.addEventListener('click', () => activateTab(tabRemoved));
+
+  // Default: show create
+  activateTab(tabCreate);
+
+  // Create account: now generates accountId
+  createForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const fullName = document.getElementById('fullName').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const role = document.getElementById('role').value;
+    const password = document.getElementById('password').value;
+
+    if (!fullName || !username || !role || !password) {
+      alert('Please fill out all fields.');
+      return;
+    }
+
+    // Generate accountId from role prefix + sequence
+    const accountId = genAccountId(role, nextAccountId);
+
+    // ensure unique accountId / username (demo)
+    if (accounts.some(a => a.username === username) || removedAccounts.some(a => a.username === username)) {
+      alert('Username already exists. Choose another one.');
+      return;
+    }
+    if (accounts.some(a => a.accountId === accountId) || removedAccounts.some(a => a.accountId === accountId)) {
+      // unlikely as we use incremental, but handle it
+      nextAccountId++;
+      alert('ID collision, generating a different ID. Please submit again.');
+      return;
+    }
+
+    const newAcc = { id: nextAccountId++, accountId, fullName, username, role, password, createdAt: today() };
+    accounts.push(newAcc);
+    renderAccounts();
+    createForm.reset();
+    // show the login credentials clearly to the admin
+    alert(`Account created (demo).\nLogin ID: ${accountId}\nPassword: (the one you entered)\n\nIMPORTANT: Share the Login ID with the user. In production, send this via secure channel.`);
+    // optionally switch to view tab
+    activateTab(tabView);
+  });
+
+  resetCreate.addEventListener('click', function(){ createForm.reset(); });
+
+  // Table action delegation for accounts (edit, change pass, remove)
+  document.addEventListener('click', function(e){
+    if (e.target.matches('.editBtn')) {
+      const id = Number(e.target.dataset.id);
+      const a = accounts.find(x => x.id === id);
+      if (!a) return;
+      document.getElementById('editId').value = a.id;
+      document.getElementById('editFullName').value = a.fullName;
+      document.getElementById('editUsername').value = a.username;
+      document.getElementById('editRole').value = a.role;
+      editModal.classList.remove('hidden');
+    }
+
+    if (e.target.matches('.passBtn')) {
+      const id = Number(e.target.dataset.id);
+      document.getElementById('passUserId').value = id;
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmNewPassword').value = '';
+      passModal.classList.remove('hidden');
+    }
+
+    if (e.target.matches('.removeBtn')) {
+      const id = Number(e.target.dataset.id);
+      if (!confirm('Move this account to Removed (Trash)?')) return;
+      const idx = accounts.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      const removed = accounts.splice(idx,1)[0];
+      removed.removedAt = today();
+      removedAccounts.push(removed);
+      renderAccounts();
+      renderRemovedAccounts();
+    }
+
+    // Removed table actions
+    if (e.target.matches('.restoreBtn')) {
+      const id = Number(e.target.dataset.id);
+      const idx = removedAccounts.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      const restored = removedAccounts.splice(idx,1)[0];
+      delete restored.removedAt;
+      accounts.push(restored);
+      renderAccounts();
+      renderRemovedAccounts();
+    }
+
+    if (e.target.matches('.permaDelBtn')) {
+      const id = Number(e.target.dataset.id);
+      if (!confirm('Permanently delete this account? This cannot be undone.')) return;
+      const idx = removedAccounts.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      removedAccounts.splice(idx,1);
+      renderRemovedAccounts();
+    }
+  });
+
+  // Edit form submit
+  editForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const id = Number(document.getElementById('editId').value);
+    const fullName = document.getElementById('editFullName').value.trim();
+    const username = document.getElementById('editUsername').value.trim();
+    const role = document.getElementById('editRole').value;
+
+    const acc = accounts.find(a => a.id === id);
+    if (!acc) { alert('Account not found'); return; }
+
+    // ensure username unique among accounts and removed (except self)
+    if ((accounts.some(a => a.username === username && a.id !== id)) || (removedAccounts.some(a => a.username === username))) {
+      alert('Username already taken.');
+      return;
+    }
+
+    acc.fullName = fullName;
+    acc.username = username;
+    acc.role = role;
+    // NOTE: accountId stays unchanged here to preserve login credentials
+    renderAccounts();
+    editModal.classList.add('hidden');
+  });
+
+  closeEditModal.addEventListener('click', ()=> editModal.classList.add('hidden'));
+  cancelEdit.addEventListener('click', ()=> editModal.classList.add('hidden'));
+
+  // Change password submit
+  passForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const id = Number(document.getElementById('passUserId').value);
+    const p1 = document.getElementById('newPassword').value;
+    const p2 = document.getElementById('confirmNewPassword').value;
+    if (!p1 || !p2) { alert('Enter the new password in both fields.'); return; }
+    if (p1 !== p2) { alert('Passwords do not match'); return; }
+    const acc = accounts.find(a => a.id === id);
+    if (!acc) { alert('Account not found'); return; }
+    acc.password = p1; // demo only
+    passModal.classList.add('hidden');
+    alert('Password changed (demo mode). In production, call your backend API and hash passwords.');
+  });
+
+  closePassModal.addEventListener('click', ()=> passModal.classList.add('hidden'));
+  cancelPass.addEventListener('click', ()=> passModal.classList.add('hidden'));
+
+  // Search handlers
+  accountsSearch?.addEventListener('input', function(){ renderAccounts(this.value || ''); });
+  removedSearch?.addEventListener('input', function(){ renderRemovedAccounts(this.value || ''); });
+  refreshAccounts?.addEventListener('click', function(){ renderAccounts(); });
+
+  // Optional: Expose functions for backend wiring
+  window.AccountsDemo = {
+    getAccounts: ()=> accounts,
+    getRemoved: ()=> removedAccounts,
+    render: ()=> { renderAccounts(); renderRemovedAccounts(); }
+  };
+
+})();
+
+/* User Activity module (localStorage-backed demo)
+   - exposes window.UserActivity.add(log)
+   - log shape: { id, timeISO, userId, accountId, name, role, type, source (IP/UA), details }
+*/
+(function(){
+  const STORAGE_KEY = 'seekyu_user_activity_v1';
+  // demo current user for "privileged" actions if needed
+  const currentUser = window.loggedUser || { id: 1, name: 'Alice Admin', role: 'Admin', accountId: 'ADM-0001' };
+
+  // DOM
+  const el = id => document.getElementById(id);
+  const activityTable = el('activityTable'), activitySearch = el('activitySearch'),
+        activityRole = el('activityRole'), activityUser = el('activityUser'),
+        activityType = el('activityType'), activityFrom = el('activityFrom'),
+        activityTo = el('activityTo'), activityRefresh = el('activityRefresh'),
+        activityExport = el('activityExport'),
+        activityModal = el('activityModal'), activityDetails = el('activityDetails'),
+        closeActivityModal = el('closeActivityModal'), activityCloseBtn = el('activityCloseBtn'),
+        activityDeleteBtn = el('activityDeleteBtn');
+
+  function load() {
+    try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; }
+    catch(e){ console.warn('Failed to load activity', e); return []; }
+  }
+  function save(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+
+  let logs = load();
+
+  // seed sample logs if empty (helps demo)
+  if (!logs || logs.length === 0) {
+    logs = [
+      { id: 'ACT-0001', timeISO: '2025-09-13T08:12:00Z', userId: 42, accountId: 'SG-1001', name: 'John Guard', role: 'Security Guard', type: 'Login', source: '192.168.1.10', details: 'Successful login' },
+      { id: 'ACT-0002', timeISO: '2025-09-13T17:05:00Z', userId: 42, accountId: 'SG-1001', name: 'John Guard', role: 'Security Guard', type: 'Logout', source: '192.168.1.10', details: 'User logged out' },
+      { id: 'ACT-0003', timeISO: '2025-09-12T09:00:00Z', userId: 2, accountId: 'ADM-0001', name: 'Alice Admin', role: 'Admin', type: 'Password Change Attempt', source: '10.0.0.5', details: 'Changed password successfully' },
+      { id: 'ACT-0004', timeISO: '2025-09-14T07:11:00Z', userId: 99, accountId: 'CL-2001', name: 'Client Bob', role: 'Client', type: 'Failed Login', source: '203.0.113.7', details: 'Incorrect password attempts: 3' }
+    ];
+    save(logs);
+  }
+
+  // helpers
+  function pad(n) { return String(n).padStart(3,'0'); }
+  function genId() { const seq = (logs.length ? logs.reduce((m,x)=>Math.max(m, Number((x.id || '').replace(/\D/g,'' )||0)),0) : 0) + 1; return 'ACT-' + String(seq).padStart(4,'0'); }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d)) return iso;
+    return d.toLocaleString();
+  }
+  function escapeHtml(s){ if (!s && s!==0) return ''; return String(s).replace(/[&<>"'`=\/]/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch]; }); }
+
+  // populate user select with unique users present
+  function populateUsers() {
+    if (!activityUser) return;
+    const uniq = {};
+    logs.forEach(l => { const key = (l.accountId||'') + '|' + (l.name||''); uniq[key] = l; });
+    const opts = [{val:'', text: 'All Users'}].concat(Object.values(uniq).map(u => ({ val: u.accountId, text: `${u.name} — ${u.accountId}` })));
+    activityUser.innerHTML = opts.map(o => `<option value="${escapeHtml(o.val)}">${escapeHtml(o.text)}</option>`).join('');
+  }
+
+  function render() {
+    if (!activityTable) return;
+    activityTable.innerHTML = '';
+    const q = (activitySearch && activitySearch.value || '').toLowerCase();
+    const role = (activityRole && activityRole.value) || '';
+    const user = (activityUser && activityUser.value) || '';
+    const type = (activityType && activityType.value) || '';
+    const from = (activityFrom && activityFrom.value) || '';
+    const to = (activityTo && activityTo.value) || '';
+
+    const filtered = logs.slice().reverse().filter(l => {
+      if (role && l.role !== role) return false;
+      if (user && l.accountId !== user) return false;
+      if (type && l.type !== type) return false;
+      if (from && l.timeISO && l.timeISO < (from + 'T00:00:00')) return false;
+      if (to && l.timeISO && l.timeISO > (to + 'T23:59:59')) return false;
+      if (!q) return true;
+      const hay = `${l.id} ${l.accountId} ${l.name} ${l.role} ${l.type} ${l.source} ${l.details}`.toLowerCase();
+      return hay.includes(q);
+    });
+
+    if (filtered.length === 0) {
+      activityTable.innerHTML = '<tr><td class="py-4 px-3 text-slate-500" colspan="7">No activity logs found.</td></tr>';
+      return;
+    }
+
+    for (const a of filtered) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="py-2 px-3 font-mono text-sm">${escapeHtml(fmtDate(a.timeISO))}</td>
+        <td class="py-2 px-3">${escapeHtml(a.name)}<div class="text-xs text-slate-400">${escapeHtml(a.accountId)}</div></td>
+        <td class="py-2 px-3">${escapeHtml(a.role)}</td>
+        <td class="py-2 px-3">${escapeHtml(a.type)}</td>
+        <td class="py-2 px-3">${escapeHtml(a.source || '')}</td>
+        <td class="py-2 px-3 max-w-xl"><div class="truncate" title="${escapeHtml(a.details || '')}">${escapeHtml(a.details || '')}</div></td>
+        <td class="py-2 px-3">
+          <button class="viewActivityBtn text-blue-600 hover:underline" data-id="${escapeHtml(a.id)}">View</button>
+          <button class="delActivityBtn ml-3 text-red-600 hover:underline" data-id="${escapeHtml(a.id)}">Delete</button>
+        </td>`;
+      activityTable.appendChild(tr);
+    }
+  }
+
+  // view modal
+  let activeId = null;
+  function openModal(id) {
+    const log = logs.find(x => x.id === id);
+    if (!log) return alert('Log not found.');
+    activeId = id;
+    if (!activityDetails) return;
+    activityDetails.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div><strong>Activity ID:</strong> ${escapeHtml(log.id)}</div>
+        <div><strong>Time:</strong> ${escapeHtml(fmtDate(log.timeISO))}</div>
+        <div><strong>User:</strong> ${escapeHtml(log.name)} (${escapeHtml(log.accountId)})</div>
+        <div><strong>Role:</strong> ${escapeHtml(log.role)}</div>
+        <div><strong>Event Type:</strong> ${escapeHtml(log.type)}</div>
+        <div><strong>Source (IP/UA):</strong> ${escapeHtml(log.source||'')}</div>
+      </div>
+      <hr class="my-3" />
+      <div><strong>Details:</strong><div class="mt-1 whitespace-pre-wrap text-slate-700">${escapeHtml(log.details||'')}</div></div>
+    `;
+    activityModal.classList.remove('hidden');
+  }
+  function closeModal() { activityModal.classList.add('hidden'); activeId = null; }
+
+  // delete active
+  function deleteActive() {
+    if (!activeId) return;
+    if (!confirm('Delete this activity log?')) return;
+    logs = logs.filter(x => x.id !== activeId);
+    save(logs);
+    populateUsers();
+    render();
+    closeModal();
+  }
+
+  // export filtered
+  function exportFiltered() {
+    // reuse render filter logic to produce exported array
+    const q = (activitySearch && activitySearch.value || '').toLowerCase();
+    const role = (activityRole && activityRole.value) || '';
+    const user = (activityUser && activityUser.value) || '';
+    const type = (activityType && activityType.value) || '';
+    const from = (activityFrom && activityFrom.value) || '';
+    const to = (activityTo && activityTo.value) || '';
+
+    const filtered = logs.slice().reverse().filter(l => {
+      if (role && l.role !== role) return false;
+      if (user && l.accountId !== user) return false;
+      if (type && l.type !== type) return false;
+      if (from && l.timeISO && l.timeISO < (from + 'T00:00:00')) return false;
+      if (to && l.timeISO && l.timeISO > (to + 'T23:59:59')) return false;
+      if (!q) return true;
+      const hay = `${l.id} ${l.accountId} ${l.name} ${l.role} ${l.type} ${l.source} ${l.details}`.toLowerCase();
+      return hay.includes(q);
+    });
+
+    const blob = new Blob([JSON.stringify(filtered, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'guard-report.csv';
+    a.download = `user-activity-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
     a.click();
+    a.remove();
     URL.revokeObjectURL(url);
+  }
+
+  // delegation listeners
+  document.addEventListener('click', function(e){
+    const t = e.target;
+    if (!t) return;
+    if (t.matches('.viewActivityBtn')) { openModal(t.dataset.id); }
+    if (t.matches('.delActivityBtn')) {
+      const id = t.dataset.id;
+      if (!confirm('Delete this activity log?')) return;
+      logs = logs.filter(x => x.id !== id);
+      save(logs);
+      populateUsers();
+      render();
+    }
   });
 
-  // clear leaves when to-date passes (run on load and daily)
-  function revertExpiredLeaves() {
-    const rows = Array.from(guardsTable.querySelectorAll('tbody tr'));
-    const now = new Date();
-    rows.forEach(r => {
-      const to = r.dataset.leaveTo;
-      if (!to) return;
-      const toDate = new Date(to);
-      if (isNaN(toDate)) return;
-      const endOfTo = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate(), 23,59,59);
-      if (now > endOfTo) {
-        const id = r.cells[1].textContent.trim();
-        clearGuardLeaveById(id);
-      }
-    });
-  }
-  revertExpiredLeaves();
-  setInterval(revertExpiredLeaves, 24 * 3600 * 1000);
+  // modal controls
+  if (closeActivityModal) closeActivityModal.addEventListener('click', closeModal);
+  if (activityCloseBtn) activityCloseBtn.addEventListener('click', closeModal);
+  if (activityModal) activityModal.addEventListener('click', function(e){ if (e.target === activityModal) closeModal(); });
+  if (activityDeleteBtn) activityDeleteBtn.addEventListener('click', deleteActive);
 
-  // recompute when the section becomes active
-  const originalShowSection = App.showSection;
-  App.showSection = function (id) {
-    originalShowSection(id);
-    if (id === 'guard-tracking') setTimeout(computeStats, 50);
+  // filters
+  [activitySearch, activityRole, activityUser, activityType, activityFrom, activityTo].forEach(elm=>{
+    if (!elm) return;
+    elm.addEventListener('input', render);
+  });
+  if (activityRefresh) activityRefresh.addEventListener('click', function(){ logs = load(); populateUsers(); render(); });
+  if (activityExport) activityExport.addEventListener('click', exportFiltered);
+
+  // initial UI setup
+  populateUsers();
+  render();
+
+  // public helper to add activity entries (other parts of app can call this)
+  window.UserActivity = {
+    add: function(payload){
+      // payload minimal shape: { timeISO, userId, accountId, name, role, type, source, details }
+      const entry = Object.assign({
+        id: genId(),
+        timeISO: new Date().toISOString(),
+        userId: payload.userId || null,
+        accountId: payload.accountId || '',
+        name: payload.name || '',
+        role: payload.role || '',
+        type: payload.type || 'Other',
+        source: payload.source || '',
+        details: payload.details || ''
+      }, payload);
+      logs.push(entry);
+      save(logs);
+      populateUsers();
+      render();
+      return entry;
+    },
+    all: function(){ return logs.slice(); }
   };
+
 })();
-  </script>
+
+</script>
 </body>
 </html>
