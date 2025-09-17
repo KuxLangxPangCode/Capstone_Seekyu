@@ -1,470 +1,1897 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeekYu Security Guard Dashboard</title>
-  <link rel="stylesheet" href="styles/Security-Guard.css" />
-  <script src="scripts/Seekyu.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeekYu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="Guard-Exam.js"></script>
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar-item.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .sidebar-item.active:hover {
+            background-color: #2563eb;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        /* carousel */
+.bulletin-card { min-width: 320px; max-width: 100%; }
+.kpi-progress { height: 10px; border-radius: 999px; }
+.kpi-desc { opacity: 0; transition: opacity .15s ease-in-out; }
+.group:hover .kpi-desc { opacity: 1; }
+
+.exam-card { max-width: 900px; margin: 0 auto; }
+.choice-btn { transition: transform .08s ease; }
+.choice-btn:active { transform: scale(.99); }
+.confetti { position: fixed; pointer-events: none; inset: 0; overflow: hidden; z-index: 9999; }
+.confetti-piece { position: absolute; width: 10px; height: 16px; opacity: .95; transform-origin: center; }
+.pulse { animation: pulse 1s infinite; }
+@keyframes pulse { 0%{ transform:scale(1) }50%{ transform:scale(1.03) }100%{ transform:scale(1) } }
+        
+    </style>
 </head>
-<body>
-  <div class="app-container">
+<body class="bg-gray-100 min-h-screen flex">
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="logo">SeekYu</div>
-      <nav>
-        <ul>
-          <li><button onclick="showSection('dashboard')" class="active">Dashboard</button></li>
-          <li><button onclick="showSection('incident-report')">Submit Incident Report</button></li>
-          <li><button onclick="showSection('kpi-score')">KPI Performance</button></li>
-          <li><button onclick="showSection('shift-schedule')">Shift Schedule</button></li>
-          <li><button onclick="showSection('request-leave')">Request for Leave</button></li>
-          <li><button onclick="showSection('take-exam')">Take Exam</button></li>
-          <li><button onclick="location.href='Index.html'">Logout</button></li>
-        </ul>
-      </nav>
-    </aside>
-
-    <div class="content">
-      <!-- Dashboard -->
-      <div id="dashboard" class="section active">
-        <div class="dashboard-header">
-          <div>
-            <h1>Security Guard Dashboard</h1>
-            <p class="muted">Overview of guard activities, schedules, and pending actions.</p>
-          </div>
-
-          <div class="header-actions">
-            <div class="notification-dropdown">
-              <button id="notifToggle" class="icon-btn" aria-expanded="false">
-                Notifications <span id="notifCount" class="badge">3</span>
-              </button>
-              <div id="notifList" class="dropdown hidden">
-                <ul>
-                  <li><strong>Incident Report:</strong> Unauthorized access reported at ABC Mall. <span class="time">3h</span></li>
-                  <li><strong>Leave Request:</strong> Maria Santos requested emergency leave. <span class="time">1d</span></li>
-                  <li><strong>Schedule Change:</strong> Your shift for tomorrow has been modified. <span class="time">2d</span></li>
-                </ul>
-                <div class="dropdown-actions"><a href="Notif-SecurityGuards.html" id="viewAllNotifs" class="small-btn">View all</a></div>
-              </div>
+    <div class="sidebar bg-gray-800 text-white w-64 min-h-screen flex flex-col">
+        <!-- Logo -->
+        <div class="p-5 border-b border-gray-700 flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-shield-alt text-blue-400 text-2xl mr-3"></i>
+                <span class="text-xl font-semibold">SeekYu</span>
             </div>
-
-            <div class="profile-summary">
-              <img src="https://via.placeholder.com/48" alt="Head Guard avatar" class="avatar">
-              <div>
-                <div class="name">Guard User</div>
-                <div class="role muted">Security Guard</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Dashboard layout -->
-        <div class="dashboard-layout">
-          <div class="dashboard-main">
-
-            <!-- Guard Tracking -->
-            <section class="guard-tracking card">
-              <h2>Security Guard Tracking</h2>
-              <p class="muted">Monitor deployments, attendance, absences and lateness in real-time.</p>
-              <div class="dshbrdtracking-grid">
-                <div class="dshbrdtracking-list">
-                  <h3>Guards Overview</h3>
-                  <table class="compact">
-                    <thead>
-                      <tr><th>Name</th><th>ID</th><th>Area</th><th>Status</th><th>Last Seen</th></tr>
-                    </thead>
-                    <tbody id="dshbrdguardTableBody">
-                      <tr><td>Juan Dela Cruz</td><td>SG001</td><td>ABC Mall</td><td><span class="status present">Present</span></td><td>10:42</td></tr>
-                      <tr><td>Maria Santos</td><td>SG045</td><td>Towerville</td><td><span class="status on-leave">On Leave</span></td><td>—</td></tr>
-                      <tr><td>Ramon Villanueva</td><td>SG078</td><td>Client A HQ</td><td><span class="status late">Late</span></td><td>09:35</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div class="tracking-stats">
-                  <h3>Attendance Summary</h3>
-                  <div class="stat-row"><span>Present</span><strong id="statPresent">98</strong></div>
-                  <div class="stat-row"><span>Absent</span><strong id="statAbsent">6</strong></div>
-                  <div class="stat-row"><span>Late</span><strong id="statLate">20</strong></div>
-                  <div class="stat-row"><span>On Leave</span><strong id="statOnLeave">6</strong></div>
-
-                  <h4>Recent Alerts</h4>
-                  <ul id="recentAlerts" class="alerts-list">
-                    <li>SG078 — Late arrival (09:35)</li>
-                    <li>SG034 — Absent (No check-in)</li>
-                    <li>Incident reported near ABC Mall loading dock</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            <!-- KPI Monitoring -->
-            <section class="dshbrdcard kpi-tracking card">
-              <h3>My KPI Overall Score</h3>
-              <div class="dshbrdkpi-grid">
-                <div class="dshbrdkpi-card">
-                  <h4>Attendance</h4>
-                  <p>95%</p>
-                </div>
-                <div class="dshbrdkpi-card">
-                  <h4>Punctuality</h4>
-                  <p>88%</p>
-                </div>
-                <div class="dshbrdkpi-card">
-                  <h4>Performance</h4>
-                  <p>92%</p>
-                </div>
-                <div class="dshbrdkpi-card">
-                  <h4>Training & Skills</h4>
-                  <p>92%</p>
-                </div>
-              </div>
-            </section>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Incident Reporting Main Section -->
-      <div id="incident-report" class="section">
-        <h1>Incident Reporting</h1>
-        <p>Select an option below:</p>
-
-        <div class="incident-buttons">
-          <button class="action-btn" onclick="showIncidentForm()">Submit Incident Report</button>
-          <button class="view-btn" onclick="showIncidentLogs()">View Incident Report Logs</button>
-        </div>
-
-        <!-- Incident Report Form (hidden by default) -->
-        <div id="incidentFormContainer" class="incident-subsection hidden">
-          <h2>Submit New Incident Report</h2>
-          <form id="incidentForm" enctype="multipart/form-data">
-            <label>Guard Name:</label>
-            <input type="text" name="guardName" placeholder="Full Name" required />
-
-            <label>Guard ID:</label>
-            <input type="text" name="guardId" placeholder="ID Number" required />
-
-            <label>Incident Date:</label>
-            <input type="date" name="incidentDate" required />
-
-            <label>Incident Time:</label>
-            <input type="time" name="incidentTime" required />
-
-            <label>Type of Incident:</label>
-            <select name="incidentType" required>
-              <option value="">-- Select Type --</option>
-              <option value="Theft">Theft</option>
-              <option value="Trespassing">Trespassing</option>
-              <option value="Vandalism">Vandalism</option>
-              <option value="Disturbance">Disturbance</option>
-              <option value="Other">Other</option>
-            </select>
-
-            <label>Actions Taken:</label>
-            <select name="actionsTaken" required>
-              <option value="">-- Select Action --</option>
-              <option value="Reported to Police">Reported to Police</option>
-              <option value="Escorted Individual Off Premises">Escorted Individual Off Premises</option>
-              <option value="First Aid Administered">First Aid Administered</option>
-              <option value="Other">Other</option>
-            </select>
-
-            <label>Incident Description:</label>
-            <textarea name="description" placeholder="Describe the incident in detail" required></textarea>
-
-            <label>Location:</label>
-            <input type="text" name="location" placeholder="Building / Area" required />
-
-            <label>Persons Involved:</label>
-            <input type="text" name="personsInvolved" placeholder="Names or 'Unknown'" />
-
-            <label>Upload Image / Evidence:</label>
-            <input type="file" name="incidentImage" accept="image/*" />
-
-            <button type="submit">Submit Report</button>
-            <button type="button" onclick="hideIncidentForm()">Cancel</button>
-          </form>
-        </div>
-
-        <!-- Incident Report Logs (hidden by default) -->
-        <div id="incidentLogsContainer" class="incident-subsection hidden">
-          <h2>Incident Report Logs</h2>
-          <table border="1" cellpadding="8" cellspacing="0">
-            <thead>
-              <tr>
-                <th>Guard Name</th>
-                <th>Guard ID</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Type</th>
-                <th>Actions Taken</th>
-                <th>Description</th>
-                <th>Location</th>
-                <th>Persons Involved</th>
-                <th>Evidence</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Example row -->
-              <tr>
-                <td>Juan Dela Cruz</td>
-                <td>SG001</td>
-                <td>2025-08-20</td>
-                <td>14:30</td>
-                <td>Theft</td>
-                <td>Reported to Police</td>
-                <td>Suspect attempted to steal merchandise from store.</td>
-                <td>ABC Mall - Ground Floor</td>
-                <td>Unknown Male</td>
-                <td><a href="#">View Image</a></td>
-              </tr>
-            </tbody>
-          </table>
-          <button type="button" onclick="hideIncidentLogs()" style="margin-top: 15px;">Close</button>
-        </div>
-      </div>
-
-      <div id="kpi-score" class="section">
-        <h1>KPI Performance Evaluation</h1>
-        <p>Check your latest KPI scores and evaluations.</p>
-        <div class="card">
-          <h3>Your Performance Metrics</h3>
-          <div class="dshbrdkpi-grid">
-            <div class="dshbrdkpi-card">
-              <h4>Attendance</h4>
-              <p>98%</p>
-            </div>
-            <div class="dshbrdkpi-card">
-              <h4>Punctuality</h4>
-              <p>95%</p>
-            </div>
-            <div class="dshbrdkpi-card">
-              <h4>Incident Response</h4>
-              <p>92%</p>
-            </div>
-            <div class="dshbrdkpi-card">
-              <h4>Team Leadership</h4>
-              <p>90%</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="shift-schedule" class="section">
-        <h1>Shift Schedule</h1>
-        <p>View your assigned work schedules here.</p>
-        <div class="card">
-          <h3>This Week's Schedule</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Day</th>
-                <th>Shift</th>
-                <th>Location</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2025-09-01</td>
-                <td>Monday</td>
-                <td>7:00 AM - 3:00 PM</td>
-                <td>ABC Mall</td>
-              </tr>
-              <tr>
-                <td>2025-09-02</td>
-                <td>Tuesday</td>
-                <td>3:00 PM - 11:00 PM</td>
-                <td>Client A HQ</td>
-              </tr>
-              <tr>
-                <td>2025-09-03</td>
-                <td>Wednesday</td>
-                <td>11:00 PM - 7:00 AM</td>
-                <td>Towerville</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="request-leave" class="section">
-        <h1>Requests for Leave</h1>
-        <p>Submit a new leave request and review past records.</p>
-
-        <!-- Leave Request Form -->
-        <div class="leave-form">
-          <h2>Submit Leave Request</h2>
-          <form>
-            <label>Leave Type:</label>
-            <select required>
-              <option value="">-- Select Leave Type --</option>
-              <option value="Sick Leave">Sick Leave</option>
-              <option value="Vacation Leave">Vacation Leave</option>
-              <option value="Emergency Leave">Emergency Leave</option>
-            </select>
-
-            <label>Start Date:</label>
-            <input type="date" required />
-
-            <label>End Date:</label>
-            <input type="date" required />
-
-            <label>Reason:</label>
-            <textarea placeholder="Enter reason for leave..." required></textarea>
-
-            <button type="submit">Submit Request</button>
-          </form>
+            <button id="sidebar-toggle" class="text-gray-400 hover:text-white lg:hidden" title="Close sidebar menu">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         
-        <!-- Leave Request History -->
-        <div class="card">
-          <h3>Leave Request History</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Request Date</th>
-                <th>Leave Type</th>
-                <th>From</th>
-                <th>To</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2025-08-15</td>
-                <td>Vacation Leave</td>
-                <td>2025-09-10</td>
-                <td>2025-09-15</td>
-                <td>Approved</td>
-              </tr>
-              <tr>
-                <td>2025-07-20</td>
-                <td>Sick Leave</td>
-                <td>2025-07-25</td>
-                <td>2025-07-26</td>
-                <td>Approved</td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4">
+            <div class="px-4 space-y-1">
+                <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Main Menu</div>
+                
+                <button onclick="showSection('dashboard')" class="sidebar-item active w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-home mr-3 text-lg text-blue-400"></i>
+                    <span>Dashboard</span>
+                </button> 
+                <button onclick="showSection('messaging-mgmt')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-comment mr-3 text-lg text-indigo-400"></i>
+                    <span>Send Message</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
+                </button>
+
+                <button onclick="showSection('request-leave')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-calendar-alt mr-3 text-lg text-pink-400"></i>
+                    <span>Request Leave</span>
+                    <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">2</span>
+                </button>
+
+                <button onclick="showSection('Take Exam')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-clipboard-list mr-3 text-lg text-pink-400"></i>
+                    <span>Take Exam</span>
+                    </button>
+
+                <button onclick="showSection('profile')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-user mr-3 text-lg text-green-400"></i>
+                    <span>My Profile</span>                                       
+                </button>
+            </div>
+            
+
+            <div class="px-4 space-y-1 mt-8">
+                <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Reports & Analytics</div>
+
+                <button onclick="showSection('notification')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-exclamation-circle mr-3 text-lg text-yellow-400"></i>
+                    <span>Notifications</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">1</span>
+
+                    <button onclick="showSection('incident-reports')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-exclamation-circle mr-3 text-lg text-orange-400"></i>
+                    <span>Incident Reports</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">1</span>
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Logout Button -->
+        <div class="p-4 border-t border-gray-700">
+            <button onclick="location.href='Index.html'" class="w-full flex items-center justify-center px-4 py-3 text-gray-200 hover:bg-red-700 hover:text-white rounded-lg bg-red-600">
+                <i class="fas fa-sign-out-alt mr-3"></i>
+                <span>Logout</span>
+            </button>
         </div>
+    </div>
+    
+
+
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+        <!-- Mobile Header -->
+        <div class="bg-white shadow-sm p-4 flex items-center justify-between lg:hidden">
+            <button id="mobile-sidebar-toggle" class="text-gray-600 hover:text-gray-900" title="Open sidebar menu">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <h1 class="text-xl font-semibold">Dashboard</h1>
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                    <i class="fas fa-user text-gray-600"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content Sections -->
+        <div class="p-6 flex-1">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active">
+
+<h1 class="text-2xl font-bold text-gray-800 mt-3">Welcome, Security Guard!</h1>
+<p class="text-gray-600">Here's a quick overview of your dashboard.</p>
+
+<div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Recent Activity & Bulletin (left) -->
+<div class="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
+<h2 class="text-xl font-semibold text-gray-800 mb-4">Bulletin Board</h2>
+<div class="relative overflow-hidden">
+<div id="bulletinTrack" class="flex gap-4 transition-transform duration-400">
+<!-- JS injects bulletin cards here -->
+</div>
+<div class="absolute left-2 top-1/2 -translate-y-1/2">
+<button id="bulletPrev" class="p-2 rounded bg-white shadow"><i class="fas fa-chevron-left"></i></button>
+</div>
+<div class="absolute right-2 top-1/2 -translate-y-1/2">
+<button id="bulletNext" class="p-2 rounded bg-white shadow"><i class="fas fa-chevron-right"></i></button>
+</div>
+</div>
+
+
+<hr class="my-4" />
+<h3 class="text-lg font-semibold text-gray-800 mb-2">Recent Activity</h3>
+<div id="recentActivity" class="border-t border-gray-100 pt-4">
+<div class="flex items-start mb-4">
+<div class="bg-blue-100 p-2 rounded-full">
+<i class="fas fa-user-plus text-blue-600"></i>
+</div>
+<div class="ml-4">
+<p class="text-gray-800"><span class="font-medium">John Doe</span> registered as a new security guard</p>
+<p class="text-sm text-gray-500">2 hours ago</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- Right Column: KPI + Profile quick -->
+<div class="bg-white rounded-lg shadow-sm p-6">
+<h3 class="text-lg font-semibold text-gray-800 mb-3">Your KPI Scores</h3>
+<div id="kpiList" class="space-y-4">
+<!-- KPIs injected by JS -->
+</div>
+<hr class="my-4" />
+<div class="flex gap-2 justify-center">
+<button onclick="showSection('profile')" class="px-3 py-2 rounded bg-slate-200 hover:bg-slate-300">View Profile</button>
+<button onclick="showSection('notifications')" class="px-3 py-2 rounded bg-slate-200 hover:bg-slate-300">View Notifications</button>
+</div>
+</div>
+</div>
+</div>
+            
+            <!-- Other Sections (initially hidden) -->
+
+            <!-- REQUEST LEAVE -->
+<div id="request-leave" class="content-section">
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Request Leave</h1>
+      <div class="flex gap-2">
+        <button id="leaveTabNew" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">New Request</button>
+        <button id="leaveTabMy" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">My Requests</button>
+      </div>
+    </div>
+
+    <!-- New Request Form -->
+    <div id="leave-new-section">
+      <form id="leaveForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm text-slate-600">Full Name</label>
+            <input id="leave_name" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Employee / Account ID</label>
+            <input id="leave_accountId" class="w-full px-3 py-2 rounded border bg-slate-50 font-mono" readonly />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Role</label>
+            <input id="leave_role" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">E-mail</label>
+            <input id="leave_email" type="email" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-sm text-slate-600">Start Date</label>
+            <input id="leave_start" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">End Date</label>
+            <input id="leave_end" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Type</label>
+            <select id="leave_type" class="w-full px-3 py-2 rounded border bg-slate-50" required>
+              <option value="">Select type</option>
+              <option>Vacation</option>
+              <option>Sick</option>
+              <option>Emergency</option>
+              <option>Bereavement</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm text-slate-600">Reason</label>
+          <textarea id="leave_reason" rows="4" class="w-full px-3 py-2 rounded border bg-slate-50" required></textarea>
+        </div>
+
+        <div class="flex gap-2">
+          <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Submit Request</button>
+          <button type="reset" id="leaveReset" class="px-4 py-2 rounded bg-slate-200">Reset</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- My Requests (table) -->
+    <div id="leave-my-section" class="hidden mt-6">
+      <div class="flex items-center gap-3 mb-4">
+        <input id="leaveSearch" placeholder="Search by ID, type or reason..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+        <select id="leaveFilterStatus" class="px-3 py-2 rounded border bg-slate-50">
+          <option value="">All Status</option>
+          <option>Pending</option>
+          <option>Approved</option>
+          <option>Rejected</option>
+        </select>
+        <input id="leaveFilterFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+        <input id="leaveFilterTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+        <button id="leaveRefresh" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
       </div>
 
-      <div id="take-exam" class="section">
-        <h1>Take Exam</h1>
-        <p>Proceed to take your assigned assessment.</p>
-        <div class="card">
-          <h3>Available Exams</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Exam Name</th>
-                <th>Due Date</th>
-                <th>Duration</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Security Protocols & Procedures</td>
-                <td>2025-09-10</td>
-                <td>60 minutes</td>
-                <td>Not Started</td>
-                <td><button class="action-btn">Start Exam</button></td>
-              </tr>
-              <tr>
-                <td>Emergency Response Training</td>
-                <td>2025-09-15</td>
-                <td>45 minutes</td>
-                <td>Not Started</td>
-                <td><button class="action-btn">Start Exam</button></td>
-              </tr>
-              <tr>
-                <td>Team Leadership Assessment</td>
-                <td>2025-08-25</td>
-                <td>90 minutes</td>
-                <td>Completed (Score: 85%)</td>
-                <td><button class="view-btn">View Results</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="overflow-x-auto bg-white rounded border">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50 text-left text-slate-600">
+            <tr>
+              <th class="py-3 px-3">Request ID</th>
+              <th class="py-3 px-3">Range</th>
+              <th class="py-3 px-3">Type</th>
+              <th class="py-3 px-3">Status</th>
+              <th class="py-3 px-3">Submitted</th>
+              <th class="py-3 px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leaveTable" class="divide-y"></tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    // Section navigation
-    function showSection(sectionId) {
-      // Hide all sections
-      document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
-      });
-      
-      // Show the selected section
-      document.getElementById(sectionId).classList.add('active');
-      
-      // Update active button in sidebar
-      document.querySelectorAll('.sidebar button').forEach(button => {
-        button.classList.remove('active');
-      });
-      
-      // Find and activate the button that corresponds to this section
-      const buttons = document.querySelectorAll('.sidebar button');
-      for (let button of buttons) {
-        if (button.getAttribute('onclick') === `showSection('${sectionId}')`) {
-          button.classList.add('active');
-          break;
-        }
+<!-- Edit Modal -->
+<div id="leaveEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white rounded-lg max-w-lg w-full p-5">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Edit Leave Request</h2>
+      <button id="closeLeaveEdit" class="text-slate-500">✕</button>
+    </div>
+
+    <form id="leaveEditForm" class="space-y-3">
+      <input type="hidden" id="editRequestId" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm text-slate-600">Start Date</label>
+          <input id="edit_start" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600">End Date</label>
+          <input id="edit_end" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm text-slate-600">Type</label>
+        <select id="edit_type" class="w-full px-3 py-2 rounded border bg-slate-50" required>
+          <option>Vacation</option><option>Sick</option><option>Emergency</option><option>Bereavement</option><option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm text-slate-600">Reason</label>
+        <textarea id="edit_reason" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50" required></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button type="submit" class="px-3 py-2 rounded bg-indigo-600 text-white">Save</button>
+        <button type="button" id="cancelLeaveEdit" class="px-3 py-2 rounded bg-slate-200">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+            <!-- Messaging Section -->
+<div id="messaging-mgmt" class="content-section">
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Messaging Management</h1>
+
+    <!-- Sub-navigation -->
+    <div class="mt-4">
+      <div class="flex gap-2 mb-4">
+        <button id="inboxBtn" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Inbox</button>
+        <button id="composeBtn" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">Compose</button>
+      </div>
+
+      <!-- Inbox Section -->
+      <div id="inbox-section" class="bg-white rounded-lg shadow-sm p-4">
+        <div class="flex items-center gap-3 mb-4">
+          <input type="text" id="messageSearch" placeholder="Search messages..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+          <button id="refreshBtn" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="text-left text-slate-500">
+              <tr>
+                <th class="py-2">Sender</th>
+                <th class="py-2">Subject</th>
+                <th class="py-2">Date</th>
+                <th class="py-2">Action</th>
+              </tr>
+            </thead>
+            <tbody id="messageTable" class="divide-y">
+              <!-- Example row -->
+              <tr>
+                <td class="py-2">Admin</td>
+                <td class="py-2">Welcome to SeekYu</td>
+                <td class="py-2">2025-09-13</td>
+                <td class="py-2">
+                  <button class="viewBtn text-blue-600 hover:underline" 
+                    data-sender="Admin" 
+                    data-recipient="You" 
+                    data-subject="Welcome to SeekYu" 
+                    data-date="2025-09-13" 
+                    data-body="This is a sample welcome message.">View</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Compose Section -->
+      <div id="compose-section" class="hidden bg-white rounded-lg shadow-sm p-4 mt-4">
+        <form id="composeForm" class="space-y-3">
+          <div>
+            <label class="block text-sm text-slate-600">To:</label>
+            <input type="text" id="recipient" name="recipient" required class="w-full px-3 py-2 rounded border bg-slate-50" />
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600">Subject:</label>
+            <input type="text" id="subject" name="subject" required class="w-full px-3 py-2 rounded border bg-slate-50" />
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600">Message:</label>
+            <textarea id="message" name="message" rows="5" required class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+          </div>
+
+          <div class="flex gap-2">
+            <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Send Message</button>
+            <button type="button" id="cancelCompose" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Popup for Viewing Message -->
+<div id="message-popup" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white rounded-lg max-w-lg w-full p-5">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Message Details</h2>
+      <button id="closePopup" class="text-slate-500 hover:text-slate-800">✕</button>
+    </div>
+
+    <p class="text-sm"><strong>From:</strong> <span id="popupSender">-</span></p>
+    <p class="text-sm"><strong>To:</strong> <span id="popupRecipient">-</span></p>
+    <p class="text-sm"><strong>Subject:</strong> <span id="popupSubject">-</span></p>
+    <p class="text-sm"><strong>Date:</strong> <span id="popupDate">-</span></p>
+
+    <div class="mt-3">
+      <p id="popupBody" class="whitespace-pre-wrap text-sm text-slate-700"></p>
+    </div>
+
+    <div class="mt-4 flex gap-2 justify-end">
+      <button id="replyBtn" class="px-3 py-2 rounded bg-emerald-600 text-white">Reply</button>
+      <button id="deleteBtn" class="px-3 py-2 rounded bg-red-600 text-white">Delete</button>
+      <button id="closePopup2" class="px-3 py-2 rounded bg-slate-200">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- INCIDENT REPORTS (replace existing #incident-reports) -->
+<div id="incident-reports" class="content-section">
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Incident Reports</h1>
+      <div class="flex gap-2">
+        <button id="irTabSubmit" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Submit Report</button>
+        <button id="irTabView" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">View Reports</button>
+      </div>
+    </div>
+
+    <!-- Submit Report -->
+    <div id="ir-submit-section">
+      <form id="incidentForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm text-slate-600">Full Name</label>
+            <input id="ir_fullName" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Employee ID / License No.</label>
+            <input id="ir_employeeId" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Role</label>
+            <select id="ir_role" class="w-full px-3 py-2 rounded border bg-slate-50" required>
+              <option value="">Select role</option>
+              <option>Security Guard</option>
+              <option>Head Guard</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Shift Date</label>
+            <input id="ir_shiftDate" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Shift Start Time</label>
+            <input id="ir_shiftStart" type="time" class="w-full px-3 py-2 rounded border bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Shift End Time</label>
+            <input id="ir_shiftEnd" type="time" class="w-full px-3 py-2 rounded border bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Contact Phone</label>
+            <input id="ir_contact" class="w-full px-3 py-2 rounded border bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">E-Mail Address</label>
+            <input id="ir_email" type="email" class="w-full px-3 py-2 rounded border bg-slate-50" />
+          </div>
+        </div>
+
+        <hr class="my-2" />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm text-slate-600">Date of Incident</label>
+            <input id="ir_date" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Time of Incident</label>
+            <input id="ir_time" type="time" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm text-slate-600">Location of Incident</label>
+            <input id="ir_location" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm text-slate-600">Incident Type</label>
+            <select id="ir_type" class="w-full px-3 py-2 rounded border bg-slate-50" required>
+              <option value="">Select type</option>
+              <option>Trespassing</option>
+              <option>Theft / Burglary</option>
+              <option>Vandalism</option>
+              <option>Fire / Smoke</option>
+              <option>Assault</option>
+              <option>Safety Hazard</option>
+              <option>False Fire Alarm</option>
+              <option>Accident</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm text-slate-600">Description of Incident</label>
+            <textarea id="ir_description" rows="5" class="w-full px-3 py-2 rounded border bg-slate-50" placeholder="Describe what happened, sequence of events..." required></textarea>
+          </div>
+        </div>
+
+        <hr />
+
+        <!-- Parties involved (dynamic) -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-semibold">Parties Involved</h3>
+            <button type="button" id="irAddPerson" class="px-2 py-1 text-xs bg-slate-200 rounded">Add Person</button>
+          </div>
+          <div id="ir_parties" class="space-y-3">
+            <!-- Party template inserted by JS -->
+          </div>
+        </div>
+
+        <hr />
+
+        <div>
+          <h3 class="text-sm font-semibold mb-2">Injuries and Medical Services</h3>
+          <div class="flex items-center gap-4 mb-2">
+            <label class="text-sm"><input type="radio" name="ir_injuries" value="Yes" /> Yes</label>
+            <label class="text-sm"><input type="radio" name="ir_injuries" value="No" checked/> No</label>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">If yes, describe injuries</label>
+            <textarea id="ir_injuries_desc" rows="2" class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+          </div>
+          <div class="mt-2">
+            <label class="block text-sm text-slate-600">Was medical treatment provided?</label>
+            <select id="ir_medical_provided" class="w-full px-3 py-2 rounded border bg-slate-50">
+              <option value="">Select</option>
+              <option>Yes</option>
+              <option>No</option>
+              <option>Refused</option>
+            </select>
+          </div>
+        </div>
+
+        <hr />
+
+        <div>
+          <h3 class="text-sm font-semibold mb-2">Actions Taken</h3>
+          <div class="flex gap-4 mb-2">
+            <label class="text-sm"><input id="ir_police_notified" type="checkbox" /> Police Notified</label>
+            <label class="text-sm"><input id="ir_medical_contacted" type="checkbox" /> Medical Services Contacted</label>
+            <label class="text-sm"><input id="ir_scene_secured" type="checkbox" /> Scene Secured</label>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Other actions taken</label>
+            <textarea id="ir_actions" rows="2" class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+          </div>
+        </div>
+
+        <hr />
+
+        <div>
+          <h3 class="text-sm font-semibold mb-2">Evidence Collected</h3>
+          <div class="flex gap-3 flex-wrap mb-2">
+            <label class="text-sm"><input id="ir_e_photos" type="checkbox" /> Photos</label>
+            <label class="text-sm"><input id="ir_e_videos" type="checkbox" /> Video Footage</label>
+            <label class="text-sm"><input id="ir_e_witness" type="checkbox" /> Witness Statements</label>
+            <label class="text-sm"><input id="ir_e_physical" type="checkbox" /> Physical Items</label>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Other Evidence</label>
+            <input id="ir_e_other" class="w-full px-3 py-2 rounded border bg-slate-50" />
+          </div>
+        </div>
+
+        <hr />
+
+        <div>
+          <label class="block text-sm text-slate-600">Additional Remarks</label>
+          <textarea id="ir_remarks" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+        </div>
+
+        <div class="flex gap-2">
+          <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Submit Report</button>
+          <button type="reset" class="px-4 py-2 rounded bg-slate-200">Reset</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- View Reports -->
+    <div id="ir-view-section" class="hidden mt-6">
+      <div class="flex items-center gap-3 mb-4">
+        <input id="reportsSearch" placeholder="Search by reporter, ID, location, subject..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+        <select id="filterRole" class="px-3 py-2 rounded border bg-slate-50">
+          <option value="">All Roles</option>
+          <option>Security Guard</option>
+          <option>Head Guard</option>
+        </select>
+        <select id="filterType" class="px-3 py-2 rounded border bg-slate-50">
+          <option value="">All Types</option>
+          <option>Trespassing</option><option>Theft / Burglary</option><option>Vandalism</option><option>Fire / Smoke</option><option>Assault</option><option>Safety Hazard</option><option>False Fire Alarm</option><option>Accident</option><option>Other</option>
+        </select>
+        <input id="filterFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+        <input id="filterTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+        <button id="refreshReports" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+      </div>
+
+      <div class="overflow-x-auto bg-white rounded border">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50 text-left text-slate-600">
+            <tr>
+              <th class="py-3 px-3">Report ID</th>
+              <th class="py-3 px-3">Date</th>
+              <th class="py-3 px-3">Reporter</th>
+              <th class="py-3 px-3">Role</th>
+              <th class="py-3 px-3">Type</th>
+              <th class="py-3 px-3">Location</th>
+              <th class="py-3 px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reportsTable" class="divide-y"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Report Details Modal -->
+<div id="reportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white rounded-lg max-w-3xl w-full p-5 overflow-y-auto max-h-[90vh]">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Incident Report Details</h2>
+      <button id="closeReportModal" class="text-slate-500">✕</button>
+    </div>
+    <div id="reportDetails" class="space-y-2 text-sm text-slate-700"></div>
+    <div class="mt-4 flex justify-end gap-2">
+      <button id="exportReportBtn" class="px-3 py-2 rounded bg-blue-600 text-white">Export (JSON)</button>
+      <button id="closeReportModal2" class="px-3 py-2 rounded bg-slate-200">Close</button>
+    </div>
+  </div>
+</div>
+
+            <!-- Notification Section -->  
+            <div id="notification" class="content-section">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h1 class="text-2xl font-bold text-gray-800 mb-6">Notifications</h1>
+                    <p class="text-gray-600">Manage system notifications and alerts.</p>
+                </div>
+            </div>
+
+            <!--Take Exam-->
+            <div id="Take Exam" class="content-section">
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Take Exam</h1>
+
+    <div id="gx-exam-root" class="exam-card bg-white rounded-lg shadow p-6">
+      <!-- Start screen -->
+      <div id="gx-start" class="">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-bold">Guarding Skills — Gamified Exam</h2>
+          <div class="text-sm text-slate-500">Earn XP, badges & climb the leaderboard</div>
+        </div>
+        <p class="text-slate-600 mt-2">10 sample questions • 3 lives • streak multiplier • hints & skips</p>
+
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="col-span-2">
+            <div class="bg-slate-50 rounded p-4">
+              <p class="text-sm">Rules:</p>
+              <ul class="list-disc pl-5 text-sm text-slate-600 leading-6">
+                <li>10 questions per exam. Correct = points + time bonus.</li>
+                <li>3 lives. Hint reduces time bonus. Skip costs a life.</li>
+                <li>Streak increases multiplier.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="bg-white border rounded p-4">
+            <div class="mb-3">
+              <label class="block text-sm text-slate-600">Select Difficulty</label>
+              <select id="gx-difficulty" class="w-full px-3 py-2 rounded border bg-slate-50">
+                <option value="easy">Easy — slower timer</option>
+                <option value="normal" selected>Normal</option>
+                <option value="hard">Hard — faster timer</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm text-slate-600">Display Name (leaderboard)</label>
+              <input id="gx-player-name" class="w-full px-3 py-2 rounded border bg-slate-50" placeholder="Your name or call sign" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex gap-2">
+          <button id="gx-start-btn" class="px-4 py-2 rounded bg-indigo-600 text-white">Start Exam</button>
+          <button id="gx-practice-btn" class="px-4 py-2 rounded bg-slate-200">Practice (no leaderboard)</button>
+          <button id="gx-view-leaderboard" class="ml-auto px-3 py-2 rounded bg-slate-100">View Leaderboard</button>
+        </div>
+      </div>
+
+      <!-- Exam screen -->
+      <div id="gx-exam" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-4">
+            <div class="text-sm text-slate-600">Score</div>
+            <div id="gx-score" class="text-xl font-bold text-indigo-600">0</div>
+            <div class="px-2 py-1 rounded bg-slate-100 text-sm text-slate-700">Streak: <span id="gx-streak">0</span></div>
+            <div class="px-2 py-1 rounded bg-red-100 text-sm text-red-700">Lives: <span id="gx-lives">3</span></div>
+          </div>
+          <div>
+            <div class="text-sm text-slate-600">Question <span id="gx-qindex">1</span>/<span id="gx-qt">10</span></div>
+            <div class="w-48 bg-slate-100 rounded overflow-hidden mt-1"><div id="gx-progress" class="h-2 bg-indigo-500 w-0"></div></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 rounded p-4 mb-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <div id="gx-question" class="text-lg font-semibold text-slate-800"></div>
+              <div id="gx-hint" class="text-sm text-slate-500 mt-1"></div>
+            </div>
+            <div class="text-sm text-slate-600">Time: <span id="gx-timer">20</span>s</div>
+          </div>
+        </div>
+
+        <div id="gx-choices" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+
+        <div class="mt-4 flex gap-2">
+          <button id="gx-hint-btn" class="px-3 py-2 rounded bg-yellow-400 text-black">Use Hint (-points)</button>
+          <button id="gx-skip-btn" class="px-3 py-2 rounded bg-slate-200">Skip (-life)</button>
+          <div class="ml-auto">
+            <button id="gx-quit" class="px-3 py-2 rounded bg-red-500 text-white">Quit</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="gx-results" class="hidden text-center">
+        <h3 class="text-2xl font-bold">Exam Complete</h3>
+        <p class="text-slate-600 mt-2">Your score</p>
+        <div id="gx-final-score" class="text-4xl font-extrabold text-indigo-600 mt-4">0</div>
+        <div class="mt-3">Badge: <span id="gx-badge" class="font-semibold text-slate-800">-</span></div>
+
+        <div class="mt-4 flex items-center justify-center gap-2">
+          <button id="gx-save" class="px-4 py-2 rounded bg-emerald-600 text-white">Save to Leaderboard</button>
+          <button id="gx-retry" class="px-4 py-2 rounded bg-slate-200">Retry</button>
+          <button id="gx-back" class="px-4 py-2 rounded bg-slate-100">Back</button>
+        </div>
+      </div>
+
+      <!-- Leaderboard modal -->
+      <div id="gx-leaderboard" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+        <div class="bg-white rounded-lg p-4 w-full max-w-2xl">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="font-semibold">Leaderboard</h4>
+            <button id="gx-leader-close" class="text-slate-500">✕</button>
+          </div>
+          <div id="gx-leader-list" class="space-y-2 text-sm max-h-96 overflow-auto"></div>
+          <div class="mt-3 flex justify-end">
+            <button id="gx-clear-lb" class="px-3 py-2 rounded bg-red-600 text-white text-sm">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- confetti container -->
+    <div id="gx-confetti" class="confetti hidden" style="position:relative; height:0;"></div>
+
+            <!-- Profile Section -->
+            <div id="profile" class="content-section">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h1 class="text-2xl font-bold text-gray-800 mb-6">Profile</h1>
+                    <p class="text-gray-600">View and edit your profile information.</p>
+                </div>
+            </div>    
+            <!-- Add other sections similarly -->
+            
+        </div>
+    </div>
+<!-- Popup Modal -->
+<div id="popup-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
+    <div class="p-6">
+      <h3 class="text-xl font-semibold text-gray-800" id="popup-title">Popup Title</h3>
+      <p class="text-gray-600 mt-2" id="popup-content">This is the popup content. You can put any information here.</p>
+    </div>
+    <div class="flex justify-end p-6 border-t border-gray-200">
+      <button id="close-popup" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
+    </div>
+  </div>
+</div>
+<!-- Replace your existing <script>...</script> with this block -->
+<script>
+  // For Exam
+  // simple init with defaults
+  window.SeekYuExam.init({
+    containerId: 'gx-exam-root',   // id of element where the exam UI will be mounted
+    playerName: '',                // optional default player name
+    autoShowOnNav: true            // if true, keeps compatibility with showSection()
+  });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Sidebar mobile toggle (kept similar to your original)
+  const mobileToggle = document.getElementById('mobile-sidebar-toggle');
+  mobileToggle?.addEventListener('click', function() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('-ml-64');
+    sidebar.classList.toggle('ml-0');
+    const toggleIcon = document.querySelector('#sidebar-toggle i');
+    if (sidebar.classList.contains('-ml-64')) {
+      toggleIcon.classList.remove('fa-times'); toggleIcon.classList.add('fa-bars');
+    } else {
+      toggleIcon.classList.remove('fa-bars'); toggleIcon.classList.add('fa-times');
+    }
+  });
+
+  // --- Section switching (keeps your showSection logic but safer) ---
+  window.showSection = function(sectionId, clickedBtn = null) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+    const target = document.getElementById(sectionId);
+    if (target) target.classList.add('active');
+
+    // mark button active if provided
+    if (clickedBtn) clickedBtn.classList.add('active');
+
+    if (window.innerWidth < 1024) {
+      document.querySelector('.sidebar')?.classList.add('-ml-64');
+      const icon = document.querySelector('#sidebar-toggle i');
+      if (icon) { icon.classList.remove('fa-times'); icon.classList.add('fa-bars'); }
+    }
+  };
+
+}); // <-- Add this closing brace for document.addEventListener
+
+  // If sidebar buttons use inline onclick (your layout), ensure the Messaging button opens inbox first
+  const messagingSidebarBtn = Array.from(document.querySelectorAll('button')).find(b => b.getAttribute('onclick')?.includes("showSection('messaging-mgmt')"));
+  if (messagingSidebarBtn) {
+    messagingSidebarBtn.addEventListener('click', function (ev) {
+      // use the safer showSection, and pass the clicked button to be marked active
+      showSection('messaging-mgmt', messagingSidebarBtn);
+      showInbox();
+    });
+  }
+
+  // --- Messaging UI elements ---
+  const inboxBtn = document.getElementById('inboxBtn');
+  const composeBtn = document.getElementById('composeBtn');
+  const inboxSection = document.getElementById('inbox-section');
+  const composeSection = document.getElementById('compose-section');
+  const cancelCompose = document.getElementById('cancelCompose');
+  const composeForm = document.getElementById('composeForm');
+  const messageTable = document.getElementById('messageTable');
+  const messagePopup = document.getElementById('message-popup');
+  const popupSender = document.getElementById('popupSender');
+  const popupRecipient = document.getElementById('popupRecipient');
+  const popupSubject = document.getElementById('popupSubject');
+  const popupDate = document.getElementById('popupDate');
+  const popupBody = document.getElementById('popupBody');
+  const replyBtn = document.getElementById('replyBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const closePopupBtns = [document.getElementById('closePopup'), document.getElementById('closePopup2')];
+
+  // In-memory messages store for frontend demo (id increments)
+  let messages = [
+    {
+      id: 1,
+      sender: 'Admin',
+      recipient: 'You',
+      subject: 'Welcome to SeekYu',
+      date: '2025-09-13',
+      body: 'This is a sample welcome message.'
+    }
+  ];
+  let nextMessageId = 2;
+  let currentViewedMessageId = null; // id of message currently shown in popup
+
+  function renderInbox() {
+    messageTable.innerHTML = '';
+    for (const msg of messages.slice().reverse()) { // show newest first
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="py-2">${escapeHtml(msg.sender)}</td>
+        <td class="py-2">${escapeHtml(msg.subject)}</td>
+        <td class="py-2">${escapeHtml(msg.date)}</td>
+        <td class="py-2">
+          <button class="viewBtn text-blue-600 hover:underline" data-id="${msg.id}">View</button>
+          <button class="delInlineBtn ml-3 text-red-600 hover:underline" data-id="${msg.id}">Delete</button>
+        </td>`;
+      messageTable.appendChild(tr);
+    }
+  }
+
+  // Simple HTML escape
+  function escapeHtml(s) {
+    if (!s && s !== 0) return '';
+    return String(s).replace(/[&<>"'`=\/]/g, function(ch) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch];
+    });
+  }
+
+  // Inbox/Compose toggles
+  function showInbox() {
+    inboxSection.classList.remove('hidden');
+    composeSection.classList.add('hidden');
+    inboxBtn.classList.add('bg-indigo-600','text-white');
+    inboxBtn.classList.remove('bg-slate-200','text-gray-800');
+    composeBtn.classList.remove('bg-indigo-600','text-white');
+    composeBtn.classList.add('bg-slate-200','text-gray-800');
+  }
+  function showCompose() {
+    composeSection.classList.remove('hidden');
+    inboxSection.classList.add('hidden');
+    composeBtn.classList.add('bg-indigo-600','text-white');
+    composeBtn.classList.remove('bg-slate-200','text-gray-800');
+    inboxBtn.classList.remove('bg-indigo-600','text-white');
+    inboxBtn.classList.add('bg-slate-200','text-gray-800');
+  }
+  inboxBtn?.addEventListener('click', showInbox);
+  composeBtn?.addEventListener('click', showCompose);
+  cancelCompose?.addEventListener('click', showInbox);
+
+  // Open a message in popup (delegated)
+  document.addEventListener('click', function(e) {
+    // view inline from table
+    if (e.target && e.target.classList.contains('viewBtn')) {
+      const id = Number(e.target.dataset.id);
+      const msg = messages.find(m => m.id === id);
+      if (!msg) return;
+      currentViewedMessageId = id;
+      popupSender.textContent = msg.sender;
+      popupRecipient.textContent = msg.recipient;
+      popupSubject.textContent = msg.subject;
+      popupDate.textContent = msg.date;
+      popupBody.textContent = msg.body;
+      messagePopup.classList.remove('hidden');
+    }
+
+    // inline delete button in table (asks confirm)
+    if (e.target && e.target.classList.contains('delInlineBtn')) {
+      const id = Number(e.target.dataset.id);
+      if (!confirm('Delete this message?')) return;
+      messages = messages.filter(m => m.id !== id);
+      renderInbox();
+      // if deleted message is currently open in popup, close popup
+      if (currentViewedMessageId === id) {
+        currentViewedMessageId = null;
+        messagePopup.classList.add('hidden');
       }
     }
+  });
 
-    // Incident report functions
-    function showIncidentForm() {
-      document.getElementById('incidentFormContainer').classList.remove('hidden');
-      document.getElementById('incidentLogsContainer').classList.add('hidden');
+  // Reply button: prefill compose form and open compose
+  replyBtn?.addEventListener('click', function() {
+    if (!currentViewedMessageId) return;
+    const msg = messages.find(m => m.id === currentViewedMessageId);
+    if (!msg) return;
+    // open messaging section and compose
+    showSection('messaging-mgmt');
+    showCompose();
+
+    // prefill
+    const recipientInput = document.getElementById('recipient');
+    const subjectInput = document.getElementById('subject');
+    const bodyTextarea = document.getElementById('message');
+
+    if (recipientInput) recipientInput.value = msg.sender || '';
+    if (subjectInput) {
+      // if subject already starts with Re:, keep it
+      subjectInput.value = msg.subject && !/^Re:/i.test(msg.subject) ? `Re: ${msg.subject}` : msg.subject || '';
+    }
+    if (bodyTextarea) {
+      bodyTextarea.value = `\n\n--- Original Message ---\nFrom: ${msg.sender}\nDate: ${msg.date}\nSubject: ${msg.subject}\n\n${msg.body}`;
+      bodyTextarea.focus();
+      // put cursor at start of textarea for user to type reply
+      bodyTextarea.setSelectionRange(0, 0);
     }
 
-    function hideIncidentForm() {
-      document.getElementById('incidentFormContainer').classList.add('hidden');
+    // close popup after replying to reduce UI noise
+    messagePopup.classList.add('hidden');
+  });
+
+  // Delete button (from popup) - removes the message and closes popup
+  deleteBtn?.addEventListener('click', function() {
+    if (!currentViewedMessageId) return;
+    if (!confirm('Delete this message? This cannot be undone in this demo.')) return;
+    messages = messages.filter(m => m.id !== currentViewedMessageId);
+    currentViewedMessageId = null;
+    messagePopup.classList.add('hidden');
+    renderInbox();
+  });
+
+  // Close popup buttons
+  closePopupBtns.forEach(btn => btn?.addEventListener('click', function(){ messagePopup.classList.add('hidden'); currentViewedMessageId = null; }));
+
+  // Clicking outside popup content closes it
+  messagePopup?.addEventListener('click', function(e) {
+    if (e.target === messagePopup) {
+      messagePopup.classList.add('hidden');
+      currentViewedMessageId = null;
+    }
+  });
+
+  // Compose handler (frontend-only simulation)
+  composeForm?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const recipient = document.getElementById('recipient').value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const body = document.getElementById('message').value.trim();
+    if (!recipient || !subject || !body) {
+      alert('Please fill out all fields.');
+      return;
+    }
+    const newMsg = {
+      id: nextMessageId++,
+      sender: 'You', // outgoing: from current user
+      recipient,
+      subject,
+      date: new Date().toISOString().split('T')[0],
+      body
+    };
+    // For demo, add to messages store (so it appears in inbox)
+    messages.push(newMsg);
+    renderInbox();
+    // Reset form and show inbox
+    composeForm.reset();
+    showInbox();
+    alert('Message sent (demo mode). In a real app this would call your backend API.');
+  });
+
+  // initial render: show inbox first
+  renderInbox();
+  showInbox();
+
+  // Utility: refresh button (just re-render here)
+  document.getElementById('refreshBtn')?.addEventListener('click', function(){ renderInbox(); });
+
+  // Search (very basic filter by subject/sender)
+  document.getElementById('messageSearch')?.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    const rows = messageTable.querySelectorAll('tr');
+    rows.forEach(r => {
+      const txt = r.textContent.toLowerCase();
+      r.style.display = txt.includes(q) ? '' : 'none';
+    });
+  });
+
+  // --- Incident Reports Section ---
+    document.addEventListener('DOMContentLoaded', function () {
+  // Tab switches for incident reports
+  const tabSubmit = document.getElementById('irTabSubmit');
+  const tabView = document.getElementById('irTabView');
+  const submitSection = document.getElementById('ir-submit-section');
+  const viewSection = document.getElementById('ir-view-section');
+
+  function irActivateTab(tab) {
+    [tabSubmit, tabView].forEach(t => t.classList.remove('bg-indigo-600','text-white'));
+    [tabSubmit, tabView].forEach(t => t.classList.add('bg-slate-200','text-gray-800'));
+    tab.classList.remove('bg-slate-200','text-gray-800');
+    tab.classList.add('bg-indigo-600','text-white');
+    submitSection.classList.add('hidden');
+    viewSection.classList.add('hidden');
+    if (tab === tabSubmit) submitSection.classList.remove('hidden');
+    if (tab === tabView) viewSection.classList.remove('hidden');
+  }
+  tabSubmit.addEventListener('click', ()=> irActivateTab(tabSubmit));
+  tabView.addEventListener('click', ()=> irActivateTab(tabView));
+  irActivateTab(tabSubmit); // default
+
+  // Parties dynamic add/remove
+  const partiesContainer = document.getElementById('ir_parties');
+  const addPersonBtn = document.getElementById('irAddPerson');
+  function createPartyBlock(index, data={}) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'p-3 border rounded bg-slate-50 relative';
+    wrapper.innerHTML = `
+      <button type="button" class="irRemovePerson absolute top-2 right-2 text-sm text-red-600">Remove</button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div><label class="block text-xs text-slate-600">Full Name</label><input name="party_name" class="w-full px-2 py-1 rounded border" value="${data.name||''}" /></div>
+        <div><label class="block text-xs text-slate-600">Role (Suspect/Victim/Witness/Other)</label><input name="party_role" class="w-full px-2 py-1 rounded border" value="${data.role||''}" /></div>
+        <div><label class="block text-xs text-slate-600">Contact</label><input name="party_contact" class="w-full px-2 py-1 rounded border" value="${data.contact||''}" /></div>
+        <div><label class="block text-xs text-slate-600">ID Type & No.</label><input name="party_id" class="w-full px-2 py-1 rounded border" value="${data.id||''}" /></div>
+        <div class="md:col-span-2"><label class="block text-xs text-slate-600">Involvement Description</label><textarea name="party_desc" rows="2" class="w-full px-2 py-1 rounded border">${data.desc||''}</textarea></div>
+      </div>`;
+    partiesContainer.appendChild(wrapper);
+    wrapper.querySelector('.irRemovePerson').addEventListener('click', ()=> wrapper.remove());
+  }
+  // start with one blank party
+  createPartyBlock(0);
+  addPersonBtn.addEventListener('click', ()=> createPartyBlock(Date.now()));
+
+  // In-memory reports store
+  let reports = [
+    // sample
+    {
+      id: 'IR-0001',
+      reporterName: 'John Guard',
+      employeeId: 'SG-1001',
+      role: 'Security Guard',
+      shiftDate: '2025-09-12',
+      shiftStart: '08:00', shiftEnd: '16:00',
+      contact: '09171234567', email: 'john.guard@example.com',
+      incidentDate: '2025-09-12', incidentTime: '17:30',
+      location: 'Client #3829 - Main Gate',
+      type: 'Accident',
+      description: 'Guard slipped on wet floor during patrol. Minor bruises.',
+      parties: [{name:'Jane Doe', role:'Witness', contact:'09170001111', id:'DL-12345', desc:'Saw slip near gate'}],
+      injuries: 'Yes',
+      injuries_desc: 'Bruise on left arm',
+      medical_provided: 'Yes',
+      police_notified: false,
+      medical_contacted: true,
+      scene_secured: true,
+      actions: 'Assisted guard, called medics, logged incident.',
+      evidence: {photos:true, videos:false, witness:true, physical:false, other:''},
+      remarks: 'Install wet-floor signage.',
+      createdAt: '2025-09-12'
+    }
+  ];
+  let nextReportSeq = 2;
+
+  // Form submission: collect data
+  const incidentForm = document.getElementById('incidentForm');
+  incidentForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    // required fields
+    const reporterName = document.getElementById('ir_fullName').value.trim();
+    const employeeId = document.getElementById('ir_employeeId').value.trim();
+    const role = document.getElementById('ir_role').value;
+    const incidentDate = document.getElementById('ir_date').value;
+    const incidentTime = document.getElementById('ir_time').value;
+    const location = document.getElementById('ir_location').value.trim();
+    const type = document.getElementById('ir_type').value;
+    const description = document.getElementById('ir_description').value.trim();
+
+    if (!reporterName || !employeeId || !role || !incidentDate || !incidentTime || !location || !type || !description) {
+      alert('Please fill all required fields.');
+      return;
     }
 
-    function showIncidentLogs() {
-      document.getElementById('incidentLogsContainer').classList.remove('hidden');
-      document.getElementById('incidentFormContainer').classList.add('hidden');
+    // collect parties
+    const partyNodes = Array.from(partiesContainer.querySelectorAll('> div'));
+    const parties = partyNodes.map(node => ({
+      name: (node.querySelector('[name="party_name"]').value || '').trim(),
+      role: (node.querySelector('[name="party_role"]').value || '').trim(),
+      contact: (node.querySelector('[name="party_contact"]').value || '').trim(),
+      id: (node.querySelector('[name="party_id"]').value || '').trim(),
+      desc: (node.querySelector('[name="party_desc"]').value || '').trim()
+    })).filter(p => p.name || p.role || p.contact || p.id || p.desc); // remove empty
+
+    const injuries = document.querySelector('input[name="ir_injuries"]:checked')?.value || 'No';
+    const injuries_desc = document.getElementById('ir_injuries_desc').value.trim();
+    const medical_provided = document.getElementById('ir_medical_provided').value;
+    const police_notified = !!document.getElementById('ir_police_notified').checked;
+    const medical_contacted = !!document.getElementById('ir_medical_contacted').checked;
+    const scene_secured = !!document.getElementById('ir_scene_secured').checked;
+    const actions = document.getElementById('ir_actions').value.trim();
+    const evidence = {
+      photos: !!document.getElementById('ir_e_photos').checked,
+      videos: !!document.getElementById('ir_e_videos').checked,
+      witness: !!document.getElementById('ir_e_witness').checked,
+      physical: !!document.getElementById('ir_e_physical').checked,
+      other: document.getElementById('ir_e_other').value.trim()
+    };
+    const remarks = document.getElementById('ir_remarks').value.trim();
+
+    // generate report ID
+    const id = `IR-${String(nextReportSeq).padStart(4,'0')}`;
+    nextReportSeq++;
+
+    const report = {
+      id,
+      reporterName,
+      employeeId,
+      role,
+      shiftDate: document.getElementById('ir_shiftDate').value || '',
+      shiftStart: document.getElementById('ir_shiftStart').value || '',
+      shiftEnd: document.getElementById('ir_shiftEnd').value || '',
+      contact: document.getElementById('ir_contact').value || '',
+      email: document.getElementById('ir_email').value || '',
+      incidentDate,
+      incidentTime,
+      location,
+      type,
+      description,
+      parties,
+      injuries,
+      injuries_desc,
+      medical_provided,
+      police_notified,
+      medical_contacted,
+      scene_secured,
+      actions,
+      evidence,
+      remarks,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    reports.push(report);
+    incidentForm.reset();
+    // clear parties and add an empty one
+    partiesContainer.innerHTML = '';
+    createInitialParty();
+    alert('Incident report submitted (demo). In production this should POST to your backend.');
+    // switch to view tab and render
+    irActivateTab(tabView);
+    renderReports();
+  });
+
+  function createInitialParty(){ partiesContainer.innerHTML=''; createPartyBlockForForm({}); }
+  function createPartyBlockForForm(data){ // reuse code from earlier createPartyBlock but inline
+    const wrapper = document.createElement('div');
+    wrapper.className = 'p-3 border rounded bg-slate-50 relative';
+    wrapper.innerHTML = `
+      <button type="button" class="irRemovePerson absolute top-2 right-2 text-sm text-red-600">Remove</button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div><label class="block text-xs text-slate-600">Full Name</label><input name="party_name" class="w-full px-2 py-1 rounded border" value="${data.name||''}" /></div>
+        <div><label class="block text-xs text-slate-600">Role (Suspect/Victim/Witness/Other)</label><input name="party_role" class="w-full px-2 py-1 rounded border" value="${data.role||''}" /></div>
+        <div><label class="block text-xs text-slate-600">Contact</label><input name="party_contact" class="w-full px-2 py-1 rounded border" value="${data.contact||''}" /></div>
+        <div><label class="block text-xs text-slate-600">ID Type & No.</label><input name="party_id" class="w-full px-2 py-1 rounded border" value="${data.id||''}" /></div>
+        <div class="md:col-span-2"><label class="block text-xs text-slate-600">Involvement Description</label><textarea name="party_desc" rows="2" class="w-full px-2 py-1 rounded border">${data.desc||''}</textarea></div>
+      </div>`;
+    partiesContainer.appendChild(wrapper);
+    wrapper.querySelector('.irRemovePerson').addEventListener('click', ()=> wrapper.remove());
+  }
+
+  // Because we created a separate createPartyBlock earlier in HTML replacement, ensure at least one on load:
+  if (partiesContainer.children.length === 0) createInitialParty();
+
+  // render reports table
+  const reportsTable = document.getElementById('reportsTable');
+  function renderReports() {
+    reportsTable.innerHTML = '';
+    const q = (document.getElementById('reportsSearch').value || '').toLowerCase();
+    const roleFilter = document.getElementById('filterRole').value;
+    const typeFilter = document.getElementById('filterType').value;
+    const from = document.getElementById('filterFrom').value;
+    const to = document.getElementById('filterTo').value;
+
+    const filtered = reports.slice().reverse().filter(r => {
+      if (roleFilter && r.role !== roleFilter) return false;
+      if (typeFilter && r.type !== typeFilter) return false;
+      if (from && r.incidentDate < from) return false;
+      if (to && r.incidentDate > to) return false;
+      if (!q) return true;
+      const hay = (r.id + ' ' + r.reporterName + ' ' + r.employeeId + ' ' + r.location + ' ' + r.type + ' ' + r.description).toLowerCase();
+      return hay.includes(q);
+    });
+
+    if (filtered.length === 0) {
+      reportsTable.innerHTML = '<tr><td class="py-4 px-3 text-slate-500" colspan="7">No reports found.</td></tr>';
+      return;
     }
 
-    function hideIncidentLogs() {
-      document.getElementById('incidentLogsContainer').classList.add('hidden');
+    for (const r of filtered) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="py-2 px-3 font-mono text-sm">${r.id}</td>
+        <td class="py-2 px-3">${r.incidentDate} ${r.incidentTime}</td>
+        <td class="py-2 px-3">${escapeHtml(r.reporterName)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.role)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.type)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.location)}</td>
+        <td class="py-2 px-3">
+          <button class="viewReportBtn text-blue-600 hover:underline" data-id="${r.id}">View</button>
+        </td>`;
+      reportsTable.appendChild(tr);
     }
+  }
 
-    // Form submission handling
-    document.getElementById('incidentForm').addEventListener('submit', function(e) {
+  // escape helper
+  function escapeHtml(s){ if (!s && s!==0) return ''; return String(s).replace(/[&<>"'`=\/]/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch]; }); }
+
+  // wire filters/search
+  ['reportsSearch','filterRole','filterType','filterFrom','filterTo'].forEach(id=>{
+    const el=document.getElementById(id);
+    if (el) el.addEventListener('input', renderReports);
+  });
+  document.getElementById('refreshReports').addEventListener('click', renderReports);
+
+  // view details modal
+  const reportModal = document.getElementById('reportModal');
+  const reportDetails = document.getElementById('reportDetails');
+  function openReportModal(report) {
+    // build HTML with full details
+    reportDetails.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div><strong>Report ID:</strong> ${report.id}</div>
+        <div><strong>Created:</strong> ${report.createdAt}</div>
+        <div><strong>Reporter:</strong> ${escapeHtml(report.reporterName)}</div>
+        <div><strong>Employee ID:</strong> ${escapeHtml(report.employeeId)}</div>
+        <div><strong>Role:</strong> ${escapeHtml(report.role)}</div>
+        <div><strong>Contact:</strong> ${escapeHtml(report.contact)}</div>
+        <div><strong>Email:</strong> ${escapeHtml(report.email)}</div>
+        <div><strong>Shift Date / Start-End:</strong> ${report.shiftDate} ${report.shiftStart||''} - ${report.shiftEnd||''}</div>
+        <div><strong>Incident Date / Time:</strong> ${report.incidentDate} ${report.incidentTime}</div>
+        <div class="md:col-span-2"><strong>Location:</strong> ${escapeHtml(report.location)}</div>
+        <div class="md:col-span-2"><strong>Type:</strong> ${escapeHtml(report.type)}</div>
+        <div class="md:col-span-2"><strong>Description:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.description)}</div></div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Parties Involved</h4>
+        ${report.parties && report.parties.length ? report.parties.map(p=>`
+          <div class="p-2 border rounded mt-2">
+            <div><strong>Name:</strong> ${escapeHtml(p.name)}</div>
+            <div><strong>Role:</strong> ${escapeHtml(p.role)}</div>
+            <div><strong>Contact:</strong> ${escapeHtml(p.contact)}</div>
+            <div><strong>ID:</strong> ${escapeHtml(p.id)}</div>
+            <div><strong>Involvement:</strong> ${escapeHtml(p.desc)}</div>
+          </div>`).join('') : '<div class="text-slate-500">No parties recorded.</div>'}
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Injuries & Medical</h4>
+        <div><strong>Were there injuries?</strong> ${escapeHtml(report.injuries)}</div>
+        <div><strong>Injuries description:</strong> ${escapeHtml(report.injuries_desc)}</div>
+        <div><strong>Medical provided:</strong> ${escapeHtml(report.medical_provided)}</div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Actions Taken</h4>
+        <div><strong>Police notified:</strong> ${report.police_notified ? 'Yes' : 'No'}</div>
+        <div><strong>Medical contacted:</strong> ${report.medical_contacted ? 'Yes' : 'No'}</div>
+        <div><strong>Scene secured:</strong> ${report.scene_secured ? 'Yes' : 'No'}</div>
+        <div class="mt-2"><strong>Other actions:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.actions)}</div></div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Evidence</h4>
+        <div><strong>Photos:</strong> ${report.evidence.photos ? 'Yes' : 'No'}</div>
+        <div><strong>Videos:</strong> ${report.evidence.videos ? 'Yes' : 'No'}</div>
+        <div><strong>Witness statements:</strong> ${report.evidence.witness ? 'Yes' : 'No'}</div>
+        <div><strong>Physical items:</strong> ${report.evidence.physical ? 'Yes' : 'No'}</div>
+        <div><strong>Other:</strong> ${escapeHtml(report.evidence.other)}</div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div><strong>Additional Remarks:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.remarks)}</div></div>
+    `;
+    reportModal.classList.remove('hidden');
+  }
+
+  // handle view button clicks (delegated)
+  document.addEventListener('click', function(e){
+    if (e.target && e.target.classList.contains('viewReportBtn')) {
+      const id = e.target.dataset.id;
+      const r = reports.find(x => x.id === id);
+      if (r) openReportModal(r);
+    }
+  });
+
+  // close modal
+  document.getElementById('closeReportModal')?.addEventListener('click', ()=> reportModal.classList.add('hidden'));
+  document.getElementById('closeReportModal2')?.addEventListener('click', ()=> reportModal.classList.add('hidden'));
+  reportModal.addEventListener('click', function(e){ if (e.target === reportModal) reportModal.classList.add('hidden'); });
+
+  // export report JSON (download)
+  document.getElementById('exportReportBtn')?.addEventListener('click', function(){
+    const content = reportDetails.textContent || '';
+    // find currently displayed report by reading the Report ID in content
+    const match = (reportDetails.textContent || '').match(/Report ID:\s*(IR-\d+)/);
+    if (!match) return alert('Cannot determine report ID for export.');
+    const id = match[1];
+    const r = reports.find(x=> x.id === id);
+    if (!r) return alert('Report not found.');
+    const blob = new Blob([JSON.stringify(r, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${r.id}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  // initial render
+  renderReports();
+
+  // helper to open view tab from sidebar click (if needed)
+  // ensure clicking your sidebar showSection('incident-reports') opens view tab by default:
+  const incidentSidebarBtn = Array.from(document.querySelectorAll('button')).find(b=> b.getAttribute('onclick')?.includes("showSection('incident-reports')"));
+  if (incidentSidebarBtn) {
+    incidentSidebarBtn.addEventListener('click', function(){
+      showSection('incident-reports', incidentSidebarBtn);
+      irActivateTab(tabView); // show list when admin clicks the sidebar
+      renderReports();
+    });
+  }
+});
+
+// --- Reqiest Leave --
+(function () {
+  // ---------- CONFIG / DEMO USER ----------
+  // Replace with your auth/session user object or set window.loggedUser before this script loads.
+  const demoLoggedUser = {
+    id: 42,
+    accountId: 'SG-1001',
+    name: 'John Guard',
+    role: 'Security Guard',
+    email: 'john.guard@example.com'
+  };
+  const loggedUser = window.loggedUser || demoLoggedUser;
+
+  // ---------- STORAGE ----------
+  const STORAGE_KEY = 'seekyu_leave_requests_v1';
+
+  function loadRequests() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (err) {
+      console.error('Failed to load leave requests', err);
+      return [];
+    }
+  }
+  function saveRequests(arr) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    } catch (err) {
+      console.error('Failed to save leave requests', err);
+    }
+  }
+
+  // ---------- ELEMENTS (expected in your HTML) ----------
+  const getEl = id => document.getElementById(id);
+
+  const tabNew = getEl('leaveTabNew');
+  const tabMy = getEl('leaveTabMy');
+  const newSection = getEl('leave-new-section');
+  const mySection = getEl('leave-my-section');
+
+  const nameInput = getEl('leave_name');
+  const accountIdInput = getEl('leave_accountId');
+  const roleInput = getEl('leave_role');
+  const emailInput = getEl('leave_email');
+
+  const startInput = getEl('leave_start');
+  const endInput = getEl('leave_end');
+  const typeSelect = getEl('leave_type');
+  const reasonInput = getEl('leave_reason');
+  const leaveForm = getEl('leaveForm');
+
+  const leaveTable = getEl('leaveTable');
+  const leaveSearch = getEl('leaveSearch');
+  const leaveFilterStatus = getEl('leaveFilterStatus');
+  const leaveFilterFrom = getEl('leaveFilterFrom');
+  const leaveFilterTo = getEl('leaveFilterTo');
+  const leaveRefresh = getEl('leaveRefresh');
+
+  // Edit modal elements
+  const editModal = getEl('leaveEditModal');
+  const closeEdit = getEl('closeLeaveEdit');
+  const cancelEdit = getEl('cancelLeaveEdit');
+  const editForm = getEl('leaveEditForm');
+  const editRequestId = getEl('editRequestId');
+  const editStart = getEl('edit_start');
+  const editEnd = getEl('edit_end');
+  const editType = getEl('edit_type');
+  const editReason = getEl('edit_reason');
+
+  // fallback warnings
+  function warnMissing(id) {
+    if (!getEl(id)) console.warn(`LeaveRequest: expected element #${id} not found.`);
+  }
+  [
+    'leaveTabNew','leaveTabMy','leave-new-section','leave-my-section',
+    'leave_name','leave_accountId','leave_role','leave_email',
+    'leave_start','leave_end','leave_type','leave_reason','leaveForm',
+    'leaveTable','leaveSearch','leaveFilterStatus','leaveFilterFrom','leaveFilterTo','leaveRefresh',
+    'leaveEditModal','closeLeaveEdit','cancelLeaveEdit','leaveEditForm','editRequestId','edit_start','edit_end','edit_type','edit_reason'
+  ].forEach(warnMissing);
+
+  // ---------- DATA ----------
+  let requests = loadRequests();
+
+  // ---------- HELPERS ----------
+  function genRequestId(seq) {
+    return `RL-${String(seq).padStart(4, '0')}`;
+  }
+  function nextSeq() {
+    if (!requests || requests.length === 0) return 1;
+    const max = requests.reduce((m, r) => {
+      const n = Number(String(r.id || '').replace(/^RL-0*/, '')) || 0;
+      return Math.max(m, n);
+    }, 0);
+    return max + 1;
+  }
+  function escapeHtml(s) {
+    if (!s && s !== 0) return '';
+    return String(s).replace(/[&<>"'`=\/]/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '/': '&#47;', '`': '&#96;', '=': '&#61;' }[ch];
+    });
+  }
+
+  // ---------- AUTO-FILL USER INFO ----------
+  function autofillUser() {
+    if (nameInput) nameInput.value = loggedUser.name || '';
+    if (accountIdInput) accountIdInput.value = loggedUser.accountId || '';
+    if (roleInput) roleInput.value = loggedUser.role || '';
+    if (emailInput) emailInput.value = loggedUser.email || '';
+  }
+  autofillUser();
+
+  // ---------- TABS ----------
+  function activateTab(tabEl) {
+    if (!tabNew || !tabMy) return;
+    [tabNew, tabMy].forEach(t => t.classList.remove('bg-indigo-600', 'text-white'));
+    [tabNew, tabMy].forEach(t => t.classList.add('bg-slate-200', 'text-gray-800'));
+    if (tabEl) {
+      tabEl.classList.remove('bg-slate-200', 'text-gray-800');
+      tabEl.classList.add('bg-indigo-600', 'text-white');
+    }
+    if (newSection) newSection.classList.add('hidden');
+    if (mySection) mySection.classList.add('hidden');
+    if (tabEl === tabNew && newSection) newSection.classList.remove('hidden');
+    if (tabEl === tabMy && mySection) mySection.classList.remove('hidden');
+  }
+  if (tabNew) tabNew.addEventListener('click', () => activateTab(tabNew));
+  if (tabMy) tabMy.addEventListener('click', () => { activateTab(tabMy); renderTable(); });
+  // default to New tab
+  activateTab(tabNew);
+
+  // ---------- SUBMIT NEW REQUEST ----------
+  if (leaveForm) {
+    leaveForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      alert('Incident report submitted successfully!');
-      this.reset();
-      hideIncidentForm();
+      const start = startInput ? startInput.value : '';
+      const end = endInput ? endInput.value : '';
+      const type = typeSelect ? typeSelect.value : '';
+      const reason = reasonInput ? reasonInput.value.trim() : '';
+
+      if (!start || !end || !type || !reason) { return alert('Please fill all required fields.'); }
+      if (end < start) { return alert('End date cannot be before start date.'); }
+
+      const seq = nextSeq();
+      const id = genRequestId(seq);
+      const now = new Date().toISOString().split('T')[0];
+
+      const req = {
+        id,
+        userId: loggedUser.id,
+        accountId: loggedUser.accountId,
+        name: loggedUser.name,
+        role: loggedUser.role,
+        email: loggedUser.email,
+        start,
+        end,
+        type,
+        reason,
+        status: 'Pending',
+        submittedAt: now,
+        updatedAt: now
+      };
+
+      requests.push(req);
+      saveRequests(requests);
+
+      if (leaveForm.reset) leaveForm.reset();
+      autofillUser();
+      alert(`Leave request submitted (${id}). Status: Pending.`);
+      if (tabMy) { activateTab(tabMy); renderTable(); }
+    });
+  }
+
+  // ---------- RENDER TABLE (My Requests only) ----------
+  function renderTable() {
+    if (!leaveTable) return;
+    leaveTable.innerHTML = '';
+    const q = (leaveSearch && leaveSearch.value || '').toLowerCase();
+    const statusFilter = (leaveFilterStatus && leaveFilterStatus.value) || '';
+    const from = (leaveFilterFrom && leaveFilterFrom.value) || '';
+    const to = (leaveFilterTo && leaveFilterTo.value) || '';
+
+    const filtered = (requests.slice().reverse()).filter(r => {
+      if (r.userId !== loggedUser.id) return false;
+      if (statusFilter && r.status !== statusFilter) return false;
+      if (from && r.start < from) return false;
+      if (to && r.end > to) return false;
+      if (!q) return true;
+      const hay = (r.id + ' ' + r.type + ' ' + r.reason + ' ' + r.status).toLowerCase();
+      return hay.includes(q);
     });
 
-    // Notification dropdown toggle
-    document.getElementById('notifToggle').addEventListener('click', function() {
-      const dropdown = document.getElementById('notifList');
-      dropdown.classList.toggle('hidden');
-    });
+    if (filtered.length === 0) {
+      leaveTable.innerHTML = '<tr><td class="py-4 px-3 text-slate-500" colspan="6">No leave requests found.</td></tr>';
+      return;
+    }
 
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-      const notifToggle = document.getElementById('notifToggle');
-      const notifList = document.getElementById('notifList');
-      
-      if (!notifToggle.contains(e.target) && !notifList.contains(e.target)) {
-        notifList.classList.add('hidden');
-      }
+    for (const r of filtered) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="py-2 px-3 font-mono text-sm">${escapeHtml(r.id)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.start)} → ${escapeHtml(r.end)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.type)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.status)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.submittedAt)}</td>
+        <td class="py-2 px-3">
+          <button class="viewLeaveBtn text-blue-600 hover:underline" data-id="${escapeHtml(r.id)}">View</button>
+          <button class="editLeaveBtn ml-3 text-indigo-600 hover:underline" data-id="${escapeHtml(r.id)}">Edit</button>
+          <button class="delLeaveBtn ml-3 text-red-600 hover:underline" data-id="${escapeHtml(r.id)}">Delete</button>
+        </td>`;
+      leaveTable.appendChild(tr);
+    }
+  }
+
+  // bind filters
+  [leaveSearch, leaveFilterStatus, leaveFilterFrom, leaveFilterTo].forEach(el => {
+    if (!el) return;
+    el.addEventListener('input', renderTable);
+  });
+  if (leaveRefresh) leaveRefresh.addEventListener('click', renderTable);
+
+  // ---------- EDIT / DELETE / VIEW (delegated) ----------
+  document.addEventListener('click', function (e) {
+    const t = e.target;
+    if (!t) return;
+
+    // VIEW
+    if (t.matches('.viewLeaveBtn')) {
+      const id = t.dataset.id;
+      if (!id) return alert('Missing request id');
+      openGuardLeaveModal(id);
+      return;
+    }
+
+    // EDIT
+    if (t.matches('.editLeaveBtn')) {
+      const id = t.dataset.id;
+      const req = requests.find(x => x.id === id);
+      if (!req) return alert('Request not found.');
+      if (req.status !== 'Pending') return alert('Only Pending requests can be edited.');
+
+      // open edit modal (ensure edit modal exists)
+      if (!editModal) return alert('Edit modal not found.');
+      if (editRequestId) editRequestId.value = req.id;
+      if (editStart) editStart.value = req.start || '';
+      if (editEnd) editEnd.value = req.end || '';
+      if (editType) editType.value = req.type || '';
+      if (editReason) editReason.value = req.reason || '';
+      editModal.classList.remove('hidden');
+      return;
+    }
+
+    // DELETE
+    if (t.matches('.delLeaveBtn')) {
+      const id = t.dataset.id;
+      if (!id) return;
+      if (!confirm('Delete this leave request?')) return;
+      requests = requests.filter(x => x.id !== id);
+      saveRequests(requests);
+      renderTable();
+      return;
+    }
+  });
+
+  // ---------- EDIT MODAL FUNCTIONS ----------
+  if (closeEdit) closeEdit.addEventListener('click', () => editModal.classList.add('hidden'));
+  if (cancelEdit) cancelEdit.addEventListener('click', () => editModal.classList.add('hidden'));
+
+  if (editForm) {
+    editForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const id = editRequestId ? editRequestId.value : null;
+      const req = requests.find(x => x.id === id);
+      if (!req) return alert('Request not found.');
+      if (req.status !== 'Pending') return alert('Cannot edit non-Pending request.');
+      const s = editStart ? editStart.value : '';
+      const en = editEnd ? editEnd.value : '';
+      if (!s || !en) return alert('Please fill dates.');
+      if (en < s) return alert('End date cannot be before start date.');
+      req.start = s; req.end = en;
+      req.type = editType ? editType.value : req.type;
+      req.reason = editReason ? editReason.value.trim() : req.reason;
+      req.updatedAt = new Date().toISOString().split('T')[0];
+      saveRequests(requests);
+      if (editModal) editModal.classList.add('hidden');
+      renderTable();
     });
-  </script>
+  }
+
+  // ---------- GUARD VIEW MODAL (create if missing) ----------
+  // If you already added modal HTML with id="guardLeaveModal", this will use it.
+  let guardModal = getEl('guardLeaveModal');
+  if (!guardModal) {
+    // create a white modal and append to body
+    const div = document.createElement('div');
+    div.id = 'guardLeaveModal';
+    div.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden';
+    div.innerHTML = `
+      <div class="bg-white rounded-lg w-11/12 md:w-3/4 lg:w-2/3 shadow-xl overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+          <h2 class="text-lg font-semibold text-slate-800">Leave Request Details</h2>
+          <button id="closeGuardLeaveModal" aria-label="Close" class="text-slate-500 hover:text-slate-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 8.586L15.95 2.636a1 1 0 111.414 1.414L11.414 10l5.95 5.95a1 1 0 01-1.414 1.414L10 11.414l-5.95 5.95A1 1 0 012.636 15.95L8.586 10 2.636 4.05A1 1 0 014.05 2.636L10 8.586z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        <div class="p-6 max-h-[70vh] overflow-y-auto">
+          <div id="guardLeaveDetails" class="text-sm text-slate-700 space-y-4"></div>
+          <hr class="my-4 border-slate-200" />
+          <div class="mt-2 text-xs text-slate-500">
+            <em>This view is read-only. To change or cancel your request, go to My Requests.</em>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t bg-slate-50">
+          <button id="guardCloseBtn" class="px-4 py-2 rounded bg-white border text-slate-700 hover:bg-slate-100">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(div);
+    guardModal = div;
+  }
+
+  // wire guard modal close buttons and details container
+  const closeGuardLeaveModal = getEl('closeGuardLeaveModal');
+  const guardCloseBtn = getEl('guardCloseBtn');
+  const guardDetails = getEl('guardLeaveDetails');
+
+  if (closeGuardLeaveModal) closeGuardLeaveModal.addEventListener('click', () => guardModal.classList.add('hidden'));
+  if (guardCloseBtn) guardCloseBtn.addEventListener('click', () => guardModal.classList.add('hidden'));
+  guardModal.addEventListener('click', function (e) { if (e.target === guardModal) guardModal.classList.add('hidden'); });
+
+  // open guard modal by id
+  function openGuardLeaveModal(id) {
+    const req = requests.find(x => x.id === id);
+    if (!req) return alert('Leave request not found.');
+
+    // enforce ownership unless privileged (Admin/Manager/HR)
+    const privileged = ['Admin', 'Manager', 'HR'].includes((loggedUser.role || '').toString());
+    if (!privileged && req.userId !== loggedUser.id) {
+      return alert('You are not authorized to view this request.');
+    }
+
+    if (!guardDetails) return alert('Modal details container missing.');
+    guardDetails.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div><span class="font-semibold text-slate-700">Request ID:</span> <span class="text-slate-600">${escapeHtml(req.id)}</span></div>
+        <div><span class="font-semibold text-slate-700">Submitted:</span> <span class="text-slate-600">${escapeHtml(req.submittedAt || req.updatedAt || '')}</span></div>
+
+        <div><span class="font-semibold text-slate-700">Name:</span> <span class="text-slate-600">${escapeHtml(req.name)}</span></div>
+        <div><span class="font-semibold text-slate-700">Account ID:</span> <span class="text-slate-600">${escapeHtml(req.accountId || '')}</span></div>
+
+        <div><span class="font-semibold text-slate-700">Role:</span> <span class="text-slate-600">${escapeHtml(req.role)}</span></div>
+        <div><span class="font-semibold text-slate-700">Email:</span> <span class="text-slate-600">${escapeHtml(req.email || '')}</span></div>
+
+        <div><span class="font-semibold text-slate-700">Range:</span> <span class="text-slate-600">${escapeHtml(req.start)} → ${escapeHtml(req.end)}</span></div>
+        <div><span class="font-semibold text-slate-700">Type:</span> <span class="text-slate-600">${escapeHtml(req.type)}</span></div>
+
+        <div class="md:col-span-2">
+          <div class="font-semibold text-slate-700 mb-1">Reason:</div>
+          <div class="text-slate-600 whitespace-pre-wrap">${escapeHtml(req.reason)}</div>
+        </div>
+      </div>
+
+      <hr class="my-3 border-slate-200" />
+
+      <div>
+        <div><span class="font-semibold text-slate-700">Status:</span> <span class="text-slate-600">${escapeHtml(req.status)}</span></div>
+        <div class="mt-2"><span class="font-semibold text-slate-700">Approver:</span> <span class="text-slate-600">${escapeHtml(req.approver || '-')}</span></div>
+        <div class="mt-2">
+          <div class="font-semibold text-slate-700">Approver Remarks:</div>
+          <div class="text-slate-600 mt-1 whitespace-pre-wrap">${escapeHtml(req.approverRemarks || '')}</div>
+        </div>
+        <div class="mt-3 text-xs text-slate-500">${escapeHtml(req.updatedAt || '')}</div>
+      </div>
+    `;
+
+    guardModal.classList.remove('hidden');
+    // scroll to top of modal content
+    guardModal.querySelector('.max-h-[70vh]')?.scrollTo({ top: 0 });
+  }
+
+  // expose helper globally
+  window.openGuardLeaveModal = openGuardLeaveModal;
+
+  // ---------- SIDEBAR HOOK (optional) ----------
+  // if the sidebar 'Request Leave' button uses showSection('request-leave')
+  try {
+    const sidebarBtn = Array.from(document.querySelectorAll('button')).find(b => b.getAttribute('onclick')?.includes("showSection('request-leave')"));
+    if (sidebarBtn) {
+      sidebarBtn.addEventListener('click', function () {
+        if (typeof showSection === 'function') showSection('request-leave', sidebarBtn);
+        if (tabMy) { activateTab(tabMy); renderTable(); }
+      });
+    }
+  } catch (e) {
+    // ignore silently
+  }
+
+  // ---------- INITIAL RENDER ----------
+  renderTable();
+
+  // expose small debug helpers
+  window.LeaveRequestsDemo = {
+    getAll: () => requests,
+    clearAll: () => { requests = []; saveRequests(requests); renderTable(); }
+  };
+
+})();
+
+// --- Dashboard Widgets ---
+// ------- Bulletin board demo data & logic -------
+const bulletins = [
+{id:1,title:'Holiday Notice',body:'Office closed on Sept 25 for local holiday.'},
+{id:2,title:'New SOP',body:'Updated patrol SOP v2.1 uploaded. Read and acknowledge.'},
+{id:3,title:'Safety Tip',body:'Always wear non-slip shoes during rainy season.'}
+];
+const track = document.getElementById('bulletinTrack');
+function renderBulletins(){
+track.innerHTML='';
+for(const b of bulletins){
+const card = document.createElement('div');
+card.className = 'bulletin-card bg-white p-4 rounded-lg border shadow-sm';
+card.style.minWidth = '300px';
+card.innerHTML = `<h4 class="font-semibold">${escapeHtml(b.title)}</h4><p class="text-sm text-slate-600 mt-2">${escapeHtml(b.body)}</p>`;
+track.appendChild(card);
+}
+}
+renderBulletins();
+
+
+let bulletIndex = 0;
+const prevBtn = document.getElementById('bulletPrev');
+const nextBtn = document.getElementById('bulletNext');
+function updateBulletTransform(){
+const width = track.children[0] ? track.children[0].getBoundingClientRect().width + 16 : 320;
+track.style.transform = `translateX(${-bulletIndex * width}px)`;
+}
+window.addEventListener('resize', updateBulletTransform);
+prevBtn.addEventListener('click', ()=>{ bulletIndex = Math.max(0, bulletIndex-1); updateBulletTransform(); });
+nextBtn.addEventListener('click', ()=>{ bulletIndex = Math.min(bulletins.length-1, bulletIndex+1); updateBulletTransform(); });
+// auto advance
+setInterval(()=>{ bulletIndex = (bulletIndex+1) % bulletins.length; updateBulletTransform(); }, 5000);
+
+
+// ------- KPI Demo -------
+const kpis = [
+{id:'k1',name:'Professional conduct',score:92,description:'Adherence to company code of conduct, courtesy and professionalism during duty.'},
+{id:'k2',name:'Operational effectiveness',score:78,description:'Efficiency in performing assigned tasks, patrol completion, and procedural compliance.'},
+{id:'k3',name:'Situational awareness and response',score:85,description:'Ability to detect, assess and respond quickly to incidents and changes in environment.'}
+];
+const kpiList = document.getElementById('kpiList');
+function renderKpis(){
+kpiList.innerHTML='';
+for(const k of kpis){
+const wrap = document.createElement('div');
+wrap.className = 'group p-2 border rounded bg-slate-50';
+wrap.innerHTML = `
+<div class="flex items-center justify-between">
+<div>
+<div class="text-sm font-medium">${escapeHtml(k.name)}</div>
+<div class="text-xs text-slate-500">${k.score}%</div>
+</div>
+<div class="text-sm font-semibold">${k.score}%</div>
+</div>
+<div class="mt-2 text-xs text-slate-500 kpi-desc">${escapeHtml(k.description)}</div>
+<div class="mt-2 bg-slate-200 rounded-full kpi-progress overflow-hidden">
+<div style="width:${Math.max(0,Math.min(100,k.score))}%" class="h-full"></div>
+</div>
+`;
+kpiList.appendChild(wrap);
+}
+}
+renderKpis();
+</script>
 </body>
 </html>
-
