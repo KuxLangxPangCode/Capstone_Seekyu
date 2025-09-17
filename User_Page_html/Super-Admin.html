@@ -6,6 +6,7 @@
     <title>SeekYu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="bulletin-announce.js"></script>
     <style>
         .sidebar {
             transition: all 0.3s ease;
@@ -152,21 +153,66 @@
                     </div>
                 </div>
                 
-                <div class="mt-6 bg-white rounded-lg shadow-sm p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
-                    <div class="border-t border-gray-100 pt-4">
-                        <div class="flex items-start mb-4">
-                            <div class="bg-blue-100 p-2 rounded-full">
-                                <i class="fas fa-user-plus text-blue-600"></i>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-gray-800"><span class="font-medium">John Doe</span> registered as a new security guard</p>
-                                <p class="text-sm text-gray-500">2 hours ago</p>
-                            </div>
-                        </div>
-                        
-                    </div>
-                </div>
+                <div class="mt-6 bg-white rounded-lg shadow-sm p-6"> 
+  <!-- Bulletin Board -->
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold text-gray-800">Bulletin Board</h2>
+    <!-- Create Announcement button -->
+    <button id="createBulletinBtn" class="px-3 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">
+      <i class="fa fa-plus mr-2"></i>Create Announcement
+    </button>
+  </div>
+
+  <div class="relative overflow-hidden">
+    <div id="bulletinTrack" class="flex gap-4 transition-transform duration-400">
+      <!-- JS injects bulletin cards here -->
+    </div>
+    <div class="absolute left-2 top-1/2 -translate-y-1/2">
+      <button id="bulletPrev" aria-label="Previous bulletin" class="p-2 rounded bg-white shadow">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+    </div>
+    <div class="absolute right-2 top-1/2 -translate-y-1/2">
+      <button id="bulletNext" aria-label="Next bulletin" class="p-2 rounded bg-white shadow">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <h2 class="text-xl font-semibold text-gray-800 mb-4 mt-6">Recent Activity</h2>
+  <div class="border-t border-gray-100 pt-4">
+    <div class="flex items-start mb-4">
+      <div class="bg-blue-100 p-2 rounded-full">
+        <i class="fas fa-user-plus text-blue-600"></i>
+      </div>
+      <div class="ml-4">
+        <p class="text-gray-800"><span class="font-medium">John Doe</span> registered as a new security guard</p>
+        <p class="text-sm text-gray-500">2 hours ago</p>
+      </div>
+    </div>
+
+    <div class="flex items-start mb-4">
+      <div class="bg-green-100 p-2 rounded-full">
+        <i class="fas fa-check-circle text-green-600"></i>
+      </div>
+      <div class="ml-4">
+        <p class="text-gray-800">Shift <span class="font-medium">#3245</span> was completed successfully</p>
+        <p class="text-sm text-gray-500">5 hours ago</p>
+      </div>
+    </div>
+
+    <div class="flex items-start">
+      <div class="bg-red-100 p-2 rounded-full">
+        <i class="fas fa-exclamation-triangle text-red-600"></i>
+      </div>
+      <div class="ml-4">
+        <p class="text-gray-800">New incident report submitted for Client #3829</p>
+        <p class="text-sm text-gray-500">Yesterday at 5:30 PM</p>
+      </div>
+    </div>
+  </div>
+</div>
             </div>
             
             <!-- Other Sections (initially hidden) -->
@@ -535,6 +581,27 @@
     <div class="flex justify-end p-6 border-t border-gray-200">
       <button id="close-popup" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
     </div>
+  </div>
+</div>
+
+<!-- Create Bulletin Modal -->
+<div id="createBulletinModal" class="fixed inset-0 hidden bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white w-full max-w-lg rounded-lg shadow-lg p-6">
+    <h3 class="text-lg font-semibold mb-4">Create Announcement</h3>
+    <form id="bulletinForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Title</label>
+        <input type="text" name="title" class="w-full border rounded px-3 py-2" required />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Body</label>
+        <textarea name="body" rows="4" class="w-full border rounded px-3 py-2" required></textarea>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" id="closeBulletinModal" class="px-4 py-2 rounded bg-gray-300">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">Save</button>
+      </div>
+    </form>
   </div>
 </div>
 <!-- Replace your existing <script>...</script> with this block -->
