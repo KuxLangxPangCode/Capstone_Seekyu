@@ -8,36 +8,49 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="bulletin-announce.js"></script>
     <style>
-        .sidebar {
-            transition: all 0.3s ease;
-        }
-        .sidebar-item.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-        .sidebar-item.active:hover {
-            background-color: #2563eb;
-        }
-        .content-section {
-            display: none;
-        }
-        .content-section.active {
-            display: block;
-        }
+        .sidebar { transition: all 0.3s ease; }
+        .sidebar-item.active { background-color: #3b82f6; color: white; }
+        .sidebar-item.active:hover { background-color: #2563eb; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .calendar-grid { grid-template-columns: repeat(7, 1fr); }
+        .day-cell { height: 2.25rem; display:flex; align-items:center; justify-content:center; }
+        /* Modal backdrop */
+        .modal-backdrop { background: rgba(15, 23, 42, 0.6); }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex">
     <!-- Sidebar -->
     <div class="sidebar bg-gray-800 text-white w-64 min-h-screen flex flex-col">
-        <!-- Logo -->
-        <div class="p-5 border-b border-gray-700 flex items-center justify-between">
-            <div class="flex items-center">
-                <i class="fas fa-shield-alt text-blue-400 text-2xl mr-3"></i>
-                <span class="text-xl font-semibold">SeekYu</span>
+        <!-- Logo & Profile -->
+        <div class="p-5 border-b border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <i class="fas fa-shield-alt text-blue-400 text-2xl mr-3"></i>
+                    <span class="text-xl font-semibold">SeekYu</span>
+                </div>
+                <button id="sidebar-toggle" class="text-gray-400 hover:text-white lg:hidden" title="Close sidebar menu">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <button id="sidebar-toggle" class="text-gray-400 hover:text-white lg:hidden" title="Close sidebar menu">
-                <i class="fas fa-times"></i>
-            </button>
+
+            <!-- Profile block -->
+            <div class="flex items-center space-x-3">
+                <div class="relative">
+                    <img id="profilePic" src="https://i.pravatar.cc/100?img=3" alt="Profile" class="w-14 h-14 rounded-full object-cover border-2 border-gray-700"/>
+                    <button id="editProfileBtn" title="Edit profile" class="absolute bottom-0 right-0 bg-gray-700 hover:bg-gray-600 p-1 rounded-full text-xs">
+                        <i class="fas fa-pen"></i>
+                    </button>
+                </div>
+                <div>
+                    <div id="profileName" class="text-sm font-semibold">Miles P. Pirater</div>
+                    <div id="profileRole" class="text-xs text-gray-300 mt-1">HR</div>
+                    <button id="editProfileSmall" class="text-xs text-gray-300 hover:text-white mt-1">Edit profile</button>
+                </div>
+            </div>
+
+            <!-- hidden file input for changing avatar (kept for quick avatar change in modal too) -->
+            <input id="profileFile" type="file" accept="image/*" class="hidden" />
         </div>
         
         <!-- Navigation -->
@@ -53,7 +66,13 @@
                 <button onclick="showSection('accounts')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
                     <i class="fas fa-user-cog mr-3 text-lg text-purple-400"></i>
                     <span>Account Management</span>
-                </button>    
+                </button>
+                
+                <!-- <button onclick="showSection('recruiting-mgmt')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-comment mr-3 text-lg text-indigo-400"></i>
+                    <span>Recruitment Management</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
+                </button> -->
                 
                 <button onclick="showSection('messaging-mgmt')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
                     <i class="fas fa-comment mr-3 text-lg text-indigo-400"></i>
@@ -65,11 +84,6 @@
 
             <div class="px-4 space-y-1 mt-8">
                 <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Reports & Analytics</div>
-
-                <button onclick="showSection('notification')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
-                    <i class="fas fa-exclamation-circle mr-3 text-lg text-yellow-400"></i>
-                    <span>Notifications</span>
-                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">1</span>
 
                     <button onclick="showSection('user-activity')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
                     <i class="fas fa-comment mr-3 text-lg text-indigo-400"></i>
@@ -114,70 +128,119 @@
                     <h1 class="text-2xl font-bold text-gray-800 mb-2">Super Admin Management Dashboard</h1>
                     <p class="text-gray-600 mb-6">Welcome to your security management portal. Monitor and manage all security operations from here.</p>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-lg bg-blue-100 text-blue-600">
-                                    <i class="fas fa-user-shield text-xl"></i>
+                    <!-- Use grid with main area + right side panel for notifications + calendar -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Main content (cards) spans two columns on large screens -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                    <div class="flex items-center">
+                                        <div class="p-3 rounded-lg bg-blue-100 text-blue-600">
+                                            <i class="fas fa-user-shield text-xl"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h2 class="text-lg font-semibold text-gray-800">245</h2>
+                                            <p class="text-sm text-gray-600">Active Guards</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="ml-4">
-                                    <h2 class="text-lg font-semibold text-gray-800">245</h2>
-                                    <p class="text-sm text-gray-600">Active Guards</p>
+                                
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                                    <div class="flex items-center">
+                                        <div class="p-3 rounded-lg bg-green-100 text-green-600">
+                                            <i class="fas fa-building text-xl"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h2 class="text-lg font-semibold text-gray-800">38</h2>
+                                            <p class="text-sm text-gray-600">Active Clients</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
+                                    <div class="flex items-center">
+                                        <div class="p-3 rounded-lg bg-purple-100 text-purple-600">
+                                            <i class="fas fa-clipboard-list text-xl"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <h2 class="text-lg font-semibold text-gray-800">12</h2>
+                                            <p class="text-sm text-gray-600">Pending Requests</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="bg-green-50 p-4 rounded-lg border border-green-100">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-lg bg-green-100 text-green-600">
-                                    <i class="fas fa-building text-xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <h2 class="text-lg font-semibold text-gray-800">38</h2>
-                                    <p class="text-sm text-gray-600">Active Clients</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-lg bg-purple-100 text-purple-600">
-                                    <i class="fas fa-clipboard-list text-xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <h2 class="text-lg font-semibold text-gray-800">12</h2>
-                                    <p class="text-sm text-gray-600">Pending Requests</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-6 bg-white rounded-lg shadow-sm p-6"> 
+
+                            <div class="mt-6 bg-white rounded-lg shadow-sm p-6"> 
   <!-- Bulletin Board -->
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-xl font-semibold text-gray-800">Bulletin Board</h2>
-    <!-- Create Announcement button -->
-    <button id="createBulletinBtn" class="px-3 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">
-      <i class="fa fa-plus mr-2"></i>Create Announcement
+<div class="flex items-center justify-between mb-4">
+  <h2 class="text-xl font-semibold text-gray-800">Bulletin Board</h2>
+  <!-- Create Announcement button -->
+  <button id="createBulletinBtn" class="px-3 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">
+    <i class="fa fa-plus mr-2"></i>Create Announcement
+  </button>
+</div>
+
+<div class="relative overflow-hidden">
+  <div id="bulletinTrack" class="flex gap-4 transition-transform duration-400">
+    <!-- JS injects bulletin cards here -->
+  </div>
+  <div class="absolute left-2 top-1/2 -translate-y-1/2">
+    <button id="bulletPrev" aria-label="Previous bulletin" class="p-2 rounded bg-white shadow">
+      <i class="fas fa-chevron-left"></i>
     </button>
   </div>
+  <div class="absolute right-2 top-1/2 -translate-y-1/2">
+    <button id="bulletNext" aria-label="Next bulletin" class="p-2 rounded bg-white shadow">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+</div>
 
-  <div class="relative overflow-hidden">
-    <div id="bulletinTrack" class="flex gap-4 transition-transform duration-400">
-      <!-- JS injects bulletin cards here -->
+<!-- Create/Edit Bulletin Modal (fixed + correctly centered + scrollable) -->
+<div id="createBulletinModal" class="fixed inset-0 hidden items-center justify-center z-50">
+  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="relative bg-white w-full max-w-xl mx-4 rounded-lg shadow-xl overflow-hidden z-10 max-h-[90vh]">
+    <div class="p-4 border-b flex items-center justify-between">
+      <h3 id="modalTitleText" class="text-lg font-semibold">Create Announcement</h3>
+      <button id="closeBulletinModal" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
     </div>
-    <div class="absolute left-2 top-1/2 -translate-y-1/2">
-      <button id="bulletPrev" aria-label="Previous bulletin" class="p-2 rounded bg-white shadow">
-        <i class="fas fa-chevron-left"></i>
-      </button>
-    </div>
-    <div class="absolute right-2 top-1/2 -translate-y-1/2">
-      <button id="bulletNext" aria-label="Next bulletin" class="p-2 rounded bg-white shadow">
-        <i class="fas fa-chevron-right"></i>
-      </button>
+    <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 4rem);">
+      <form id="bulletinForm" class="space-y-4">
+        <div>
+          <label class="text-xs font-medium text-gray-600">Title *</label>
+          <input name="title" required class="w-full mt-1 px-3 py-2 border rounded bg-gray-50" />
+        </div>
+
+        <div>
+          <label class="text-xs font-medium text-gray-600">Body *</label>
+          <textarea name="body" rows="4" required class="w-full mt-1 px-3 py-2 border rounded bg-gray-50"></textarea>
+        </div>
+
+        <div>
+          <label class="text-xs font-medium text-gray-600">Image (optional)</label>
+          <div class="mt-2 flex items-start gap-3">
+            <div>
+              <img id="modalImagePreview" src="" alt="preview" class="w-28 h-20 object-cover rounded border bg-gray-100 hidden" />
+            </div>
+            <div class="flex-1">
+              <input id="bulletinImageFile" type="file" accept="image/*" class="block mb-2" />
+              <div class="flex items-center gap-3">
+                <button type="button" id="removeImageBtn" class="text-xs px-3 py-1 rounded bg-red-100 text-red-700 hidden">Remove image</button>
+                <div class="text-xs text-gray-500">Allowed: jpg/png. Small images recommended.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-2 border-t">
+          <button type="button" id="cancelBulletin" class="px-4 py-2 rounded border">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Save</button>
+        </div>
+      </form>
     </div>
   </div>
+</div>
+
 
   <!-- Recent Activity -->
   <h2 class="text-xl font-semibold text-gray-800 mb-4 mt-6">Recent Activity</h2>
@@ -213,6 +276,67 @@
     </div>
   </div>
 </div>
+                        </div>
+
+                        <!-- Right side panel: Notifications + Calendar -->
+                        <aside class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">Notifications</h3>
+                            <ul id="notifList" class="space-y-2 max-h-40 overflow-y-auto mb-4">
+                                <!-- sample notifications -->
+                                <li class="p-3 rounded-lg bg-gray-50 border border-gray-100">
+                                    <div class="flex items-start justify-between">
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-800">Holiday Notice</div>
+                                            <div class="text-xs text-gray-500">Office closed on Sept 25 for local holiday.</div>
+                                        </div>
+                                        <div class="text-xs text-gray-400 ml-3">2d</div>
+                                    </div>
+                                </li>
+                                <li class="p-3 rounded-lg bg-gray-50 border border-gray-100">
+                                    <div class="flex items-start justify-between">
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-800">New Leave Request</div>
+                                            <div class="text-xs text-gray-500">John D. submitted a leave request.</div>
+                                        </div>
+                                        <div class="text-xs text-gray-400 ml-3">1d</div>
+                                    </div>
+                                </li>
+                                <li class="p-3 rounded-lg bg-gray-50 border border-gray-100">
+                                    <div class="flex items-start justify-between">
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-800">Incident Report</div>
+                                            <div class="text-xs text-gray-500">Incident #234 requires review.</div>
+                                        </div>
+                                        <div class="text-xs text-gray-400 ml-3">3h</div>
+                                    </div>
+                                </li>
+                            </ul>
+
+                            <!-- Calendar -->
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="text-sm font-semibold" id="calendarMonth">Month Year</div>
+                                    <div class="flex items-center space-x-2">
+                                        <button id="prevMonth" class="p-2 rounded hover:bg-gray-100"><i class="fas fa-chevron-left"></i></button>
+                                        <button id="nextMonth" class="p-2 rounded hover:bg-gray-100"><i class="fas fa-chevron-right"></i></button>
+                                    </div>
+                                </div>
+
+                                <div class="grid calendar-grid gap-1 text-xs text-gray-600 mb-2">
+                                    <div class="text-center font-medium">Sun</div>
+                                    <div class="text-center font-medium">Mon</div>
+                                    <div class="text-center font-medium">Tue</div>
+                                    <div class="text-center font-medium">Wed</div>
+                                    <div class="text-center font-medium">Thu</div>
+                                    <div class="text-center font-medium">Fri</div>
+                                    <div class="text-center font-medium">Sat</div>
+                                </div>
+
+                                <div id="calendarDays" class="grid calendar-grid gap-1 text-sm text-gray-700"></div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
             </div>
             
             <!-- Other Sections (initially hidden) -->
@@ -458,6 +582,14 @@
   </div>
 </div>
 
+            <!-- Recruitment management Section -->  
+            <div id="recruiting-mgmt" class="content-section">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h1 class="text-2xl font-bold text-gray-800 mb-6">Recruitment Management</h1>
+                    <p class="text-gray-600">Manage system notifications and alerts.</p>
+                </div>
+            </div>
+
             <!-- Messaging Section -->
 <div id="messaging-mgmt" class="content-section">
   <div class="bg-white rounded-lg shadow-sm p-6">
@@ -534,7 +666,51 @@
     </div>
   </div>
 </div>
+            <!-- Edit Profile Modal (simplified: full name, email, phone, avatar) -->
+    <div id="editProfileModal" class="fixed inset-0 hidden items-center justify-center z-50">
+        <div class="modal-backdrop absolute inset-0"></div>
+        <div class="relative bg-white w-full max-w-2xl mx-4 rounded-lg shadow-xl overflow-hidden">
+            <div class="p-4 border-b flex items-center justify-between">
+                <h3 class="text-lg font-semibold">Edit Profile (HR)</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <form id="profileForm" class="space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <img id="modalAvatar" src="https://i.pravatar.cc/100?img=3" class="w-20 h-20 rounded-full object-cover border" alt="avatar"/>
+                            <div class="mt-2">
+                                <input id="modalFile" type="file" accept="image/*" class="hidden" />
+                                <button type="button" id="changeAvatarBtn" class="text-xs px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 mt-2"><i class="fas fa-image mr-1"></i> Change</button>
+                            </div>
+                        </div>
 
+                        <div class="flex-1 grid grid-cols-2 gap-3">
+                            <div class="col-span-2">
+                                <label class="text-xs font-medium text-gray-600">Full name *</label>
+                                <input id="inputFullName" required class="w-full mt-1 px-3 py-2 border rounded bg-gray-50" />
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-medium text-gray-600">Email *</label>
+                                <input id="inputEmail" type="email" required class="w-full mt-1 px-3 py-2 border rounded bg-gray-50" />
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-medium text-gray-600">Phone</label>
+                                <input id="inputPhone" class="w-full mt-1 px-3 py-2 border rounded bg-gray-50" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-3 pt-2 border-t">
+                        <button type="button" id="cancelProfile" class="px-4 py-2 rounded border">Cancel</button>
+                        <button type="submit" id="saveProfile" class="px-4 py-2 rounded bg-blue-600 text-white">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 <!-- Popup for Viewing Message -->
 <div id="message-popup" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
   <div class="bg-white rounded-lg max-w-lg w-full p-5">
@@ -584,26 +760,6 @@
   </div>
 </div>
 
-<!-- Create Bulletin Modal -->
-<div id="createBulletinModal" class="fixed inset-0 hidden bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-white w-full max-w-lg rounded-lg shadow-lg p-6">
-    <h3 class="text-lg font-semibold mb-4">Create Announcement</h3>
-    <form id="bulletinForm" class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Title</label>
-        <input type="text" name="title" class="w-full border rounded px-3 py-2" required />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Body</label>
-        <textarea name="body" rows="4" class="w-full border rounded px-3 py-2" required></textarea>
-      </div>
-      <div class="flex justify-end gap-2">
-        <button type="button" id="closeBulletinModal" class="px-4 py-2 rounded bg-gray-300">Cancel</button>
-        <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700">Save</button>
-      </div>
-    </form>
-  </div>
-</div>
 <!-- Replace your existing <script>...</script> with this block -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
