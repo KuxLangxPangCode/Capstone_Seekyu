@@ -1,190 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SeekYu</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="Guard-Exam.js"></script>
-    <style>
-        .sidebar {
-            transition: all 0.3s ease;
-        }
-        .sidebar-item.active {
-            background-color: #3b82f6;
-            color: white;
-        }
-        .sidebar-item.active:hover {
-            background-color: #2563eb;
-        }
-        .content-section {
-            display: none;
-        }
-        .content-section.active {
-            display: block;
-        }
-        /* carousel */
-.bulletin-card { min-width: 320px; max-width: 100%; }
-.kpi-progress { height: 10px; border-radius: 999px; }
-.kpi-desc { opacity: 0; transition: opacity .15s ease-in-out; }
-.group:hover .kpi-desc { opacity: 1; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeekYu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- optional: keep your exam script -->
+  <script src="Guard-Exam.js"></script>
+  <style>
+    .sidebar { transition: all 0.3s ease; }
+    .sidebar-item.active { background-color: #3b82f6; color: white; }
+    .sidebar-item.active:hover { background-color: #2563eb; }
+    .content-section { display: none; }
+    .content-section.active { display: block; }
+    .calendar-grid { grid-template-columns: repeat(7, 1fr); }
+    .day-cell { height: 2.25rem; display:flex; align-items:center; justify-content:center; }
+    .modal-backdrop { background: rgba(15, 23, 42, 0.6); }
 
-.exam-card { max-width: 900px; margin: 0 auto; }
-.choice-btn { transition: transform .08s ease; }
-.choice-btn:active { transform: scale(.99); }
-.confetti { position: fixed; pointer-events: none; inset: 0; overflow: hidden; z-index: 9999; }
-.confetti-piece { position: absolute; width: 10px; height: 16px; opacity: .95; transform-origin: center; }
-.pulse { animation: pulse 1s infinite; }
-@keyframes pulse { 0%{ transform:scale(1) }50%{ transform:scale(1.03) }100%{ transform:scale(1) } }
-        
-    </style>
+    /* carousel */
+    .bulletin-card { min-width: 320px; max-width: 100%; }
+    .kpi-progress { height: 10px; border-radius: 999px; }
+    .kpi-desc { opacity: 0; transition: opacity .15s ease-in-out; }
+    .group:hover .kpi-desc { opacity: 1; }
+
+    .exam-card { max-width: 900px; margin: 0 auto; }
+    .choice-btn { transition: transform .08s ease; }
+    .choice-btn:active { transform: scale(.99); }
+    .confetti { position: fixed; pointer-events: none; inset: 0; overflow: hidden; z-index: 9999; }
+    .confetti-piece { position: absolute; width: 10px; height: 16px; opacity: .95; transform-origin: center; }
+    .pulse { animation: pulse 1s infinite; }
+    @keyframes pulse { 0%{ transform:scale(1) }50%{ transform:scale(1.03) }100%{ transform:scale(1) } }
+
+    /* small helpful rules */
+    #bulletinWrap { min-height: 16rem; }
+    #bulletinTrack { will-change: transform; }
+  </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex">
-    <!-- Sidebar -->
-    <div class="sidebar bg-gray-800 text-white w-64 min-h-screen flex flex-col">
-        <!-- Logo -->
-        <div class="p-5 border-b border-gray-700 flex items-center justify-between">
-            <div class="flex items-center">
-                <i class="fas fa-shield-alt text-blue-400 text-2xl mr-3"></i>
-                <span class="text-xl font-semibold">SeekYu</span>
-            </div>
-            <button id="sidebar-toggle" class="text-gray-400 hover:text-white lg:hidden" title="Close sidebar menu">
-                <i class="fas fa-times"></i>
-            </button>
+  <!-- Sidebar -->
+  <div id="sidebar" class="sidebar bg-gray-800 text-white w-64 min-h-screen flex flex-col">
+    <!-- Logo & Profile -->
+    <div class="p-5 border-b border-gray-700">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center">
+          <i class="fas fa-shield-alt text-blue-400 text-2xl mr-3"></i>
+          <span class="text-xl font-semibold">SeekYu</span>
         </div>
-        
-        <!-- Navigation -->
-        <nav class="flex-1 overflow-y-auto py-4">
-            <div class="px-4 space-y-1">
-                <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Main Menu</div>
-                
-                <button onclick="showSection('dashboard')" class="sidebar-item active w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
-                    <i class="fas fa-home mr-3 text-lg text-blue-400"></i>
-                    <span>Dashboard</span>
-                </button> 
-                <button onclick="showSection('messaging-mgmt')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
-                    <i class="fas fa-comment mr-3 text-lg text-indigo-400"></i>
-                    <span>Send Message</span>
-                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
-                </button>
+        <button id="sidebar-toggle" class="text-gray-400 hover:text-white lg:hidden" title="Close sidebar menu">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
 
-                <button onclick="showSection('request-leave')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
-                    <i class="fas fa-calendar-alt mr-3 text-lg text-pink-400"></i>
-                    <span>Request Leave</span>
-                    <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">2</span>
-                </button>
-
-                <button onclick="showSection('Take Exam')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
-                    <i class="fas fa-clipboard-list mr-3 text-lg text-pink-400"></i>
-                    <span>Take Exam</span>
-                    </button>
-
-                <button onclick="showSection('profile')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
-                    <i class="fas fa-user mr-3 text-lg text-green-400"></i>
-                    <span>My Profile</span>                                       
-                </button>
-            </div>
-            
-
-            <div class="px-4 space-y-1 mt-8">
-                <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Reports & Analytics</div>
-
-                <button onclick="showSection('notification')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
-                    <i class="fas fa-exclamation-circle mr-3 text-lg text-yellow-400"></i>
-                    <span>Notifications</span>
-                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">1</span>
-
-                    <button onclick="showSection('incident-reports')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
-                    <i class="fas fa-exclamation-circle mr-3 text-lg text-orange-400"></i>
-                    <span>Incident Reports</span>
-                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">1</span>
-                </button>
-            </div>
-        </nav>
-        
-        <!-- Logout Button -->
-        <div class="p-4 border-t border-gray-700">
-            <button onclick="location.href='Index.html'" class="w-full flex items-center justify-center px-4 py-3 text-gray-200 hover:bg-red-700 hover:text-white rounded-lg bg-red-600">
-                <i class="fas fa-sign-out-alt mr-3"></i>
-                <span>Logout</span>
-            </button>
+      <!-- Profile block -->
+      <div class="flex items-center space-x-3">
+        <div class="relative">
+          <img id="profilePic" src="https://i.pravatar.cc/100?img=3" alt="Profile" class="w-14 h-14 rounded-full object-cover border-2 border-gray-700"/>
+          <button id="editProfileBtn" title="Edit profile" class="absolute bottom-0 right-0 bg-gray-700 hover:bg-gray-600 p-1 rounded-full text-xs">
+            <i class="fas fa-pen"></i>
+          </button>
         </div>
+        <div>
+          <div id="profileName" class="text-sm font-semibold">Miles P. Pirater</div>
+          <div id="profileRole" class="text-xs text-gray-300 mt-1">HR</div>
+          <button id="editProfileSmall" class="text-xs text-gray-300 hover:text-white mt-1">Edit profile</button>
+        </div>
+      </div>
     </div>
-    
 
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto py-4">
+      <div class="px-4 space-y-1">
+        <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Main Menu</div>
 
+        <button onclick="showSection('dashboard')" class="sidebar-item active w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+          <i class="fas fa-home mr-3 text-lg text-blue-400"></i>
+          <span>Dashboard</span>
+        </button>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
-        <!-- Mobile Header -->
-        <div class="bg-white shadow-sm p-4 flex items-center justify-between lg:hidden">
-            <button id="mobile-sidebar-toggle" class="text-gray-600 hover:text-gray-900" title="Open sidebar menu">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            <h1 class="text-xl font-semibold">Dashboard</h1>
-            <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2">
-                    <i class="fas fa-user text-gray-600"></i>
-                </div>
-            </div>
+        <button onclick="showSection('messaging-mgmt')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+          <i class="fas fa-comment mr-3 text-lg text-indigo-400"></i>
+          <span>Send Message</span>
+          <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
+        </button>
+
+        <button onclick="showSection('request-leave')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+          <i class="fas fa-calendar-alt mr-3 text-lg text-pink-400"></i>
+          <span>Request Leave</span>
+          <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">2</span>
+        </button>
+
+        <button onclick="showSection('take-exam')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+          <i class="fas fa-clipboard-list mr-3 text-lg text-pink-400"></i>
+          <span>Take Exam</span>
+        </button>
+      </div>
+
+      <div class="px-4 space-y-1 mt-8">
+        <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Reports & Analytics</div>
+
+        <button onclick="showSection('incident-reports')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+          <i class="fas fa-exclamation-circle mr-3 text-lg text-orange-400"></i>
+          <span>Incident Reports</span>
+          <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">1</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Logout -->
+    <div class="p-4 border-t border-gray-700">
+      <button onclick="location.href='Index.html'" class="w-full flex items-center justify-center px-4 py-3 text-gray-200 hover:bg-red-700 hover:text-white rounded-lg bg-red-600">
+        <i class="fas fa-sign-out-alt mr-3"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col">
+    <!-- Mobile Header -->
+    <div class="bg-white shadow-sm p-4 flex items-center justify-between lg:hidden">
+      <button id="mobile-sidebar-toggle" class="text-gray-600 hover:text-gray-900" title="Open sidebar menu">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      <h1 class="text-xl font-semibold">Dashboard</h1>
+      <div class="flex items-center">
+        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+          <i class="fas fa-user text-gray-600"></i>
         </div>
-        
-        <!-- Content Sections -->
-        <div class="p-6 flex-1">
-            <!-- Dashboard Section -->
-            <div id="dashboard" class="content-section active">
+      </div>
+    </div>
 
-<h1 class="text-2xl font-bold text-gray-800 mt-3">Welcome, Security Guard!</h1>
-<p class="text-gray-600">Here's a quick overview of your dashboard.</p>
+    <!-- Content Sections (all inside same container) -->
+    <div class="p-6 flex-1">
+      <!-- Dashboard -->
+      <div id="dashboard" class="content-section active">
+        <h1 class="text-2xl font-bold text-gray-800 mt-3">Welcome, Security Guard!</h1>
+        <p class="text-gray-600">Here's a quick overview of your dashboard.</p>
 
-<div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-<!-- Recent Activity & Bulletin (left) -->
-<div class="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
-<h2 class="text-xl font-semibold text-gray-800 mb-4">Bulletin Board</h2>
-<div class="relative overflow-hidden">
-<div id="bulletinTrack" class="flex gap-4 transition-transform duration-400">
-<!-- JS injects bulletin cards here -->
-</div>
-<div class="absolute left-2 top-1/2 -translate-y-1/2">
-<button id="bulletPrev" class="p-2 rounded bg-white shadow"><i class="fas fa-chevron-left"></i></button>
-</div>
-<div class="absolute right-2 top-1/2 -translate-y-1/2">
-<button id="bulletNext" class="p-2 rounded bg-white shadow"><i class="fas fa-chevron-right"></i></button>
-</div>
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Left: Bulletin & Activity -->
+          <div class="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Bulletin Board</h2>
+
+            <div id="bulletinWrap" class="relative">
+              <div class="overflow-hidden rounded-lg">
+                <div id="bulletinTrack" class="flex gap-4 transition-transform duration-500">
+                  <!-- injected by JS -->
+                </div>
+              </div>
+
+              <div class="absolute left-2 top-1/2 -translate-y-1/2">
+                <button id="bulletPrev" class="p-2 rounded bg-white shadow" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+              </div>
+              <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                <button id="bulletNext" class="p-2 rounded bg-white shadow" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+              </div>
+
+              <div id="bulletIndicators" class="absolute left-1/2 -translate-x-1/2 bottom-3 flex gap-2"></div>
+            </div>
+<!-- Shift Schedule (Today) -->
+<div class="mt-6 bg-white rounded-lg shadow-sm p-6">
+  <h3 class="text-lg font-semibold text-gray-800 mb-4">Shift Schedule (Today)</h3>
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Guard</th>
+          <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Area</th>
+          <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Start</th>
+          <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">End</th>
+          <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2 border-b">Miguel Santos</td>
+          <td class="px-4 py-2 border-b">Warehouse A</td>
+          <td class="px-4 py-2 border-b">07:00</td>
+          <td class="px-4 py-2 border-b">15:00</td>
+          <td class="px-4 py-2 border-b text-green-600 font-medium">On Duty</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
+<!-- Attendance Records -->
+<div class="mt-6 bg-white rounded-lg shadow-sm p-6">
+  <h3 class="text-lg font-semibold text-gray-800 mb-4">Your Attendance Records</h3>
 
-<hr class="my-4" />
-<h3 class="text-lg font-semibold text-gray-800 mb-2">Recent Activity</h3>
-<div id="recentActivity" class="border-t border-gray-100 pt-4">
-<div class="flex items-start mb-4">
-<div class="bg-blue-100 p-2 rounded-full">
-<i class="fas fa-user-plus text-blue-600"></i>
-</div>
-<div class="ml-4">
-<p class="text-gray-800"><span class="font-medium">John Doe</span> registered as a new security guard</p>
-<p class="text-sm text-gray-500">2 hours ago</p>
-</div>
-</div>
-</div>
-</div>
+  <!-- Logs will appear here -->
+  <div id="attendanceList" class="space-y-3 mb-4">
+    <p class="text-xs text-gray-500">No attendance yet.</p>
+  </div>
 
+  <!-- Buttons -->
+  <div class="flex space-x-3">
+    <button id="btnCheckIn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg">
+      Check In
+    </button>
+    <button id="btnCheckOut" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg">
+      Check Out
+    </button>
+  </div>
+</div>
+            <hr class="my-4" />
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Recent Activity</h3>
+            <div id="recentActivity" class="border-t border-gray-100 pt-4">
+              <div class="flex items-start mb-4">
+                <div class="bg-blue-100 p-2 rounded-full"><i class="fas fa-user-plus text-blue-600"></i></div>
+                <div class="ml-4">
+                  <p class="text-gray-800"><span class="font-medium">John Doe</span> registered as a new security guard</p>
+                  <p class="text-sm text-gray-500">2 hours ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-<!-- Right Column: KPI + Profile quick -->
-<div class="bg-white rounded-lg shadow-sm p-6">
-<h3 class="text-lg font-semibold text-gray-800 mb-3">Your KPI Scores</h3>
-<div id="kpiList" class="space-y-4">
-<!-- KPIs injected by JS -->
-</div>
-<hr class="my-4" />
-<div class="flex gap-2 justify-center">
-<button onclick="showSection('profile')" class="px-3 py-2 rounded bg-slate-200 hover:bg-slate-300">View Profile</button>
-<button onclick="showSection('notifications')" class="px-3 py-2 rounded bg-slate-200 hover:bg-slate-300">View Notifications</button>
-</div>
-</div>
-</div>
-</div>
+          <!-- Right: Notifications, Calendar, KPI -->
+          <div class="bg-white rounded-lg shadow-sm p-6">
+            <aside class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-4">
+              <h3 class="text-lg font-semibold text-gray-800 mb-3">Notifications</h3>
+              <ul id="notifList" class="space-y-2 max-h-40 overflow-y-auto mb-4">
+                <li class="p-3 rounded-lg bg-gray-50 border border-gray-100">
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <div class="text-sm font-medium text-gray-800">Holiday Notice</div>
+                      <div class="text-xs text-gray-500">Office closed on Sept 25 for local holiday.</div>
+                    </div>
+                    <div class="text-xs text-gray-400 ml-3">2d</div>
+                  </div>
+                </li>
+              </ul>
+
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-sm font-semibold" id="calendarMonth">Month Year</div>
+                  <div class="flex items-center space-x-2">
+                    <button id="prevMonth" class="p-2 rounded hover:bg-gray-100" title="Previous month"><i class="fas fa-chevron-left"></i></button>
+                    <button id="nextMonth" class="p-2 rounded hover:bg-gray-100" title="Next month"><i class="fas fa-chevron-right"></i></button>
+                  </div>
+                </div>
+
+                <div class="grid calendar-grid gap-1 text-xs text-gray-600 mb-2">
+                  <div class="text-center font-medium">Sun</div><div class="text-center font-medium">Mon</div>
+                  <div class="text-center font-medium">Tue</div><div class="text-center font-medium">Wed</div>
+                  <div class="text-center font-medium">Thu</div><div class="text-center font-medium">Fri</div>
+                  <div class="text-center font-medium">Sat</div>
+                </div>
+
+                <div id="calendarDays" class="grid calendar-grid gap-1 text-sm text-gray-700"></div>
+              </div>
+            </aside>
+
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">Your KPI Scores</h3>
+            <div id="kpiList" class="space-y-4">
+              <div class="p-3 rounded-lg bg-gray-50 border border-gray-100">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <div class="text-sm font-medium text-gray-800">Attendance</div>
+                    <div class="text-xs text-gray-500">On-time rate</div>
+                  </div>
+                  <div class="text-indigo-600 font-semibold">92%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
             
             <!-- Other Sections (initially hidden) -->
 
@@ -655,17 +739,8 @@
     </div>
   </div>
 </div>
-
-            <!-- Notification Section -->  
-            <div id="notification" class="content-section">
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h1 class="text-2xl font-bold text-gray-800 mb-6">Notifications</h1>
-                    <p class="text-gray-600">Manage system notifications and alerts.</p>
-                </div>
-            </div>
-
             <!--Take Exam-->
-            <div id="Take Exam" class="content-section">
+            <div id="take-exam" class="content-section">
   <div class="bg-white rounded-lg shadow-sm p-6">
     <h1 class="text-2xl font-bold text-gray-800 mb-6">Take Exam</h1>
 
@@ -778,21 +853,10 @@
         </div>
       </div>
     </div>
-
     <!-- confetti container -->
     <div id="gx-confetti" class="confetti hidden" style="position:relative; height:0;"></div>
+</div>    
 
-            <!-- Profile Section -->
-            <div id="profile" class="content-section">
-                <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h1 class="text-2xl font-bold text-gray-800 mb-6">Profile</h1>
-                    <p class="text-gray-600">View and edit your profile information.</p>
-                </div>
-            </div>    
-            <!-- Add other sections similarly -->
-            
-        </div>
-    </div>
 <!-- Popup Modal -->
 <div id="popup-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50">
   <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
@@ -805,6 +869,52 @@
     </div>
   </div>
 </div>
+
+<!-- Edit Profile Modal (simplified: full name, email, phone, avatar) -->
+    <div id="editProfileModal" class="fixed inset-0 hidden items-center justify-center z-50">
+        <div class="modal-backdrop absolute inset-0"></div>
+        <div class="relative bg-white w-full max-w-2xl mx-4 rounded-lg shadow-xl overflow-hidden">
+            <div class="p-4 border-b flex items-center justify-between">
+                <h3 class="text-lg font-semibold">Edit Profile</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <form id="profileForm" class="space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <img id="modalAvatar" src="https://i.pravatar.cc/100?img=3" class="w-20 h-20 rounded-full object-cover border" alt="avatar"/>
+                            <div class="mt-2">
+                                <input id="modalFile" type="file" accept="image/*" class="hidden" />
+                                <button type="button" id="changeAvatarBtn" class="text-xs px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 mt-2"><i class="fas fa-image mr-1"></i> Change</button>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 grid grid-cols-2 gap-3">
+                            <div class="col-span-2">
+                                <label class="text-xs font-medium text-gray-600">Full name *</label>
+                                <input id="inputFullName" required class="w-full mt-1 px-3 py-2 border rounded bg-gray-50" />
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-medium text-gray-600">Email *</label>
+                                <input id="inputEmail" type="email" required class="w-full mt-1 px-3 py-2 border rounded bg-gray-50" />
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-medium text-gray-600">Phone</label>
+                                <input id="inputPhone" class="w-full mt-1 px-3 py-2 border rounded bg-gray-50" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-3 pt-2 border-t">
+                        <button type="button" id="cancelProfile" class="px-4 py-2 rounded border">Cancel</button>
+                        <button type="submit" id="saveProfile" class="px-4 py-2 rounded bg-blue-600 text-white">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 <!-- Replace your existing <script>...</script> with this block -->
 <script>
   // For Exam
@@ -1829,69 +1939,370 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 
 // --- Dashboard Widgets ---
-// ------- Bulletin board demo data & logic -------
-const bulletins = [
-{id:1,title:'Holiday Notice',body:'Office closed on Sept 25 for local holiday.'},
-{id:2,title:'New SOP',body:'Updated patrol SOP v2.1 uploaded. Read and acknowledge.'},
-{id:3,title:'Safety Tip',body:'Always wear non-slip shoes during rainy season.'}
-];
-const track = document.getElementById('bulletinTrack');
-function renderBulletins(){
-track.innerHTML='';
-for(const b of bulletins){
-const card = document.createElement('div');
-card.className = 'bulletin-card bg-white p-4 rounded-lg border shadow-sm';
-card.style.minWidth = '300px';
-card.innerHTML = `<h4 class="font-semibold">${escapeHtml(b.title)}</h4><p class="text-sm text-slate-600 mt-2">${escapeHtml(b.body)}</p>`;
-track.appendChild(card);
+
+// ---------- Profile modal logic (fixed & working) ----------
+const profilePicEl = document.getElementById('profilePic');
+const profileFile = document.createElement('input');
+profileFile.type = 'file';
+profileFile.accept = 'image/*';
+profileFile.className = 'hidden';
+document.body.appendChild(profileFile); // quick avatar change (sidebar)
+
+const editProfileBtn = document.getElementById('editProfileBtn');
+const editProfileSmall = document.getElementById('editProfileSmall');
+const profileModal = document.getElementById('editProfileModal');
+const closeProfileModal = document.getElementById('closeModal');
+const cancelProfile = document.getElementById('cancelProfile');
+const profileForm = document.getElementById('profileForm');
+const modalAvatar = document.getElementById('modalAvatar');
+const modalFile = document.getElementById('modalFile');
+const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+const inputFullName = document.getElementById('inputFullName');
+const inputEmail = document.getElementById('inputEmail');
+const inputPhone = document.getElementById('inputPhone');
+const profileNameEl = document.getElementById('profileName');
+const profileRoleEl = document.getElementById('profileRole');
+
+// Load profile from localStorage or defaults
+function loadProfile() {
+  const raw = localStorage.getItem('seekyu-profile');
+  const defaultProfile = {
+    fullName: 'Miles P. Pirater',
+    email: 'miles@example.com',
+    phone: '',
+    role: 'Security Guard',
+    avatar: 'https://i.pravatar.cc/100?img=3'
+  };
+  let profile;
+  try { profile = raw ? JSON.parse(raw) : defaultProfile; } catch (e) { profile = defaultProfile; }
+
+  profileNameEl.textContent = profile.fullName || defaultProfile.fullName;
+  profileRoleEl.textContent = profile.role || defaultProfile.role;
+  profilePicEl.src = profile.avatar || defaultProfile.avatar;
+  modalAvatar.src = profile.avatar || defaultProfile.avatar;
+  inputFullName.value = profile.fullName || '';
+  inputEmail.value = profile.email || '';
+  inputPhone.value = profile.phone || '';
 }
+loadProfile();
+
+// Modal open/close
+function openProfileModal() {
+  profileModal.classList.remove('hidden');
+  profileModal.classList.add('flex');
+  loadProfile();
 }
-renderBulletins();
+function closeProfileModalFn() {
+  profileModal.classList.remove('flex');
+  profileModal.classList.add('hidden');
+}
+
+editProfileBtn?.addEventListener('click', openProfileModal);
+editProfileSmall?.addEventListener('click', openProfileModal);
+closeProfileModal?.addEventListener('click', closeProfileModalFn);
+cancelProfile?.addEventListener('click', (e) => { e.preventDefault(); closeProfileModalFn(); });
+profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeProfileModalFn(); });
+
+// Avatar change inside modal
+changeAvatarBtn?.addEventListener('click', () => modalFile.click());
+modalFile?.addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (ev) {
+    modalAvatar.src = ev.target.result;
+    profilePicEl.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// Quick sidebar avatar change
+profilePicEl.addEventListener('click', () => profileFile.click());
+profileFile.addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (ev) {
+    profilePicEl.src = ev.target.result;
+    modalAvatar.src = ev.target.result;
+    // persist avatar only
+    let raw = localStorage.getItem('seekyu-profile');
+    let profile = raw ? JSON.parse(raw) : {};
+    profile.avatar = ev.target.result;
+    try { localStorage.setItem('seekyu-profile', JSON.stringify(profile)); } catch (err) { console.warn(err); }
+  };
+  reader.readAsDataURL(file);
+});
+
+// Save profile form
+profileForm?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!inputFullName.value.trim() || !inputEmail.value.trim()) {
+    alert('Please provide at least a name and email.');
+    return;
+  }
+
+  const raw = localStorage.getItem('seekyu-profile');
+  let existing = {};
+  try { existing = raw ? JSON.parse(raw) : {}; } catch (err) { existing = {}; }
+
+  const updatedProfile = {
+    ...existing,
+    fullName: inputFullName.value.trim(),
+    email: inputEmail.value.trim(),
+    phone: inputPhone.value.trim(),
+    avatar: modalAvatar.src || profilePicEl.src
+  };
+
+  try { localStorage.setItem('seekyu-profile', JSON.stringify(updatedProfile)); } catch (err) { console.warn(err); }
+  loadProfile();
+  closeProfileModalFn();
+});
 
 
-let bulletIndex = 0;
-const prevBtn = document.getElementById('bulletPrev');
-const nextBtn = document.getElementById('bulletNext');
-function updateBulletTransform(){
-const width = track.children[0] ? track.children[0].getBoundingClientRect().width + 16 : 320;
-track.style.transform = `translateX(${-bulletIndex * width}px)`;
-}
-window.addEventListener('resize', updateBulletTransform);
-prevBtn.addEventListener('click', ()=>{ bulletIndex = Math.max(0, bulletIndex-1); updateBulletTransform(); });
-nextBtn.addEventListener('click', ()=>{ bulletIndex = Math.min(bulletins.length-1, bulletIndex+1); updateBulletTransform(); });
-// auto advance
-setInterval(()=>{ bulletIndex = (bulletIndex+1) % bulletins.length; updateBulletTransform(); }, 5000);
+// ---------- Attendance Check-In/Out ----------
+document.addEventListener("DOMContentLoaded", () => {
+  const attendanceList = document.getElementById("attendanceList");
+  const btnCheckIn = document.getElementById("btnCheckIn");
+  const btnCheckOut = document.getElementById("btnCheckOut");
+
+  function clearPlaceholder() {
+    const firstChild = attendanceList.firstElementChild;
+    if (firstChild && firstChild.classList.contains('text-xs')) {
+      attendanceList.removeChild(firstChild);
+    }
+  }
+  function formatTime(date) {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
+  let currentRecord = null;
+
+  // initial button states
+  btnCheckIn.disabled = false;
+  btnCheckOut.disabled = true;
+
+  btnCheckIn.addEventListener("click", () => {
+    clearPlaceholder();
+    const now = new Date();
+    const dateStr = now.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+    const timeIn = formatTime(now);
+
+    // new record card
+    const recordDiv = document.createElement("div");
+    recordDiv.className = "p-3 rounded-lg bg-white border border-gray-200 shadow-sm";
+    recordDiv.innerHTML = `
+      <div class="flex justify-between">
+        <div>
+          <div class="text-sm font-medium text-gray-800">${dateStr}</div>
+          <div class="text-xs text-gray-500">Time In: <span class="text-green-600 timeIn">${timeIn}</span></div>
+          <div class="text-xs text-gray-500">Time Out: <span class="timeOut text-gray-400">-</span></div>
+        </div>
+        <div class="text-xs text-gray-500 self-start">Now</div>
+      </div>
+    `;
+
+    attendanceList.prepend(recordDiv);
+    currentRecord = recordDiv.querySelector(".timeOut");
+
+    btnCheckIn.disabled = true;
+    btnCheckOut.disabled = false;
+  });
+
+  btnCheckOut.addEventListener("click", () => {
+    if (!currentRecord) {
+      alert("No active check-in record found.");
+      return;
+    }
+    const now = new Date();
+    const timeOut = formatTime(now);
+    currentRecord.textContent = timeOut;
+    currentRecord.classList.remove("text-gray-400");
+    currentRecord.classList.add("text-red-600");
+
+    currentRecord = null;
+    btnCheckIn.disabled = false;
+    btnCheckOut.disabled = true;
+  });
+});
 
 
-// ------- KPI Demo -------
-const kpis = [
-{id:'k1',name:'Professional conduct',score:92,description:'Adherence to company code of conduct, courtesy and professionalism during duty.'},
-{id:'k2',name:'Operational effectiveness',score:78,description:'Efficiency in performing assigned tasks, patrol completion, and procedural compliance.'},
-{id:'k3',name:'Situational awareness and response',score:85,description:'Ability to detect, assess and respond quickly to incidents and changes in environment.'}
-];
-const kpiList = document.getElementById('kpiList');
-function renderKpis(){
-kpiList.innerHTML='';
-for(const k of kpis){
-const wrap = document.createElement('div');
-wrap.className = 'group p-2 border rounded bg-slate-50';
-wrap.innerHTML = `
-<div class="flex items-center justify-between">
-<div>
-<div class="text-sm font-medium">${escapeHtml(k.name)}</div>
-<div class="text-xs text-slate-500">${k.score}%</div>
-</div>
-<div class="text-sm font-semibold">${k.score}%</div>
-</div>
-<div class="mt-2 text-xs text-slate-500 kpi-desc">${escapeHtml(k.description)}</div>
-<div class="mt-2 bg-slate-200 rounded-full kpi-progress overflow-hidden">
-<div style="width:${Math.max(0,Math.min(100,k.score))}%" class="h-full"></div>
-</div>
-`;
-kpiList.appendChild(wrap);
-}
-}
-renderKpis();
+// ---------- Dashboard widgets: bulletin carousel, profile modal, calendar, KPI ----------
+document.addEventListener('DOMContentLoaded', () => {
+
+  // small helper
+  function escapeHtml(str = '') {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  /* ---------------- Bulletin carousel ---------------- */
+  const bulletins = [
+    { id: 1, title: 'Holiday Notice', body: 'Office closed on Sept 25 for local holiday.', image: 'bulletin1.jpg' },
+    { id: 2, title: 'New SOP', body: 'Updated patrol SOP v2.1 uploaded. Read and acknowledge.', image: 'bulletin2.jpg' },
+    { id: 3, title: 'Safety Tip', body: 'Always wear non-slip shoes during rainy season.', image: 'bulletin3.jpg' }
+  ];
+
+  const track = document.getElementById('bulletinTrack');
+  const prevBtn = document.getElementById('bulletPrev');
+  const nextBtn = document.getElementById('bulletNext');
+  const indicatorsWrap = document.getElementById('bulletIndicators');
+  let bulletIndex = 0;
+  let bulletAutoPlay = null;
+
+  function renderBulletins() {
+    if (!track) return;
+    track.innerHTML = '';
+    const viewport = track.parentElement || track;
+
+    for (const b of bulletins) {
+      const slide = document.createElement('div');
+      slide.className = 'flex-none w-full';
+      slide.innerHTML = `
+        <div class="relative">
+          <img src="${escapeHtml(b.image || '')}" alt="${escapeHtml(b.title)}"
+               class="w-full h-64 sm:h-72 md:h-80 object-cover rounded-lg"/>
+          <div class="absolute left-4 bottom-4 bg-black bg-opacity-50 text-white p-3 rounded-md max-w-[80%]">
+            <h3 class="font-semibold text-lg">${escapeHtml(b.title)}</h3>
+            <p class="text-xs text-gray-200 mt-1">${escapeHtml(b.body)}</p>
+          </div>
+        </div>
+      `;
+      track.appendChild(slide);
+    }
+
+    if (indicatorsWrap) {
+      indicatorsWrap.innerHTML = '';
+      for (let i = 0; i < bulletins.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'w-2 h-2 rounded-full bg-gray-300';
+        dot.style.cursor = 'pointer';
+        dot.setAttribute('data-index', i);
+        dot.addEventListener('click', () => {
+          bulletIndex = i;
+          updateBulletTransform();
+        });
+        indicatorsWrap.appendChild(dot);
+      }
+    }
+    updateBulletTransform();
+  }
+
+  function updateBulletTransform() {
+    if (!track) return;
+    const viewport = track.parentElement || track;
+    const width = Math.round(viewport.clientWidth || 0);
+    track.style.transform = `translateX(-${bulletIndex * width}px)`;
+    if (indicatorsWrap) {
+      Array.from(indicatorsWrap.children).forEach((dot, i) => {
+        dot.classList.toggle('bg-indigo-600', i === bulletIndex);
+        dot.classList.toggle('bg-gray-300', i !== bulletIndex);
+      });
+    }
+  }
+
+  function startBulletAuto() {
+    stopBulletAuto();
+    bulletAutoPlay = setInterval(() => {
+      bulletIndex = (bulletIndex + 1) % Math.max(1, bulletins.length);
+      updateBulletTransform();
+    }, 6000);
+  }
+  function stopBulletAuto() {
+    if (bulletAutoPlay) { clearInterval(bulletAutoPlay); bulletAutoPlay = null; }
+  }
+
+  if (track) {
+    renderBulletins();
+    window.addEventListener('resize', () => window.requestAnimationFrame(updateBulletTransform));
+    prevBtn?.addEventListener('click', () => { bulletIndex = (bulletIndex - 1 + bulletins.length) % Math.max(1, bulletins.length); updateBulletTransform(); });
+    nextBtn?.addEventListener('click', () => { bulletIndex = (bulletIndex + 1) % Math.max(1, bulletins.length); updateBulletTransform(); });
+    [track, prevBtn, nextBtn].forEach(el => {
+      el?.addEventListener('mouseenter', stopBulletAuto);
+      el?.addEventListener('mouseleave', startBulletAuto);
+    });
+    startBulletAuto();
+  }
+
+  /* ---------------- Calendar ------------------- */
+  (function () {
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    let curr = new Date();
+    const calMonthEl = document.getElementById('calendarMonth');
+    const daysContainer = document.getElementById('calendarDays');
+    const prevMonth = document.getElementById('prevMonth');
+    const nextMonth = document.getElementById('nextMonth');
+    if (!calMonthEl || !daysContainer) return;
+
+    function renderCalendar(date) {
+      daysContainer.innerHTML = '';
+      const year = date.getFullYear(), month = date.getMonth();
+      calMonthEl.textContent = monthNames[month] + ' ' + year;
+      const firstDay = new Date(year, month, 1);
+      const startingDay = firstDay.getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      for (let i = 0; i < startingDay; i++) {
+        const blank = document.createElement('div');
+        blank.className = 'day-cell text-center text-sm text-gray-300';
+        daysContainer.appendChild(blank);
+      }
+      const today = new Date();
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'day-cell rounded hover:bg-gray-100 cursor-default text-center p-1';
+        cell.textContent = d;
+        if (d === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+          cell.classList.add('bg-blue-600', 'text-white', 'font-semibold');
+          cell.style.borderRadius = '0.5rem';
+        } else cell.classList.add('text-gray-700');
+        daysContainer.appendChild(cell);
+      }
+    }
+
+    prevMonth?.addEventListener('click', () => { curr = new Date(curr.getFullYear(), curr.getMonth() - 1, 1); renderCalendar(curr); });
+    nextMonth?.addEventListener('click', () => { curr = new Date(curr.getFullYear(), curr.getMonth() + 1, 1); renderCalendar(curr); });
+    renderCalendar(curr);
+  })();
+
+  /* ---------------- KPI rendering ------------------- */
+  const kpis = [
+    { id: 'k1', name: 'Professional conduct', score: 92, description: 'Adherence to company code of conduct, courtesy and professionalism during duty.' },
+    { id: 'k2', name: 'Operational effectiveness', score: 78, description: 'Efficiency in performing assigned tasks, patrol completion, and procedural compliance.' },
+    { id: 'k3', name: 'Situational awareness and response', score: 85, description: 'Ability to detect, assess and respond quickly to incidents and changes in environment.' }
+  ];
+  const kpiList = document.getElementById('kpiList');
+  function renderKpis() {
+    if (!kpiList) return;
+    kpiList.innerHTML = '';
+    for (const k of kpis) {
+      const wrap = document.createElement('div');
+      wrap.className = 'group p-2 border rounded bg-slate-50';
+      const pctWidth = Math.max(0, Math.min(100, k.score));
+      wrap.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="text-sm font-medium">${escapeHtml(k.name)}</div>
+            <div class="text-xs text-slate-500">${k.score}%</div>
+          </div>
+          <div class="text-sm font-semibold">${k.score}%</div>
+        </div>
+        <div class="mt-2 text-xs text-slate-500 kpi-desc">${escapeHtml(k.description)}</div>
+        <div class="mt-2 bg-slate-200 rounded-full kpi-progress overflow-hidden h-2">
+          <div style="width:${pctWidth}%" class="h-full bg-indigo-600"></div>
+        </div>
+      `;
+      kpiList.appendChild(wrap);
+    }
+  }
+  renderKpis();
+
+  window.addEventListener('load', () => updateBulletTransform());
+});
+
 </script>
 </body>
 </html>
