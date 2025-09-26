@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Apply · MJL Security Agency · Seekyu</title>
+  <meta name="description" content="Apply as Security Guard or Staff at MJL Security Agency via Seekyu." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
+          colors: {
+            brand: {
+              dark: "#0a2239",
+              primary: "#0a2239",
+              accent: "#facc15",
+              light: "#e6eef6",
+            },
+          },
+          boxShadow: {
+            soft: "0 10px 30px -12px rgba(2, 6, 23, 0.25)",
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    .lift { transition: transform .18s ease, box-shadow .18s ease; }
+    .lift:hover { transform: translateY(-2px); box-shadow: 0 14px 28px -16px rgba(2,6,23,.35); }
+    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+  </style>
+</head>
+<body class="font-sans text-slate-800 bg-slate-50">
+
+  <!-- Header -->
+  <header class="bg-brand-dark text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <img src="images/MJL logo.png" alt="MJL Security Agency logo" class="h-10 w-auto" />
+        <span class="text-lg sm:text-xl font-extrabold tracking-tight">MJL Security Agency</span>
+      </a>
+      <a href="index.html" class="text-sm hover:text-brand-accent">← Back to Home</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="bg-white border-b border-slate-200">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-light text-brand-dark text-xs uppercase tracking-wider ring-1 ring-slate-200">
+        Seekyu Recruitment
+      </span>
+      <h1 class="mt-3 text-3xl sm:text-4xl font-extrabold text-brand-primary">Start Your Application</h1>
+      <p class="mt-2 text-slate-600">Create your applicant account, pick your role, fill in details, and upload PDFs.</p>
+    </div>
+  </section>
+
+  <!-- Application Form -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <form id="applicationForm" class="space-y-8" novalidate>
+
+      <!-- 1) Create Account -->
+      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft" id="accountSection">
+        <h2 class="text-lg font-semibold">1) Create Account</h2>
+        <p class="text-sm text-slate-600 mt-1">We’ll use this to let you log in and track your application.</p>
+
+        <div class="mt-4 grid sm:grid-cols-2 gap-4">
+          <div class="sm:col-span-2">
+            <label class="text-sm font-medium" for="accountEmail">Account Email</label>
+            <input id="accountEmail" name="accountEmail" type="email" required
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="you@example.com" />
+            <label class="mt-2 inline-flex items-center gap-2 text-sm">
+              <input id="syncEmail" type="checkbox" class="rounded">
+              <span>Use this as my Personal Information email too</span>
+            </label>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium" for="accountPassword">Password</label>
+            <div class="relative">
+              <input id="accountPassword" name="accountPassword" type="password" required minlength="8"
+                     class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary pr-10"
+                     placeholder="At least 8 characters" />
+              <button type="button" id="togglePass" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 text-xs hover:text-slate-700">Show</button>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Include upper & lower case, a number, and a symbol.</p>
+            <div class="mt-2 h-2 w-full rounded bg-slate-200 overflow-hidden">
+              <div id="pwBar" class="h-full w-0 bg-emerald-500 transition-all"></div>
+            </div>
+            <div id="pwLabel" class="text-xs mt-1 text-slate-600">Strength: —</div>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium" for="accountPassword2">Confirm Password</label>
+            <input id="accountPassword2" name="accountPassword2" type="password" required
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="Re-type password" />
+          </div>
+        </div>
+      </section>
+
+      <!-- 2) Role Selection -->
+      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
+        <h2 class="text-lg font-semibold">2) Choose Application Type</h2>
+        <p class="text-sm text-slate-600 mt-1">Pick one. Fields below will adjust automatically.</p>
+        <div class="mt-4 grid sm:grid-cols-2 gap-4">
+          <label class="lift p-4 rounded-xl border border-slate-200 cursor-pointer flex items-start gap-3 has-[:checked]:ring-2 has-[:checked]:ring-emerald-500">
+            <input type="radio" name="appType" value="guard" class="mt-1" checked />
+            <div>
+              <div class="font-medium">Security Guard</div>
+              <div class="text-sm text-slate-600">Requires licenses/certifications upload</div>
+            </div>
+          </label>
+          <label class="lift p-4 rounded-xl border border-slate-200 cursor-pointer flex items-start gap-3 has-[:checked]:ring-2 has-[:checked]:ring-emerald-500">
+            <input type="radio" name="appType" value="staff" class="mt-1" />
+            <div>
+              <div class="font-medium">Staff</div>
+              <div class="text-sm text-slate-600">Requires résumé and supporting docs</div>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <!-- 3) Personal Info -->
+      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
+        <h2 class="text-lg font-semibold">3) Personal Information</h2>
+        <div class="mt-4 grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium" for="firstName">First Name</label>
+            <input id="firstName" name="firstName" type="text" required
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="Juan" />
+          </div>
+          <div>
+            <label class="text-sm font-medium" for="middleName">Middle Name (optional)</label>
+            <input id="middleName" name="middleName" type="text"
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="Santos" />
+          </div>
+          <div>
+            <label class="text-sm font-medium" for="lastName">Last Name</label>
+            <input id="lastName" name="lastName" type="text" required
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="Dela Cruz" />
+          </div>
+          <div>
+            <label class="text-sm font-medium" for="email">Email</label>
+            <input id="email" name="email" type="email" required
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="you@example.com" />
+          </div>
+          <div>
+            <label class="text-sm font-medium" for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" required pattern="^(09|\+639)\d{9}$"
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="09xxxxxxxxx" />
+            <p class="text-xs text-slate-500 mt-1">Format: 09XXXXXXXXX or +639XXXXXXXXX</p>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-sm font-medium" for="address">Address</label>
+            <input id="address" name="address" type="text" required
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="Street, Barangay, City, Province" />
+          </div>
+          <div>
+            <label class="text-sm font-medium" for="birthdate">Birthdate</label>
+            <input id="birthdate" name="birthdate" type="date" required
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" />
+          </div>
+          <div>
+            <label class="text-sm font-medium" for="sex">Sex</label>
+            <select id="sex" name="sex" required
+                    class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary">
+              <option value="" disabled selected>Select</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4) Role-Specific -->
+      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
+        <h2 class="text-lg font-semibold">4) Role-Specific Details</h2>
+
+        <!-- Guard fields -->
+        <div id="guardFields" class="mt-4 grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium" for="licenseNo">Security Guard License No.</label>
+            <input id="licenseNo" name="licenseNo" type="text"
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="e.g., 1234-567890" />
+          </div>
+          <div>
+            <label class="text-sm font-medium" for="licenseExpiry">License Expiry</label>
+            <input id="licenseExpiry" name="licenseExpiry" type="date"
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" />
+          </div>
+          <div>
+            <label class="text-sm font-medium" for="certs">Certifications</label>
+            <select id="certs" name="certs"
+                    class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary">
+              <option>SSG NC II</option>
+              <option>Basic Security Training</option>
+              <option>First Aid</option>
+              <option>Others</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-medium" for="experienceYears">Years of Experience</label>
+            <input id="experienceYears" name="experienceYears" type="number" min="0"
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="0" />
+          </div>
+        </div>
+
+        <!-- Staff fields -->
+        <div id="staffFields" class="hidden mt-4 grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="text-sm font-medium" for="desiredRole">Desired Position</label>
+            <input id="desiredRole" name="desiredRole" type="text"
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="e.g., HR Assistant" />
+          </div>
+          <div>
+            <label class="text-sm font-medium" for="expectedSalary">Expected Monthly Salary (PHP)</label>
+            <input id="expectedSalary" name="expectedSalary" type="number" min="0"
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="e.g., 20000" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-sm font-medium" for="portfolio">Portfolio/LinkedIn (optional)</label>
+            <input id="portfolio" name="portfolio" type="url"
+                   class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                   placeholder="https://..." />
+          </div>
+        </div>
+      </section>
+
+      <!-- 5) Work History (repeatable) -->
+      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold">5) Work History</h2>
+          <button type="button" id="addWork" class="lift text-sm px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200">+ Add another job</button>
+        </div>
+        <p class="text-sm text-slate-600 mt-1">Add your most recent job first. Each entry is required.</p>
+        <div id="workList" class="mt-4 space-y-4"></div>
+
+        <template id="workTemplate">
+          <div class="work-item p-4 border border-slate-200 rounded-xl">
+            <div class="flex items-center justify-between mb-3">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs">Work Entry</span>
+              <button type="button" class="removeWork text-sm text-rose-600 hover:text-rose-700 hidden">Remove</button>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm font-medium">Company Name</label>
+                <input type="text" class="req mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" placeholder="Company Inc." />
+              </div>
+              <div>
+                <label class="text-sm font-medium">Position / Title</label>
+                <input type="text" class="req mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" placeholder="Security Guard / Staff" />
+              </div>
+              <div>
+                <label class="text-sm font-medium">Start (YYYY-MM)</label>
+                <input type="month" class="req mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" />
+              </div>
+              <div>
+                <label class="text-sm font-medium">End (leave blank if current)</label>
+                <input type="month" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" />
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-sm font-medium">Key Responsibilities / Achievements</label>
+                <textarea rows="3" class="req mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" placeholder="Briefly describe your duties..."></textarea>
+              </div>
+            </div>
+          </div>
+        </template>
+      </section>
+
+      <!-- 6) Education (repeatable) -->
+      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-semibold">6) Education</h2>
+          <button type="button" id="addEdu" class="lift text-sm px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200">+ Add another school</button>
+        </div>
+        <p class="text-sm text-slate-600 mt-1">Add your highest/most recent first. Each entry is required.</p>
+        <div id="eduList" class="mt-4 space-y-4"></div>
+
+        <template id="eduTemplate">
+          <div class="edu-item p-4 border border-slate-200 rounded-xl">
+            <div class="flex items-center justify-between mb-3">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs">Education Entry</span>
+              <button type="button" class="removeEdu text-sm text-rose-600 hover:text-rose-700 hidden">Remove</button>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm font-medium">Highest Level / Program</label>
+                <input type="text" class="req mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" placeholder="Senior High / Vocational / College / Course" />
+              </div>
+              <div>
+                <label class="text-sm font-medium">School / Training Center</label>
+                <input type="text" class="req mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" placeholder="School name" />
+              </div>
+              <div>
+                <label class="text-sm font-medium">Graduation / Completion Year</label>
+                <input type="number" min="1950" max="2100" class="req mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" placeholder="e.g., 2023" />
+              </div>
+              <div class="sm:col-span-1">
+                <label class="text-sm font-medium">Honors/Awards (optional)</label>
+                <input type="text" class="mt-1 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary" placeholder="e.g., Dean’s Lister" />
+              </div>
+            </div>
+          </div>
+        </template>
+      </section>
+
+      <!-- 7) Skills (Required) -->
+      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
+        <h2 class="text-lg font-semibold">7) Skills</h2>
+        <p class="text-sm text-slate-600 mt-1">List relevant skills (e.g., CCTV monitoring, first aid, MS Office).</p>
+        <textarea id="skills" name="skills" rows="4" required
+                  class="mt-4 w-full rounded-lg border-slate-300 focus:border-brand-primary focus:ring-brand-primary"
+                  placeholder="Comma-separated or sentences are fine."></textarea>
+      </section>
+
+      <!-- 8) Upload Requirements -->
+      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
+        <h2 class="text-lg font-semibold">8) Upload Requirements (PDF only)</h2>
+        <p class="text-sm text-slate-600 mt-1">Max 5 MB per file. Only <strong>PDF</strong> is accepted right now.</p>
+
+        <div class="mt-4 grid gap-4">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium" for="resumePdf">Résumé / CV (PDF) <span class="text-rose-600">*</span></label>
+              <input id="resumePdf" name="resumePdf" type="file" accept="application/pdf" required
+                     class="mt-1 block w-full text-sm file:mr-3 file:py-2 file:px-3 file:border-0 file:rounded-lg file:bg-brand-light file:text-brand-dark hover:file:bg-slate-200" />
+              <p class="text-xs text-slate-500 mt-1">Required for Guard & Staff</p>
+            </div>
+            <div>
+              <label class="text-sm font-medium" for="clearancePdf">NBI/Police Clearance (PDF) <span class="text-rose-600">*</span></label>
+              <input id="clearancePdf" name="clearancePdf" type="file" accept="application/pdf" required
+                     class="mt-1 block w-full text-sm file:mr-3 file:py-2 file:px-3 file:border-0 file:rounded-lg file:bg-brand-light file:text-brand-dark hover:file:bg-slate-200" />
+            </div>
+          </div>
+
+          <!-- Guard-only requirement -->
+          <div id="guardReq" class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium" for="licensePdf">Security Guard License (PDF) <span class="text-rose-600">*</span></label>
+              <input id="licensePdf" name="licensePdf" type="file" accept="application/pdf"
+                     class="mt-1 block w-full text-sm file:mr-3 file:py-2 file:px-3 file:border-0 file:rounded-lg file:bg-brand-light file:text-brand-dark hover:file:bg-slate-200" />
+            </div>
+            <div>
+              <label class="text-sm font-medium" for="trainingPdf">Training Certificates (PDF)</label>
+              <input id="trainingPdf" name="trainingPdf" type="file" accept="application/pdf"
+                     class="mt-1 block w-full text-sm file:mr-3 file:py-2 file:px-3 file:border-0 file:rounded-lg file:bg-brand-light file:text-brand-dark hover:file:bg-slate-200" />
+            </div>
+          </div>
+
+          <!-- Staff-only requirement -->
+          <div id="staffReq" class="hidden grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium" for="torPdf">Transcript of Records (PDF)</label>
+              <input id="torPdf" name="torPdf" type="file" accept="application/pdf"
+                     class="mt-1 block w-full text-sm file:mr-3 file:py-2 file:px-3 file:border-0 file:rounded-lg file:bg-brand-light file:text-brand-dark hover:file:bg-slate-200" />
+            </div>
+            <div>
+              <label class="text-sm font-medium" for="otherPdf">Other Supporting Doc (PDF)</label>
+              <input id="otherPdf" name="otherPdf" type="file" accept="application/pdf"
+                     class="mt-1 block w-full text-sm file:mr-3 file:py-2 file:px-3 file:border-0 file:rounded-lg file:bg-brand-light file:text-brand-dark hover:file:bg-slate-200" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9) Consent -->
+      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
+        <h2 class="text-lg font-semibold">9) Consent</h2>
+        <label class="mt-3 flex items-start gap-3">
+          <input id="consent" type="checkbox" class="mt-1" />
+          <span class="text-sm text-slate-700">I confirm the information provided is true and I agree to MJL Security Agency’s processing of my data for recruitment purposes.</span>
+        </label>
+      </section>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-between">
+        <a href="index.html" class="text-sm text-slate-600 hover:text-slate-800">← Back</a>
+        <button type="submit" class="px-6 py-3 rounded-lg bg-brand-primary text-white font-semibold hover:bg-slate-900">Submit Application</button>
+      </div>
+
+      <!-- Inline alerts -->
+      <div id="formAlert" class="hidden mt-4 p-4 rounded-lg border text-sm"></div>
+    </form>
+
+    <!-- Confirmation Card -->
+    <div id="confirmationCard" class="hidden mt-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h3 class="text-xl font-bold text-emerald-700">Application submitted!</h3>
+          <p class="text-slate-600 mt-1">Your account has been created (demo). We’ll email you updates.</p>
+        </div>
+        <svg class="w-8 h-8 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <div class="mt-4 text-sm text-slate-600" id="confirmationSummary"></div>
+      <div class="mt-6 flex gap-3">
+        <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-accent text-black font-medium hover:bg-yellow-300" href="index.html">Go to Home</a>
+        <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 text-white font-medium hover:bg-black" href="index.html">Applicant Login</a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="bg-brand-dark text-white mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-sm flex items-center justify-between">
+      <p>© <span id="year"></span> MJL Security Agency · Seekyu</p>
+      <a href="index.html#contact" class="hover:text-brand-accent">Contact Us</a>
+    </div>
+  </footer>
+
+  <script>
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Helpers
+    const $ = (s, root=document) => root.querySelector(s);
+    const $$ = (s, root=document) => Array.from(root.querySelectorAll(s));
+    const show = (el, on=true) => el.classList.toggle('hidden', !on);
+
+    // ==== Account creation helpers ====
+    const accountEmail   = $('#accountEmail');
+    const syncEmail      = $('#syncEmail');
+    const personalEmail  = $('#email');
+    const pass1          = $('#accountPassword');
+    const pass2          = $('#accountPassword2');
+    const pwBar          = $('#pwBar');
+    const pwLabel        = $('#pwLabel');
+    const togglePassBtn  = $('#togglePass');
+
+    function passwordStrength(pw){
+      if (!pw) return {score:0, label:'—'};
+      const len = pw.length >= 8;
+      const lower = /[a-z]/.test(pw);
+      const upper = /[A-Z]/.test(pw);
+      const digit = /\d/.test(pw);
+      const sym   = /[^A-Za-z0-9]/.test(pw);
+      let score = (len?1:0) + lower + upper + digit + sym; // 0..5
+      if (pw.length >= 12 && score >= 4) score++; // bonus for length
+      // normalize to 0..4
+      score = Math.min(4, Math.max(0, score - 1));
+      const labels = ['Very weak','Weak','Okay','Good','Strong'];
+      return {score, label: labels[score]};
+    }
+    function updatePwUI(){
+      const {score, label} = passwordStrength(pass1.value);
+      const widths = ['10%','30%','55%','80%','100%'];
+      const colors = ['#ef4444','#f59e0b','#facc15','#10b981','#059669'];
+      pwBar.style.width = widths[score];
+      pwBar.style.backgroundColor = colors[score];
+      pwLabel.textContent = `Strength: ${label}`;
+    }
+    pass1.addEventListener('input', updatePwUI);
+    updatePwUI();
+
+    togglePassBtn.addEventListener('click', () => {
+      const toType = pass1.type === 'password' ? 'text' : 'password';
+      pass1.type = toType; pass2.type = toType;
+      togglePassBtn.textContent = toType === 'password' ? 'Show' : 'Hide';
+    });
+
+    function syncPersonalEmail(){
+      if (!personalEmail) return;
+      if (syncEmail.checked){
+        personalEmail.value = accountEmail.value;
+        personalEmail.readOnly = true;
+        personalEmail.classList.add('bg-slate-100');
+      } else {
+        personalEmail.readOnly = false;
+        personalEmail.classList.remove('bg-slate-100');
+      }
+    }
+    syncEmail.addEventListener('change', syncPersonalEmail);
+    accountEmail.addEventListener('input', () => { if (syncEmail.checked) syncPersonalEmail(); });
+
+    // ==== Role UI toggling ====
+    const appTypeRadios = $$('input[name="appType"]');
+    const guardFields = $('#guardFields');
+    const staffFields = $('#staffFields');
+    const guardReq    = $('#guardReq');
+    const staffReq    = $('#staffReq');
+
+    function setReq(el, isRequired){
+      if (!el) return;
+      el.required = !!isRequired;
+      el.setAttribute('aria-required', isRequired ? 'true' : 'false');
+    }
+
+    function applyRoleUI(role){
+      const isGuard = role === 'guard';
+      show(guardFields, isGuard);
+      show(guardReq, isGuard);
+      show(staffFields, !isGuard);
+      show(staffReq, !isGuard);
+      setReq($('#licenseNo'),     isGuard);
+      setReq($('#licenseExpiry'), isGuard);
+      setReq($('#licensePdf'),    isGuard);
+      setReq($('#desiredRole'),  !isGuard);
+    }
+
+    appTypeRadios.forEach(r => r.addEventListener('change', () => applyRoleUI(r.value)));
+    applyRoleUI('guard');
+
+    // ==== Repeatable Work / Education ====
+    const workList = $('#workList');
+    const eduList  = $('#eduList');
+    const workTpl  = $('#workTemplate');
+    const eduTpl   = $('#eduTemplate');
+    const addWorkBtn = $('#addWork');
+    const addEduBtn  = $('#addEdu');
+
+    function addWork(initial=false){
+      const node = workTpl.content.firstElementChild.cloneNode(true);
+      if (!initial) node.querySelector('.removeWork').classList.remove('hidden');
+      workList.appendChild(node);
+    }
+    function addEdu(initial=false){
+      const node = eduTpl.content.firstElementChild.cloneNode(true);
+      if (!initial) node.querySelector('.removeEdu').classList.remove('hidden');
+      eduList.appendChild(node);
+    }
+    // initial one each
+    addWork(true); addEdu(true);
+
+    addWorkBtn.addEventListener('click', () => addWork());
+    addEduBtn.addEventListener('click', () => addEdu());
+
+    // Delegated remove handlers
+    workList.addEventListener('click', (e) => {
+      if (e.target.closest('.removeWork')) {
+        const item = e.target.closest('.work-item');
+        if (workList.children.length > 1) item.remove();
+      }
+    });
+    eduList.addEventListener('click', (e) => {
+      if (e.target.closest('.removeEdu')) {
+        const item = e.target.closest('.edu-item');
+        if (eduList.children.length > 1) item.remove();
+      }
+    });
+
+    // ==== File validation ====
+    const MAX_MB = 5, maxBytes = MAX_MB * 1024 * 1024;
+    function validatePdf(input){
+      if (!input || !input.files || !input.files[0]) return true;
+      const f = input.files[0];
+      if (f.type !== 'application/pdf') return { ok:false, msg:`${input.labels?.[0]?.innerText || 'File'} must be a PDF.` };
+      if (f.size > maxBytes) return { ok:false, msg:`${input.labels?.[0]?.innerText || 'File'} exceeds ${MAX_MB} MB.` };
+      return { ok:true };
+    }
+
+    // ==== Alerts ====
+    const form = $('#applicationForm');
+    const alertBox = $('#formAlert');
+    const confirmationCard = $('#confirmationCard');
+    const confirmationSummary = $('#confirmationSummary');
+    function showAlert(msg, type='error'){
+      alertBox.textContent = msg;
+      alertBox.className = '';
+      alertBox.classList.add('mt-4','p-4','rounded-lg','border','text-sm');
+      alertBox.classList.add(type === 'error'
+        ? 'border-rose-300','bg-rose-50','text-rose-800'
+        : 'border-emerald-300','bg-emerald-50','text-emerald-800');
+      show(alertBox, true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    const clearAlert = () => show(alertBox, false);
+
+    // ==== Submit + validation ====
+    form.addEventListener('submit', (e) => {
+      e.preventDefault(); clearAlert();
+
+      // Account validation
+      if (!accountEmail.value.trim()) { showAlert('Please enter an Account Email.'); accountEmail.focus(); return; }
+      if (!accountEmail.checkValidity()) { showAlert('Account Email format looks invalid.'); accountEmail.focus(); return; }
+
+      const p1 = pass1.value, p2 = pass2.value;
+      if (!p1 || p1.length < 8) { showAlert('Password must be at least 8 characters.'); pass1.focus(); return; }
+      const reqs = [
+        [/[a-z]/, 'a lowercase letter'],
+        [/[A-Z]/, 'an uppercase letter'],
+        [/\d/,    'a number'],
+        [/[^A-Za-z0-9]/, 'a symbol']
+      ].filter(([re]) => !re.test(p1)).map(([,msg]) => msg);
+      if (reqs.length) { showAlert('Password needs: ' + reqs.join(', ') + '.'); pass1.focus(); return; }
+      if (p1 !== p2) { showAlert('Passwords do not match.'); pass2.focus(); return; }
+
+      // role
+      const role = $('input[name="appType"]:checked')?.value || 'guard';
+
+      // base required
+      const requiredIds = ['firstName','lastName','email','phone','address','birthdate','sex','resumePdf','clearancePdf','skills'];
+
+      // role-specific
+      if (role === 'guard') requiredIds.push('licenseNo','licenseExpiry','licensePdf');
+      else requiredIds.push('desiredRole');
+
+      // check base ids
+      for (const id of requiredIds) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const emptyFile = (el.type === 'file' && (!el.files || !el.files[0]));
+        const emptyVal  = (el.type !== 'file' && !String(el.value).trim());
+        if (emptyFile || emptyVal) {
+          const label = document.querySelector(`label[for="${id}"]`);
+          showAlert(`Please complete: ${label ? label.textContent : id}`);
+          el.focus(); return;
+        }
+      }
+
+      // require at least 1 work & 1 education block
+      if (workList.children.length < 1) { showAlert('Please add at least one Work History entry.'); return; }
+      if (eduList.children.length  < 1) { showAlert('Please add at least one Education entry.'); return; }
+
+      // validate each work entry
+      for (const item of $$('.work-item', workList)) {
+        const reqs = $$('.req', item);
+        for (const el of reqs) {
+          if (!String(el.value).trim()) {
+            showAlert('Please complete all required fields in each Work History entry.');
+            el.focus(); return;
+          }
+        }
+      }
+
+      // validate each education entry
+      for (const item of $$('.edu-item', eduList)) {
+        const reqs = $$('.req', item);
+        for (const el of reqs) {
+          if (!String(el.value).trim()) {
+            showAlert('Please complete all required fields in each Education entry.');
+            el.focus(); return;
+          }
+          if (el.type === 'number') {
+            const val = +el.value;
+            if (isNaN(val) || val < 1950 || val > 2100) {
+              showAlert('Education completion year must be between 1950 and 2100.');
+              el.focus(); return;
+            }
+          }
+        }
+      }
+
+      // consent
+      if (!$('#consent').checked) {
+        showAlert('Please agree to the consent to continue.');
+        $('#consent').focus(); return;
+      }
+
+      // pdf validations
+      for (const id of ['resumePdf','clearancePdf','licensePdf','trainingPdf','torPdf','otherPdf']) {
+        const input = document.getElementById(id);
+        if (!input || !input.files || !input.files[0]) continue;
+        const res = validatePdf(input);
+        if (!res.ok) { showAlert(res.msg); input.focus(); return; }
+      }
+
+      // Build summary
+      const work = $$('.work-item', workList).map(item => {
+        const inputs = $$('input, textarea', item);
+        return {
+          company: inputs[0].value,
+          position: inputs[1].value,
+          start: inputs[2].value,
+          end: inputs[3].value || 'Present',
+          responsibilities: inputs[4].value
+        };
+      });
+
+      const education = $$('.edu-item', eduList).map(item => {
+        const inputs = $$('input', item);
+        return {
+          level: inputs[0].value,
+          school: inputs[1].value,
+          gradYear: inputs[2].value,
+          honors: inputs[3].value || ''
+        };
+      });
+
+      // keep password out of summary for safety
+      const summary = {
+        accountEmail: accountEmail.value,
+        role,
+        name: `${$('#firstName').value} ${$('#middleName').value ? $('#middleName').value + ' ' : ''}${$('#lastName').value}`,
+        email: $('#email').value,
+        phone: $('#phone').value,
+        address: $('#address').value,
+        birthdate: $('#birthdate').value,
+        skills: $('#skills').value,
+        ...(role === 'guard' ? {
+          licenseNo: $('#licenseNo').value,
+          licenseExpiry: $('#licenseExpiry').value,
+          certs: $('#certs').value,
+          experienceYears: $('#experienceYears').value
+        } : {
+          desiredRole: $('#desiredRole').value,
+          expectedSalary: $('#expectedSalary').value,
+          portfolio: $('#portfolio').value
+        }),
+        work,
+        education
+      };
+
+      // Show confirmation
+      form.classList.add('hidden');
+      show(confirmationCard, true);
+
+      const rows = [
+        ['Account Email', summary.accountEmail],
+        ['Role', summary.role],
+        ['Name', summary.name],
+        ['Email', summary.email],
+        ['Phone', summary.phone],
+        ['Address', summary.address],
+        ['Birthdate', summary.birthdate],
+        ...(summary.licenseNo ? [['License No.', summary.licenseNo], ['License Expiry', summary.licenseExpiry]] : []),
+        ...(summary.desiredRole ? [['Desired Role', summary.desiredRole], ['Expected Salary', summary.expectedSalary || '']] : []),
+        ['Skills', summary.skills]
+      ].map(([k,v]) => `
+        <tr><td class="py-2 pr-4 font-medium text-slate-700">${k}</td>
+        <td class="py-2 text-slate-600">${v || '<span class="text-slate-400">—</span>'}</td></tr>
+      `).join('');
+
+      const workBlock = summary.work.map((w,i) => `
+        <div class="mt-3">
+          <div class="font-semibold text-slate-800">Work #${i+1}</div>
+          <div class="text-slate-600 text-sm">${w.company} — ${w.position} (${w.start} – ${w.end})</div>
+          <div class="text-slate-600 text-sm mt-1">${w.responsibilities}</div>
+        </div>
+      `).join('');
+
+      const eduBlock = summary.education.map((ed,i) => `
+        <div class="mt-3">
+          <div class="font-semibold text-slate-800">Education #${i+1}</div>
+          <div class="text-slate-600 text-sm">${ed.level} — ${ed.school} (${ed.gradYear})</div>
+          ${ed.honors ? `<div class="text-slate-600 text-sm mt-1">Honors: ${ed.honors}</div>` : ''}
+        </div>
+      `).join('');
+
+      confirmationSummary.innerHTML = `
+        <div class="overflow-x-auto">
+          <table class="mt-2 w-full text-sm">
+            <tbody class="divide-y divide-slate-200">${rows}</tbody>
+          </table>
+        </div>
+        <div class="mt-4">${workBlock}</div>
+        <div class="mt-4">${eduBlock}</div>
+        <p class="mt-4 text-xs text-slate-500">Note: account creation + submission are demo-only on the frontend. Hook this up to your backend to save securely.</p>
+      `;
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>
