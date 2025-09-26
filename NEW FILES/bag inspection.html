@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Seekyu · Bag Inspection Scenario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Inter + Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .stage { position: relative; height: 480px; }
+    .piece {
+      position: absolute; width: 86px; user-select: none; cursor: grab;
+      opacity: 0; transform: translate(-50%,-50%) scale(.9) rotate(0deg);
+      transition:
+        left .55s cubic-bezier(.2,.7,.2,1),
+        top  .55s cubic-bezier(.2,.7,.2,1),
+        opacity .3s ease,
+        transform .18s ease;
+    }
+    .piece.ready { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    .piece:active { cursor: grabbing; }
+    /* Confiscate drop focus */
+    .drop-focus { box-shadow: 0 0 0 2px rgba(14,165,233,.9) inset; background: #f0f9ff !important; }
+
+    /* Confiscate Box grid + shrinked items */
+    #confiscateBox {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .in-box {
+      position: static !important;
+      width: 56px !important;
+      height: 56px !important;
+      object-fit: contain;
+      transform: none !important;
+      cursor: default;
+      user-select: none;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 font-[Inter]">
+  <!-- Top -->
+  <header class="border-b border-slate-200 bg-white">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg bg-sky-600 text-white grid place-items-center font-bold">S</div>
+        <div class="text-sm font-semibold tracking-tight">Seekyu · Assessment</div>
+      </div>
+      <div class="text-xs text-slate-500">Scenario: Bag Inspection</div>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-8">
+    <!-- Scenario Brief -->
+    <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-xl md:text-2xl font-semibold tracking-tight">Scenario Brief</h1>
+          <p id="instruction" class="mt-1 text-slate-600">
+            Begin to reveal the bag in the center. Click the bag to scatter items around it.
+            Drag only prohibited items into the Confiscate Box. Then Submit.
+          </p>
+        </div>
+        <span class="inline-flex items-center text-[11px] px-2 py-1 rounded-full border border-slate-200 text-slate-600">Case #A-102</span>
+      </div>
+
+      <div class="mt-4 grid gap-3 sm:grid-cols-3">
+        <div class="rounded-xl border border-slate-200 p-3">
+          <div class="text-xs text-slate-500">Location</div>
+          <div class="text-sm font-medium">Campus Gate 2</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 p-3">
+          <div class="text-xs text-slate-500">Objective</div>
+          <div class="text-sm font-medium">Identify & secure prohibited items</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 p-3">
+          <div class="text-xs text-slate-500">Guidance</div>
+          <div class="text-sm font-medium">Do not remove allowed items</div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-slate-600">Begin the scenario to show the bag.</p>
+        <button id="beginBtn" type="button"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">
+          Begin Scenario
+        </button>
+      </div>
+    </section>
+
+    <!-- Interaction Card -->
+    <section class="mt-6 bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-semibold">Bag Inspection</h2>
+        <span class="text-xs text-slate-500">Step 1 of 2</span>
+      </div>
+
+      <!-- Centered Bag + Scatter Stage -->
+      <div id="stage" class="stage mt-4 rounded-xl border border-slate-200 bg-slate-50/60 overflow-hidden">
+        <!-- Centered bag (appears after Begin) -->
+        <button id="bagBtn" type="button" aria-label="Open bag"
+          class="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 rounded-lg">
+          <img id="bagClosed" src="images/bag.png" alt="Bag"
+               class="w-40 md:w-48 transition-transform duration-150 hover:scale-[1.01] cursor-pointer select-none" />
+        </button>
+        <!-- NOTE: items are appended here as independent absolutely-positioned siblings (no container). -->
+      </div>
+
+      <!-- Kept for compatibility with your original IDs -->
+      <div id="items" class="hidden"></div>
+
+      <!-- Confiscate -->
+      <div class="mt-6">
+        <div class="flex items-center justify-between">
+          <label for="confiscateBox" class="block text-sm font-medium text-slate-700">Confiscate Box</label>
+          <span class="text-xs text-slate-500">Step 2 of 2</span>
+        </div>
+        <div id="confiscateBox"
+             class="hidden mt-2 min-h-28 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3 transition-all"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-4 flex items-center gap-3">
+        <button id="submitBtn"
+          class="hidden inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          Submit
+        </button>
+        <button type="button" id="resetBtn"
+          class="hidden inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm">
+          Reset
+        </button>
+        <div id="score" class="hidden text-sm font-medium text-slate-800" aria-live="polite"></div>
+      </div>
+
+      <p class="mt-3 text-xs text-slate-500">Tip: Drag only prohibited items into the Confiscate Box.</p>
+    </section>
+
+    <!-- Outcome -->
+    <section id="outcome" class="hidden mt-6 bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <div class="flex items-center gap-2">
+        <div id="outcomeDot" class="h-2.5 w-2.5 rounded-full bg-slate-300"></div>
+        <h3 class="text-base font-semibold">Scenario Outcome</h3>
+      </div>
+      <p id="outcomeText" class="mt-2 text-slate-700 text-sm"></p>
+    </section>
+  </main>
+
+  <script>
+    // Elements
+    const beginBtn = document.getElementById('beginBtn');
+    const stage = document.getElementById('stage');
+    const bagBtn = document.getElementById('bagBtn');
+    const instruction = document.getElementById('instruction');
+    const confiscateBox = document.getElementById('confiscateBox');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const scoreDiv = document.getElementById('score');
+    const outcome = document.getElementById('outcome');
+    const outcomeDot = document.getElementById('outcomeDot');
+    const outcomeText = document.getElementById('outcomeText');
+
+    // Config/state
+    let finished = false;
+    let score = 0;
+    const manifest = [
+      { src: "images/notebook.png",  type: "allowed",     alt: "Notebook" },
+      { src: "images/tumbler.png",   type: "allowed",     alt: "Tumbler"  },
+      { src: "images/knife.png",     type: "prohibited",  alt: "Knife"    },
+      { src: "images/lighter.png",   type: "prohibited",  alt: "Lighter"  },
+      { src: "images/pen.png",       type: "allowed",     alt: "Pen"      },
+      { src: "images/ruler.png",     type: "allowed",     alt: "Ruler"    },
+    ];
+    const totalProhibited = manifest.filter(m => m.type === "prohibited").length;
+
+    // Begin → show bag only
+    beginBtn.addEventListener('click', () => {
+      bagBtn.classList.remove('hidden');
+      beginBtn.disabled = true;
+      beginBtn.classList.add('opacity-60','cursor-not-allowed');
+      instruction.textContent = "Click the bag to scatter items around it.";
+    });
+
+    // Click bag → scatter items (no container); show Confiscate Box & actions
+    bagBtn.addEventListener('click', () => {
+      if (stage.querySelector('[data-piece]')) return; // already scattered
+      scatterItemsAroundBag();
+      confiscateBox.classList.remove('hidden');
+      submitBtn.classList.remove('hidden');
+      resetBtn.classList.remove('hidden');
+      instruction.textContent = "Drag only prohibited items into the Confiscate Box, then submit.";
+    });
+
+    // --- Scatter with overlap avoidance ---
+    function scatterItemsAroundBag() {
+      const rect = stage.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const PAD = 36;
+      const maxRadius = Math.min(rect.width, rect.height) / 2 - PAD;
+      const minRadius = Math.max(80, maxRadius * 0.45);
+
+      // Generate random polar targets first
+      const targets = manifest.map(() => {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = minRadius + Math.random() * (maxRadius - minRadius);
+        return { x: centerX + Math.cos(angle) * radius, y: centerY + Math.sin(angle) * radius };
+      });
+
+      // Resolve overlaps (repel)
+      const size = 86, r = size * 0.62; // approximate radius for overlap checks
+      for (let iter = 0; iter < 18; iter++) {
+        let moved = false;
+        for (let i = 0; i < targets.length; i++) {
+          for (let j = i + 1; j < targets.length; j++) {
+            const dx = targets[j].x - targets[i].x;
+            const dy = targets[j].y - targets[i].y;
+            const dist = Math.hypot(dx, dy) || 0.001;
+            const minDist = r * 1.15;
+            if (dist < minDist) {
+              const push = (minDist - dist) / 2;
+              const ux = dx / dist, uy = dy / dist;
+              targets[i].x -= ux * push; targets[i].y -= uy * push;
+              targets[j].x += ux * push; targets[j].y += uy * push;
+              moved = true;
+            }
+          }
+          targets[i].x = Math.max(PAD, Math.min(rect.width - PAD, targets[i].x));
+          targets[i].y = Math.max(PAD, Math.min(rect.height - PAD, targets[i].y));
+        }
+        if (!moved) break;
+      }
+
+      // Create DOM pieces at center, animate to resolved targets
+      manifest.forEach((item, i) => {
+        const img = document.createElement('img');
+        img.src = item.src; img.alt = item.alt; img.dataset.type = item.type;
+        img.setAttribute('data-piece','1');
+        img.className = 'piece';
+        img.id = Math.random().toString(36).slice(2,9);
+        img.style.left = centerX + 'px';
+        img.style.top  = centerY + 'px';
+        stage.appendChild(img);
+
+        img.addEventListener('dragstart', dragStart);
+        img.addEventListener('touchstart', touchStart, { passive: true });
+
+        const rot = (Math.random() * 16 - 8);
+        const t = targets[i];
+        setTimeout(() => {
+          img.style.left = t.x + 'px';
+          img.style.top  = t.y + 'px';
+          img.style.transform = `translate(-50%,-50%) rotate(${rot}deg)`;
+          img.classList.add('ready');
+        }, 90 + i * 90);
+      });
+    }
+
+    // --- Drag & Drop into Confiscate Box ---
+    function dragStart(e) {
+      if (finished) return;
+      e.dataTransfer.setData('type', e.target.dataset.type);
+      e.dataTransfer.setData('id', e.target.id || (e.target.id = Math.random().toString(36).slice(2,9)));
+    }
+    confiscateBox.addEventListener('dragover', e => {
+      if (!finished) { e.preventDefault(); confiscateBox.classList.add('drop-focus'); }
+    });
+    confiscateBox.addEventListener('dragleave', () => confiscateBox.classList.remove('drop-focus'));
+    confiscateBox.addEventListener('drop', e => {
+      if (finished) return;
+      e.preventDefault();
+      confiscateBox.classList.remove('drop-focus');
+
+      const type = e.dataTransfer.getData('type');
+      const id   = e.dataTransfer.getData('id');
+      const el   = document.getElementById(id);
+      if (!el) return;
+
+      // Scale down and place inside the box
+      el.style.position = 'static';
+      el.style.left = ''; el.style.top = '';
+      el.style.width = '56px';
+      el.style.height = '56px';
+      el.style.transform = 'none';
+      el.classList.remove('piece');
+      el.classList.add('in-box');
+      el.setAttribute('draggable', false);
+      confiscateBox.appendChild(el);
+    });
+
+    // --- Touch support ---
+    let touchDragging = null;
+    function touchStart(e) {
+      if (finished) return;
+      touchDragging = e.currentTarget;
+      touchDragging.style.opacity = .75;
+      document.addEventListener('touchmove', touchMove, { passive: false });
+      document.addEventListener('touchend', touchEnd);
+    }
+    function touchMove(e) {
+      if (!touchDragging) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      const target = document.elementFromPoint(t.clientX, t.clientY);
+      if (target && (target === confiscateBox || confiscateBox.contains(target))) {
+        confiscateBox.classList.add('drop-focus');
+      } else {
+        confiscateBox.classList.remove('drop-focus');
+      }
+    }
+    function touchEnd() {
+      const over = confiscateBox.classList.contains('drop-focus');
+      confiscateBox.classList.remove('drop-focus');
+
+      if (touchDragging) {
+        touchDragging.style.opacity = 1;
+        if (over) {
+          touchDragging.style.position = 'static';
+          touchDragging.style.left = ''; touchDragging.style.top = '';
+          touchDragging.style.width = '56px';
+          touchDragging.style.height = '56px';
+          touchDragging.style.transform = 'none';
+          touchDragging.classList.remove('piece');
+          touchDragging.classList.add('in-box');
+          touchDragging.setAttribute('draggable', false);
+          confiscateBox.appendChild(touchDragging);
+        }
+      }
+      touchDragging = null;
+      document.removeEventListener('touchmove', touchMove);
+      document.removeEventListener('touchend', touchEnd);
+    }
+
+    // Submit → scoring
+    submitBtn.addEventListener('click', () => {
+      if (finished) return;
+      finished = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitted";
+
+      const inBox = Array.from(confiscateBox.querySelectorAll('[data-type]'));
+      const correct = inBox.filter(el => el.dataset.type === 'prohibited').length;
+      const wrong   = inBox.filter(el => el.dataset.type === 'allowed').length;
+      score = correct - wrong;
+
+      const pct = Math.round((correct / totalProhibited) * 100);
+
+      scoreDiv.classList.remove('hidden');
+      scoreDiv.textContent = `Your final score: ${score} • Correct: ${correct}/${totalProhibited} (${pct}%) • Wrong: ${wrong}`;
+
+      outcome.classList.remove('hidden');
+      if (pct === 100 && wrong === 0) {
+        outcomeDot.className = "h-2.5 w-2.5 rounded-full bg-emerald-500";
+        outcomeText.textContent = "Pass — All prohibited items secured, no false positives.";
+      } else if (pct >= 60 && wrong <= 1) {
+        outcomeDot.className = "h-2.5 w-2.5 rounded-full bg-amber-500";
+        outcomeText.textContent = "Conditional Pass — Good job; review to reduce false positives.";
+      } else {
+        outcomeDot.className = "h-2.5 w-2.5 rounded-full bg-rose-500";
+        outcomeText.textContent = "Fail — Missed key contraband or too many allowed items confiscated.";
+      }
+    });
+
+    // Reset
+    resetBtn.addEventListener('click', () => window.location.reload());
+  </script>
+</body>
+</html>
