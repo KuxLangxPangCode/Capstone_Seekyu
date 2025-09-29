@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SeekYu • Super Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="bulletin-announce.js" defer></script>
+
+  <!-- Theme Tokens (mirrors the Admin revamp) -->
+  <style>
+    :root {
+      --ring: 0 0% 100% / 6%;
+    }
+    .sidebar { transition: transform .25s ease, width .25s ease; }
+    .sidebar-item { transition: background-color .15s ease, color .15s ease; }
+    .sidebar-item.active { background-color: rgb(30 41 59 / .45); color: #fff; }
+    .content-section { display: none; }
+    .content-section.active { display: block; }
+    .calendar-grid { grid-template-columns: repeat(7, 1fr); }
+    .day-cell { height: 2.25rem; display:flex; align-items:center; justify-content:center; }
+    .modal-backdrop { background: rgba(15, 23, 42, 0.6); }
+    /* nicer scrollbars for long panes */
+    .thin-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+    .thin-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800">
+  <div class="flex min-h-screen">
+  <aside class="sidebar w-72 bg-white border-r border-slate-200 hidden lg:block">
+      <div class="p-5 border-b border-slate-200">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 grid place-content-center"><i class="fas fa-shield-alt"></i></div>
+          <div>
+            <div class="text-lg font-semibold tracking-tight">SeekYu</div>
+            <div class="text-xs text-slate-500">Security Management Suite</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile quick -->
+      <div class="px-5 py-4 border-b border-slate-200">
+        <div class="flex items-center gap-3">
+          <img id="profilePic" src="https://i.pravatar.cc/100?img=3" class="h-11 w-11 rounded-full border border-slate-200 object-cover" alt="avatar"/>
+          <div class="min-w-0">
+            <div id="profileName" class="font-medium truncate">Miles P. Pirater</div>
+            <div id="profileRole" class="text-xs text-slate-500">HR</div>
+            <button id="editProfileSmall" class="text-xs text-indigo-600 hover:text-indigo-700 mt-1">Edit profile</button>
+          </div>
+          <button id="editProfileBtn" class="ml-auto px-2.5 py-1.5 rounded-md border border-slate-200 text-xs">Edit</button>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="p-4">
+        <div class="text-[11px] uppercase tracking-wider text-slate-500 px-2 mb-2">Main</div>
+        <ul class="space-y-1">
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3 active" onclick="showSection('dashboard', this)"><span class="nav-pill"></span><i class="fas fa-home text-indigo-500 w-5 text-center"></i><span>Dashboard</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('recruiting-mgmt', this)"><span class="nav-pill"></span><i class="fas fa-user-plus text-emerald-500 w-5 text-center"></i><span>Recruitment Management</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('client-mgmt', this)"><span class="nav-pill"></span><i class="fas fa-users text-amber-500 w-5 text-center"></i><span>Client Management</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('guard-mgmt', this)"><span class="nav-pill"></span><i class="fas fa-user-shield text-rose-500 w-5 text-center"></i><span>Security Guard Management</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('messaging-mgmt', this)"><span class="nav-pill"></span><i class="fas fa-comment text-indigo-400 w-5 text-center"></i><span>Send Message</span><span class="ml-auto inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500 text-white">3</span></button></li>
+        </ul>
+
+        <div class="text-[11px] uppercase tracking-wider text-slate-500 px-2 mt-5 mb-2">Reports</div>
+        <ul class="space-y-1">
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('attendance-monitoring', this)"><span class="nav-pill"></span><i class="fas fa-chart-line text-teal-500 w-5 text-center"></i><span>Attendance Monitoring</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('leave-requests', this)"><span class="nav-pill"></span><i class="fas fa-calendar-alt text-pink-500 w-5 text-center"></i><span>Leave Requests</span><span class="ml-auto inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-500 text-white">2</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('incident-reports', this)"><span class="nav-pill"></span><i class="fas fa-exclamation-circle text-orange-500 w-5 text-center"></i><span>Incident Reports</span><span class="ml-auto inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500 text-white">1</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('notification', this)"><span class="nav-pill"></span><i class="fas fa-bell text-yellow-500 w-5 text-center"></i><span>Notifications</span><span class="ml-auto inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500 text-white">1</span></button></li>
+        </ul>
+
+        <div class="mt-6 px-2"><button onclick="location.href='Index.html'" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-slate-200 hover:bg-rose-600 hover:text-white transition"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button></div>
+      </nav>
+    </aside>  
+
+    <!-- Main Column -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Topbar (sticky) -->
+      <div class="hidden lg:flex items-center justify-between bg-white/90 backdrop-blur border-b border-slate-200 sticky top-0 z-40 px-6 py-3">
+        <div class="flex items-center gap-3 text-slate-600">
+          <i class="fa-regular fa-circle-dot"></i>
+          <span class="text-base sm:text-lg font-semibold">Super Admin Management Dashboard</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="relative">
+            <i class="fa fa-search absolute left-2.5 top-2.5 text-slate-400 text-sm"></i>
+            <input placeholder="Quick search…" class="pl-8 pr-3 py-2 rounded-md border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+          </div>
+          <button id="mobile-sidebar-toggle" class="lg:hidden px-3 py-2 border rounded-md">
+            <i class="fa fa-bars"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile header -->
+      <div class="bg-white shadow-sm p-4 flex items-center justify-between lg:hidden">
+        <button id="mobile-sidebar-toggle-2" class="text-slate-600 hover:text-slate-900" title="Open sidebar menu">
+          <i class="fas fa-bars text-xl"></i>
+        </button>
+        <h1 class="text-base font-semibold">Dashboard</h1>
+        <div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center">
+          <i class="fas fa-user text-slate-600"></i>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <main class="p-6 flex-1">
+        <!-- Dashboard -->
+        <section id="dashboard" class="content-section active">
+          <div class="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-6">
+            <!-- Left / Main -->
+            <div class="space-y-6">
+              <!-- KPI Cards -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                  <div class="flex items-center">
+                    <div class="p-2.5 rounded-lg bg-blue-50 text-blue-600">
+                      <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="ml-4">
+                      <h2 class="text-xl font-semibold">245</h2>
+                      <p class="text-sm text-slate-500">Active Guards</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                  <div class="flex items-center">
+                    <div class="p-2.5 rounded-lg bg-emerald-50 text-emerald-600">
+                      <i class="fas fa-building"></i>
+                    </div>
+                    <div class="ml-4">
+                      <h2 class="text-xl font-semibold">38</h2>
+                      <p class="text-sm text-slate-500">Active Clients</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition">
+                  <div class="flex items-center">
+                    <div class="p-2.5 rounded-lg bg-violet-50 text-violet-600">
+                      <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="ml-4">
+                      <h2 class="text-xl font-semibold">12</h2>
+                      <p class="text-sm text-slate-500">Pending Requests</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bulletin Board -->
+              <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-lg font-semibold">Bulletin Board</h2>
+                  <button id="createBulletinBtn" class="px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">
+                    <i class="fa fa-plus mr-2"></i>Create Announcement
+                  </button>
+                </div>
+                <div class="relative overflow-hidden">
+                  <div id="bulletinTrack" class="flex gap-4 transition-transform duration-300 will-change-transform"></div>
+                  <div class="absolute left-2 top-1/2 -translate-y-1/2">
+                    <button id="bulletPrev" aria-label="Previous" class="p-2 rounded-md bg-white border shadow-sm">
+                      <i class="fas fa-chevron-left"></i>
+                    </button>
+                  </div>
+                  <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                    <button id="bulletNext" aria-label="Next" class="p-2 rounded-md bg-white border shadow-sm">
+                      <i class="fas fa-chevron-right"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Modal: Create/Edit Bulletin -->
+                <div id="createBulletinModal" class="fixed inset-0 hidden items-center justify-center z-50">
+                  <div class="absolute inset-0 bg-black/50"></div>
+                  <div class="relative bg-white w-full max-w-xl mx-4 rounded-lg shadow-xl overflow-hidden z-10 max-h-[90vh]">
+                    <div class="p-4 border-b flex items-center justify-between">
+                      <h3 id="modalTitleText" class="text-base font-semibold">Create Announcement</h3>
+                      <button id="closeBulletinModal" class="text-slate-500 hover:text-slate-700"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="p-6 overflow-y-auto thin-scroll" style="max-height: calc(90vh - 4rem)">
+                      <form id="bulletinForm" class="space-y-4">
+                        <div>
+                          <label class="text-xs font-medium text-slate-600">Title *</label>
+                          <input name="title" required class="w-full mt-1 px-3 py-2 border rounded-md bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100" />
+                        </div>
+                        <div>
+                          <label class="text-xs font-medium text-slate-600">Body *</label>
+                          <textarea name="body" rows="4" required class="w-full mt-1 px-3 py-2 border rounded-md bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100"></textarea>
+                        </div>
+                        <div>
+                          <label class="text-xs font-medium text-slate-600">Image (optional)</label>
+                          <div class="mt-2 flex items-start gap-3">
+                            <img id="modalImagePreview" src="" alt="preview" class="w-28 h-20 object-cover rounded border bg-slate-100 hidden" />
+                            <div class="flex-1">
+                              <input id="bulletinImageFile" type="file" accept="image/*" class="block mb-2" />
+                              <div class="flex items-center gap-3 text-xs">
+                                <button type="button" id="removeImageBtn" class="px-3 py-1 rounded bg-red-100 text-red-700 hidden">Remove image</button>
+                                <span class="text-slate-500">Allowed: jpg/png.</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-2 pt-2 border-t">
+                          <button type="button" id="cancelBulletin" class="px-4 py-2 rounded-md border">Cancel</button>
+                          <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white">Save</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Recent Activity (simple) -->
+                <h3 class="text-base font-semibold text-slate-800 mt-6 mb-3">Recent Activity</h3>
+                <div class="space-y-3">
+                  <div class="flex items-start gap-3">
+                    <div class="bg-blue-100 p-2 rounded-full text-blue-600"><i class="fas fa-user-plus"></i></div>
+                    <div class="text-sm">
+                      <p><span class="font-medium">John Doe</span> registered as a new security guard</p>
+                      <p class="text-xs text-slate-500">2 hours ago</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <div class="bg-emerald-100 p-2 rounded-full text-emerald-600"><i class="fas fa-check-circle"></i></div>
+                    <div class="text-sm">
+                      <p>Shift <span class="font-medium">#3245</span> was completed successfully</p>
+                      <p class="text-xs text-slate-500">5 hours ago</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-3">
+                    <div class="bg-red-100 p-2 rounded-full text-red-600"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="text-sm">
+                      <p>New incident report submitted for Client #3829</p>
+                      <p class="text-xs text-slate-500">Yesterday at 5:30 PM</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right / Aside -->
+            <aside class="h-full lg:sticky lg:top-6">
+              <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+                <h3 class="text-base font-semibold mb-3">Notifications</h3>
+                <ul id="notifList" class="space-y-2 max-h-48 overflow-y-auto thin-scroll mb-4">
+                  <li class="p-3 rounded-lg bg-slate-50 border border-slate-100">
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <div class="text-sm font-medium">Holiday Notice</div>
+                        <div class="text-xs text-slate-500">Office closed on Sept 25 for local holiday.</div>
+                      </div>
+                      <div class="text-[11px] text-slate-400 ml-3 whitespace-nowrap">2d</div>
+                    </div>
+                  </li>
+                  <li class="p-3 rounded-lg bg-slate-50 border border-slate-100">
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <div class="text-sm font-medium">New Leave Request</div>
+                        <div class="text-xs text-slate-500">John D. submitted a leave request.</div>
+                      </div>
+                      <div class="text-[11px] text-slate-400 ml-3 whitespace-nowrap">1d</div>
+                    </div>
+                  </li>
+                  <li class="p-3 rounded-lg bg-slate-50 border border-slate-100">
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <div class="text-sm font-medium">Incident Report</div>
+                        <div class="text-xs text-slate-500">Incident #234 requires review.</div>
+                      </div>
+                      <div class="text-[11px] text-slate-400 ml-3 whitespace-nowrap">3h</div>
+                    </div>
+                  </li>
+                </ul>
+
+                <!-- Calendar -->
+                <div>
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="text-sm font-semibold" id="calendarMonth">Month Year</div>
+                    <div class="flex items-center gap-1.5">
+                      <button id="prevMonth" class="p-2 rounded hover:bg-slate-100"><i class="fas fa-chevron-left"></i></button>
+                      <button id="nextMonth" class="p-2 rounded hover:bg-slate-100"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                  </div>
+                  <div class="grid calendar-grid gap-1 text-xs text-slate-600 mb-2">
+                    <div class="text-center font-medium">Sun</div>
+                    <div class="text-center font-medium">Mon</div>
+                    <div class="text-center font-medium">Tue</div>
+                    <div class="text-center font-medium">Wed</div>
+                    <div class="text-center font-medium">Thu</div>
+                    <div class="text-center font-medium">Fri</div>
+                    <div class="text-center font-medium">Sat</div>
+                  </div>
+                  <div id="calendarDays" class="grid calendar-grid gap-1 text-sm text-slate-700"></div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ACCOUNTS -->
+        <section id="accounts" class="content-section">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h1 class="text-xl font-bold">Account Management</h1>
+              <div class="flex gap-2">
+                <button id="accountsTabCreate" class="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm">Create Account</button>
+                <button id="accountsTabView" class="px-3 py-2 rounded-md bg-slate-200 text-slate-800 text-sm">View Accounts</button>
+                <button id="accountsTabRemoved" class="px-3 py-2 rounded-md bg-slate-200 text-slate-800 text-sm">Removed Accounts</button>
+              </div>
+            </div>
+
+            <!-- Create -->
+            <div id="create-account-section">
+              <form id="createAccountForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm text-slate-600">Full Name</label>
+                  <input id="fullName" class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" required />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-600">Username</label>
+                  <input id="username" class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" required />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-600">Role</label>
+                  <select id="role" class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" required>
+                    <option value="">Select role</option>
+                    <option>Super Admin</option>
+                    <option>Admin</option>
+                    <option>HR</option>
+                    <option>Security Guard</option>
+                    <option>Head Guard</option>
+                    <option>Client</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-600">Password</label>
+                  <input id="password" type="password" class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" required />
+                </div>
+                <div class="md:col-span-2 flex gap-2 mt-2">
+                  <button type="submit" class="px-4 py-2 rounded-md bg-emerald-600 text-white">Create Account</button>
+                  <button type="button" id="resetCreate" class="px-4 py-2 rounded-md bg-slate-200">Reset</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- View -->
+            <div id="view-accounts-section" class="hidden mt-6">
+              <div class="flex items-center gap-3 mb-4">
+                <input id="accountsSearch" placeholder="Search by name, username or role..." class="flex-1 px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                <button id="refreshAccounts" class="px-3 py-2 rounded-md bg-slate-100 border">Refresh</button>
+              </div>
+              <div class="overflow-x-auto bg-white rounded-lg border">
+                <table class="min-w-full text-sm">
+                  <thead class="bg-slate-50 text-left text-slate-600 sticky top-0 z-10">
+                    <tr>
+                      <th class="py-3 px-3">Login ID</th>
+                      <th class="py-3 px-3">Name</th>
+                      <th class="py-3 px-3">Username</th>
+                      <th class="py-3 px-3">Role</th>
+                      <th class="py-3 px-3">Created</th>
+                      <th class="py-3 px-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="accountsTable" class="divide-y"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Removed -->
+            <div id="removed-accounts-section" class="hidden mt-6">
+              <div class="flex items-center gap-3 mb-4">
+                <input id="removedSearch" placeholder="Search removed accounts..." class="flex-1 px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+              </div>
+              <div class="overflow-x-auto bg-white rounded-lg border">
+                <table class="min-w-full text-sm">
+                  <thead class="bg-slate-50 text-left text-slate-600 sticky top-0 z-10">
+                    <tr>
+                      <th class="py-3 px-3">Login ID</th>
+                      <th class="py-3 px-3">Name</th>
+                      <th class="py-3 px-3">Username</th>
+                      <th class="py-3 px-3">Role</th>
+                      <th class="py-3 px-3">Removed</th>
+                      <th class="py-3 px-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="removedAccountsTable" class="divide-y"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Account Modal -->
+          <div id="editAccountModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+            <div class="bg-white rounded-xl max-w-lg w-full p-5 shadow-xl">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-semibold">Edit Account</h3>
+                <button id="closeEditModal" class="text-slate-500">✕</button>
+              </div>
+              <form id="editAccountForm" class="space-y-3">
+                <input type="hidden" id="editId" />
+                <div>
+                  <label class="block text-sm text-slate-600">Full Name</label>
+                  <input id="editFullName" class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-600">Username</label>
+                  <input id="editUsername" class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-600">Role</label>
+                  <select id="editRole" class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100">
+                    <option>Super Admin</option>
+                    <option>Admin</option>
+                    <option>HR</option>
+                    <option>Security Guard</option>
+                    <option>Head Guard</option>
+                    <option>Client</option>
+                  </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                  <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white">Save Changes</button>
+                  <button type="button" id="cancelEdit" class="px-4 py-2 rounded-md bg-slate-200">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Change Password Modal -->
+          <div id="changePasswordModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+            <div class="bg-white rounded-xl max-w-md w-full p-5 shadow-xl">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-semibold">Change Password</h3>
+                <button id="closePassModal" class="text-slate-500">✕</button>
+              </div>
+              <form id="changePasswordForm" class="space-y-3">
+                <input type="hidden" id="passUserId" />
+                <div>
+                  <label class="block text-sm text-slate-600">New Password</label>
+                  <input id="newPassword" type="password" class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-600">Confirm Password</label>
+                  <input id="confirmNewPassword" type="password" class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                  <button type="submit" class="px-4 py-2 rounded-md bg-emerald-600 text-white">Change Password</button>
+                  <button type="button" id="cancelPass" class="px-4 py-2 rounded-md bg-slate-200">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- USER ACTIVITY -->
+        <section id="user-activity" class="content-section">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h1 class="text-xl font-bold">View User Activity</h1>
+                <p class="text-slate-600 text-sm">Audit trail of user actions: logins, logouts, password attempts, profile changes, etc.</p>
+              </div>
+              <div class="flex gap-2 items-center">
+                <button id="activityExport" class="px-3 py-2 rounded-md bg-slate-100 border">Export (JSON)</button>
+                <button id="activityRefresh" class="px-3 py-2 rounded-md bg-slate-100 border">Refresh</button>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 mb-4">
+              <input id="activitySearch" type="text" placeholder="Search (user, id, ip, details...)" class="flex-1 min-w-[220px] px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+              <select id="activityRole" class="px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100">
+                <option value="">All Roles</option>
+                <option>Super Admin</option>
+                <option>Admin</option>
+                <option>HR</option>
+                <option>Client</option>
+                <option>Applicant</option>
+                <option>Security Guard</option>
+                <option>Head Guard</option>
+              </select>
+              <select id="activityUser" class="px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100">
+                <option value="">All Users</option>
+              </select>
+              <select id="activityType" class="px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100">
+                <option value="">All Types</option>
+                <option>Login</option>
+                <option>Logout</option>
+                <option>Failed Login</option>
+                <option>Password Change Attempt</option>
+                <option>Password Changed</option>
+                <option>Edit Profile</option>
+                <option>Other</option>
+              </select>
+              <input id="activityFrom" type="date" class="px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+              <input id="activityTo" type="date" class="px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+            </div>
+
+            <div class="overflow-x-auto bg-white rounded-lg border">
+              <table class="min-w-full text-sm">
+                <thead class="bg-slate-50 text-left text-slate-600 sticky top-0 z-10">
+                  <tr>
+                    <th class="py-3 px-3">Time</th>
+                    <th class="py-3 px-3">User</th>
+                    <th class="py-3 px-3">Role</th>
+                    <th class="py-3 px-3">Event</th>
+                    <th class="py-3 px-3">Source</th>
+                    <th class="py-3 px-3">Details</th>
+                    <th class="py-3 px-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="activityTable" class="divide-y"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Activity Modal -->
+          <div id="activityModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+            <div class="bg-white rounded-xl max-w-3xl w-full p-5 shadow-xl overflow-y-auto max-h-[90vh]">
+              <div class="flex items-start justify-between mb-3">
+                <h2 class="text-base font-semibold">Activity Details</h2>
+                <button id="closeActivityModal" class="text-slate-500">✕</button>
+              </div>
+              <div id="activityDetails" class="text-sm text-slate-700 space-y-3"></div>
+              <div class="mt-4 flex justify-end gap-2">
+                <button id="activityDeleteBtn" class="px-3 py-2 rounded-md bg-red-600 text-white">Delete</button>
+                <button id="activityCloseBtn" class="px-3 py-2 rounded-md bg-slate-200">Close</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Messaging -->
+        <section id="messaging-mgmt" class="content-section">
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h1 class="text-xl font-bold mb-6">Messaging Management</h1>
+            <div class="flex gap-2 mb-4">
+              <button id="inboxBtn" class="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm">Inbox</button>
+              <button id="composeBtn" class="px-3 py-2 rounded-md bg-slate-200 text-slate-800 text-sm">Compose</button>
+            </div>
+            <div id="inbox-section" class="bg-white rounded-lg border p-4">
+              <div class="flex items-center gap-3 mb-4">
+                <input type="text" id="messageSearch" placeholder="Search messages..." class="flex-1 px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                <button id="refreshBtn" class="px-3 py-2 rounded-md bg-slate-100 border">Refresh</button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                  <thead class="text-left text-slate-500 bg-slate-50">
+                    <tr>
+                      <th class="py-2 px-2">Sender</th>
+                      <th class="py-2 px-2">Subject</th>
+                      <th class="py-2 px-2">Date</th>
+                      <th class="py-2 px-2">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="messageTable" class="divide-y">
+                    <tr>
+                      <td class="py-2 px-2">Admin</td>
+                      <td class="py-2 px-2">Welcome to SeekYu</td>
+                      <td class="py-2 px-2">2025-09-13</td>
+                      <td class="py-2 px-2">
+                        <button class="viewBtn text-blue-600 hover:underline" data-id="1">View</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div id="compose-section" class="hidden bg-white rounded-lg border p-4 mt-4">
+              <form id="composeForm" class="space-y-3">
+                <div>
+                  <label class="block text-sm text-slate-600">To:</label>
+                  <input type="text" id="recipient" name="recipient" required class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-600">Subject:</label>
+                  <input type="text" id="subject" name="subject" required class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-600">Message:</label>
+                  <textarea id="message" name="message" rows="5" required class="w-full px-3 py-2 rounded-md border bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-100"></textarea>
+                </div>
+                <div class="flex gap-2">
+                  <button type="submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white">Send Message</button>
+                  <button type="button" id="cancelCompose" class="px-4 py-2 rounded-md bg-slate-200">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Message Viewer Modal (shared) -->
+  <div id="message-popup" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+    <div class="bg-white rounded-xl max-w-lg w-full p-5 shadow-xl">
+      <div class="flex items-start justify-between mb-3">
+        <h2 class="text-base font-semibold">Message Details</h2>
+        <button id="closePopup" class="text-slate-500">✕</button>
+      </div>
+      <p class="text-sm"><strong>From:</strong> <span id="popupSender">-</span></p>
+      <p class="text-sm"><strong>To:</strong> <span id="popupRecipient">-</span></p>
+      <p class="text-sm"><strong>Subject:</strong> <span id="popupSubject">-</span></p>
+      <p class="text-sm"><strong>Date:</strong> <span id="popupDate">-</span></p>
+      <div class="mt-3"><p id="popupBody" class="whitespace-pre-wrap text-sm text-slate-700"></p></div>
+      <div class="mt-4 flex gap-2 justify-end">
+        <button id="replyBtn" class="px-3 py-2 rounded-md bg-emerald-600 text-white">Reply</button>
+        <button id="deleteBtn" class="px-3 py-2 rounded-md bg-red-600 text-white">Delete</button>
+        <button id="closePopup2" class="px-3 py-2 rounded-md bg-slate-200">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup (generic) -->
+  <div id="popup-modal" class="fixed inset-0 hidden items-center justify-center bg-black/40 z-50">
+    <div class="bg-white rounded-xl shadow-xl w-11/12 md:w-1/2 lg:w-1/3 p-6">
+      <h3 class="text-lg font-semibold" id="popup-title">Popup Title</h3>
+      <p class="text-slate-600 mt-2" id="popup-content">This is the popup content. You can put any information here.</p>
+      <div class="flex justify-end mt-6">
+        <button id="close-popup" class="px-4 py-2 bg-indigo-600 text-white rounded-md">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts (kept logic, tightened where helpful) -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Mobile toggles
+    function toggleSidebar() {
+      const sb = document.querySelector('.sidebar');
+      sb.classList.toggle('-ml-64');
+      sb.classList.toggle('ml-0');
+      const icon = document.querySelector('#sidebar-toggle i');
+      if (icon) icon.classList.toggle('fa-bars');
+      if (icon) icon.classList.toggle('fa-times');
+    }
+    document.getElementById('mobile-sidebar-toggle')?.addEventListener('click', toggleSidebar);
+    document.getElementById('mobile-sidebar-toggle-2')?.addEventListener('click', toggleSidebar);
+
+    // Safer section switcher (mirrors Admin)
+    window.showSection = function(sectionId, clickedBtn = null) {
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+      const target = document.getElementById(sectionId);
+      if (target) target.classList.add('active');
+      if (clickedBtn) clickedBtn.classList.add('active');
+      // hide sidebar on mobile
+      if (window.innerWidth < 1024) {
+        document.querySelector('.sidebar')?.classList.add('-ml-64');
+      }
+    };
+  });
+
+  // ===== Messaging Logic (unchanged behavior) =====
+  const inboxBtn = document.getElementById('inboxBtn');
+  const composeBtn = document.getElementById('composeBtn');
+  const inboxSection = document.getElementById('inbox-section');
+  const composeSection = document.getElementById('compose-section');
+  const cancelCompose = document.getElementById('cancelCompose');
+  const composeForm = document.getElementById('composeForm');
+  const messageTable = document.getElementById('messageTable');
+  const messagePopup = document.getElementById('message-popup');
+  const popupSender = document.getElementById('popupSender');
+  const popupRecipient = document.getElementById('popupRecipient');
+  const popupSubject = document.getElementById('popupSubject');
+  const popupDate = document.getElementById('popupDate');
+  const popupBody = document.getElementById('popupBody');
+  const replyBtn = document.getElementById('replyBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const closePopupBtns = [document.getElementById('closePopup'), document.getElementById('closePopup2')];
+
+  let messages = [
+    { id: 1, sender: 'Admin', recipient: 'You', subject: 'Welcome to SeekYu', date: '2025-09-13', body: 'This is a sample welcome message.' }
+  ];
+  let nextMessageId = 2;
+  let currentViewedMessageId = null;
+
+  function escapeHtml(s){ if (!s && s !== 0) return ''; return String(s).replace(/[&<>"'`=\/]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch])); }
+
+  function renderInbox() {
+    if (!messageTable) return;
+    messageTable.innerHTML = '';
+    for (const msg of messages.slice().reverse()) {
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-slate-50';
+      tr.innerHTML = `
+        <td class="py-2 px-2">${escapeHtml(msg.sender)}</td>
+        <td class="py-2 px-2">${escapeHtml(msg.subject)}</td>
+        <td class="py-2 px-2">${escapeHtml(msg.date)}</td>
+        <td class="py-2 px-2">
+          <button class="viewBtn text-blue-600 hover:underline" data-id="${msg.id}">View</button>
+          <button class="delInlineBtn ml-3 text-red-600 hover:underline" data-id="${msg.id}">Delete</button>
+        </td>`;
+      messageTable.appendChild(tr);
+    }
+  }
+
+  function showInbox(){ inboxSection.classList.remove('hidden'); composeSection.classList.add('hidden'); inboxBtn.classList.add('bg-indigo-600','text-white'); inboxBtn.classList.remove('bg-slate-200','text-slate-800'); composeBtn.classList.remove('bg-indigo-600','text-white'); composeBtn.classList.add('bg-slate-200','text-slate-800'); }
+  function showCompose(){ composeSection.classList.remove('hidden'); inboxSection.classList.add('hidden'); composeBtn.classList.add('bg-indigo-600','text-white'); composeBtn.classList.remove('bg-slate-200','text-slate-800'); inboxBtn.classList.remove('bg-indigo-600','text-white'); inboxBtn.classList.add('bg-slate-200','text-slate-800'); }
+  inboxBtn?.addEventListener('click', showInbox);
+  composeBtn?.addEventListener('click', showCompose);
+  cancelCompose?.addEventListener('click', showInbox);
+
+  document.addEventListener('click', function(e){
+    if (e.target?.classList.contains('viewBtn')) {
+      const id = Number(e.target.dataset.id);
+      const msg = messages.find(m => m.id === id); if (!msg) return;
+      currentViewedMessageId = id;
+      popupSender.textContent = msg.sender;
+      popupRecipient.textContent = msg.recipient;
+      popupSubject.textContent = msg.subject;
+      popupDate.textContent = msg.date;
+      popupBody.textContent = msg.body;
+      messagePopup.classList.remove('hidden'); messagePopup.classList.add('flex');
+    }
+    if (e.target?.classList.contains('delInlineBtn')) {
+      const id = Number(e.target.dataset.id);
+      if (!confirm('Delete this message?')) return;
+      messages = messages.filter(m => m.id !== id);
+      renderInbox();
+      if (currentViewedMessageId === id) { currentViewedMessageId = null; messagePopup.classList.add('hidden'); messagePopup.classList.remove('flex'); }
+    }
+  });
+
+  replyBtn?.addEventListener('click', function(){
+    if (!currentViewedMessageId) return; const msg = messages.find(m => m.id === currentViewedMessageId); if (!msg) return;
+    showSection('messaging-mgmt'); showCompose();
+    const recipientInput = document.getElementById('recipient');
+    const subjectInput = document.getElementById('subject');
+    const bodyTextarea = document.getElementById('message');
+    if (recipientInput) recipientInput.value = msg.sender || '';
+    if (subjectInput) subjectInput.value = msg.subject && !/^Re:/i.test(msg.subject) ? `Re: ${msg.subject}` : msg.subject || '';
+    if (bodyTextarea) { bodyTextarea.value = `\n\n--- Original Message ---\nFrom: ${msg.sender}\nDate: ${msg.date}\nSubject: ${msg.subject}\n\n${msg.body}`; bodyTextarea.focus(); bodyTextarea.setSelectionRange(0,0); }
+    messagePopup.classList.add('hidden'); messagePopup.classList.remove('flex');
+  });
+
+  deleteBtn?.addEventListener('click', function(){
+    if (!currentViewedMessageId) return; if (!confirm('Delete this message? This cannot be undone in this demo.')) return;
+    messages = messages.filter(m => m.id !== currentViewedMessageId); currentViewedMessageId = null; messagePopup.classList.add('hidden'); messagePopup.classList.remove('flex'); renderInbox();
+  });
+
+  closePopupBtns.forEach(btn => btn?.addEventListener('click', function(){ messagePopup.classList.add('hidden'); messagePopup.classList.remove('flex'); currentViewedMessageId = null; }));
+  messagePopup?.addEventListener('click', function(e){ if (e.target === messagePopup) { messagePopup.classList.add('hidden'); messagePopup.classList.remove('flex'); currentViewedMessageId = null; } });
+
+  composeForm?.addEventListener('submit', function(e){
+    e.preventDefault();
+    const recipient = document.getElementById('recipient').value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const body = document.getElementById('message').value.trim();
+    if (!recipient || !subject || !body) { alert('Please fill out all fields.'); return; }
+    const newMsg = { id: nextMessageId++, sender: 'You', recipient, subject, date: new Date().toISOString().split('T')[0], body };
+    messages.push(newMsg); renderInbox(); composeForm.reset(); showInbox(); alert('Message sent (demo mode).');
+  });
+
+  renderInbox(); showInbox();
+
+  // Quick: clicking the sidebar Messaging item should open Inbox first
+  const messagingSidebarBtn = Array.from(document.querySelectorAll('button')).find(b => b.getAttribute('onclick')?.includes("showSection('messaging-mgmt'"));
+  if (messagingSidebarBtn) { messagingSidebarBtn.addEventListener('click', function(){ showSection('messaging-mgmt', messagingSidebarBtn); showInbox(); }); }
+  </script>
+</body>
+</html>

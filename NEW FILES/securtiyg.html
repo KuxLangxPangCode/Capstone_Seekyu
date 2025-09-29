@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeekYu — Clean Layout Upgrade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    /* ===============================
+       CLEAN LAYOUT UPGRADE LAYER
+       (non‑destructive: can be dropped into your current page)
+       =============================== */
+
+    :root { color-scheme: light; }
+    html.dark { color-scheme: dark; }
+
+    /* Page shell */
+    .content-shell { max-width: 1400px; margin-inline: auto; }
+
+    /* Cards – unify style across the app */
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .card-inset { padding: 1.25rem; }
+    .card-title { font-size: 1.125rem; font-weight: 700; color: #0f172a; }
+    .card-subtle { color: #64748b; }
+
+    /* Section header (title + actions) */
+    .section-header { display: flex; align-items: center; gap: .75rem; justify-content: space-between; padding-bottom: .75rem; margin-bottom: 1rem; border-bottom: 1px solid #eef2f7; }
+    .section-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; letter-spacing: -.01em; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap:.5rem; border-radius: 10px; padding: .5rem .85rem; font-weight: 600; border: 1px solid transparent; }
+    .btn-primary { background:#4f46e5; color:#fff; }
+    .btn-ghost { background:#fff; color:#0f172a; border-color:#e5e7eb; }
+    .btn-muted { background:#f1f5f9; color:#0f172a; }
+    .btn-icon { width: 36px; height: 36px; justify-content: center; padding: 0; }
+
+    /* Badges/Pills */
+    .badge { display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .5rem; border-radius:999px; font-size:.7rem; font-weight:700; border:1px solid #e5e7eb; color:#0f172a; background:#fff; }
+
+    /* Tables */
+    .table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .925rem; }
+    .table thead th { position: sticky; top: 0; background:#fff; z-index: 5; text-align:left; font-weight:700; color:#475569; padding:.65rem .75rem; border-bottom:1px solid #e5e7eb; }
+    .table tbody td { padding:.65rem .75rem; border-bottom:1px solid #edf2f7; }
+    .table tbody tr:hover { background:#f8fafc; }
+    .table.zebra tbody tr:nth-child(even) { background:#fcfdff; }
+
+    /* Scroll container with fading shadows */
+    .scroll-area { position: relative; overflow:auto; }
+    .scroll-area::before, .scroll-area::after { content:""; position:absolute; left:0; right:0; height:18px; pointer-events:none; z-index:10; }
+    .scroll-area::before { top:0; background:linear-gradient(#fff, rgba(255,255,255,0)); }
+    .scroll-area::after { bottom:0; background:linear-gradient(rgba(255,255,255,0), #fff); }
+
+    /* Sidebar collapse */
+    .sidebar { transition: width .25s ease; }
+    .sidebar.collapsed { width: 76px; }
+    .sidebar.collapsed .label { display:none; }
+
+    /* Header bar */
+    .appbar { position: sticky; top: 0; z-index: 40; backdrop-filter: saturate(180%) blur(8px); background: rgba(255,255,255,.75); border-bottom: 1px solid #e5e7eb; }
+
+    /* Dark mode shim (works with your existing classes) */
+    html.dark body { background-color:#0b1220; }
+    html.dark .appbar { background: rgba(2,6,23,.6); border-color:#1e293b; }
+    html.dark .card { background:#0f172a; border-color:#1f2a3a; box-shadow: 0 1px 2px rgba(0,0,0,.45); }
+    html.dark .card-title, html.dark .section-title { color:#e5e7eb; }
+    html.dark .card-subtle { color:#94a3b8; }
+    html.dark .badge { background:#0f172a; color:#e5e7eb; border-color:#334155; }
+    html.dark .btn-ghost { background:#0f172a; color:#e5e7eb; border-color:#334155; }
+    html.dark .btn-muted { background:#111827; color:#e5e7eb; }
+    html.dark .table thead th { background:#0f172a; border-color:#334155; color:#cbd5e1; }
+    html.dark .table tbody td { border-color:#1f2a3a; color:#e5e7eb; }
+    html.dark .table tbody tr:hover { background:#0b1220; }
+    html.dark .scroll-area::before { background:linear-gradient(#0f172a, rgba(15,23,42,0)); }
+    html.dark .scroll-area::after { background:linear-gradient(rgba(15,23,42,0), #0f172a); }
+
+    /* Utility tweaks */
+    .heading-hero { font-weight: 900; letter-spacing:-.02em; }
+    .stat { display:flex; flex-direction:column; gap:.25rem; padding:.85rem 1rem; border-radius:12px; border:1px solid #e5e7eb; }
+    html.dark .stat { border-color:#334155; }
+  </style>
+</head>
+<body class="min-h-screen flex bg-gray-50">
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar bg-gray-900 text-white w-64 min-h-screen flex flex-col">
+    <div class="p-4 flex items-center justify-between border-b border-gray-800">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-shield-alt text-indigo-400 text-xl"></i>
+        <span class="label font-bold">SeekYu</span>
+      </div>
+      <button id="collapseSidebar" class="btn btn-icon btn-ghost" title="Collapse sidebar">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-4 space-y-1">
+      <div class="px-3 text-gray-400 text-[11px] uppercase tracking-wider label">Main</div>
+      <button data-target="dashboard" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-house text-indigo-400 w-5 text-center"></i><span class="label">Dashboard</span>
+      </button>
+      <button data-target="messaging" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-comment text-sky-400 w-5 text-center"></i><span class="label">Send Message</span>
+        <span class="ml-auto badge">3</span>
+      </button>
+      <button data-target="leave" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-calendar-days text-pink-400 w-5 text-center"></i><span class="label">Request Leave</span>
+        <span class="ml-auto badge">2</span>
+      </button>
+      <button data-target="exam" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-clipboard-list text-pink-400 w-5 text-center"></i><span class="label">Take Exam</span>
+      </button>
+
+      <div class="px-3 mt-5 text-gray-400 text-[11px] uppercase tracking-wider label">Reports</div>
+      <button data-target="incidents" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-circle-exclamation text-orange-400 w-5 text-center"></i><span class="label">Incident Reports</span>
+        <span class="ml-auto badge">1</span>
+      </button>
+    </nav>
+
+    <div class="p-3 border-t border-gray-800">
+      <button class="w-full btn btn-primary justify-center"><i class="fa-solid fa-right-from-bracket"></i><span class="label">Logout</span></button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 flex flex-col">
+    <!-- APP BAR -->
+    <header class="appbar">
+      <div class="content-shell px-4 py-3 flex items-center gap-3">
+        <h1 class="heading-hero text-xl md:text-2xl text-slate-900 dark:text-slate-100">Dashboard</h1>
+        <div class="ml-auto flex items-center gap-2">
+          <div class="hidden md:flex items-center border rounded-xl px-2 py-1 bg-white dark:bg-slate-900 dark:border-slate-700">
+            <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+            <input placeholder="Search…" class="outline-none bg-transparent text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 w-56"/>
+          </div>
+          <button id="themeToggle" class="btn btn-icon btn-ghost" title="Toggle dark mode"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
+          <button class="btn btn-ghost"><i class="fa-regular fa-bell"></i><span class="hidden sm:inline">Notifications</span></button>
+          <div class="w-9 h-9 rounded-full overflow-hidden ring-2 ring-white/70">
+            <img src="https://i.pravatar.cc/100?img=3" class="w-full h-full object-cover" alt="avatar"/>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content-shell w-full px-4 py-6 space-y-6">
+      <!-- Top stats -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="stat"><div class="text-xs text-slate-500">On-duty Guards</div><div class="text-2xl font-extrabold">18</div></div>
+        <div class="stat"><div class="text-xs text-slate-500">Open Incidents</div><div class="text-2xl font-extrabold">3</div></div>
+        <div class="stat"><div class="text-xs text-slate-500">Avg. KPI</div><div class="text-2xl font-extrabold">85%</div></div>
+        <div class="stat"><div class="text-xs text-slate-500">Unread Messages</div><div class="text-2xl font-extrabold">4</div></div>
+      </section>
+
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Bulletin + Recent -->
+        <div class="lg:col-span-2 card">
+          <div class="card-inset">
+            <div class="section-header">
+              <div class="section-title">Bulletin Board</div>
+              <div class="flex gap-2"><button class="btn btn-muted"><i class="fa-solid fa-rotate"></i>Refresh</button></div>
+            </div>
+
+            <div class="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+              <div id="bulletin" class="flex snap-x snap-mandatory overflow-x-auto">
+                <!-- slides injected by JS -->
+              </div>
+              <div class="absolute inset-x-0 bottom-2 flex items-center justify-center gap-2" id="bulletinDots"></div>
+            </div>
+
+            <div class="mt-6">
+              <div class="section-header"><div class="section-title">Recent Activity</div></div>
+              <ul id="recent" class="space-y-3">
+                <li class="flex gap-3 items-start">
+                  <span class="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 grid place-items-center"><i class="fa-solid fa-user-plus"></i></span>
+                  <div>
+                    <div class="font-semibold text-slate-800 dark:text-slate-100">John Doe</div>
+                    <div class="text-sm card-subtle">registered as a new security guard · 2h ago</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: Notifications, Calendar, KPI -->
+        <div class="space-y-6">
+          <div class="card card-inset">
+            <div class="section-header"><div class="section-title">Notifications</div></div>
+            <ul id="notifList" class="space-y-2 max-h-48 scroll-area pr-2">
+              <li class="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <div class="text-sm font-semibold">Holiday Notice</div>
+                    <div class="text-xs card-subtle">Office closed on Sept 25 for local holiday.</div>
+                  </div>
+                  <div class="text-xs text-slate-400">2d</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card card-inset">
+            <div class="section-header"><div class="section-title">Calendar</div></div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="font-semibold" id="calendarMonth"></div>
+              <div class="flex gap-2">
+                <button id="prevMonth" class="btn btn-icon btn-ghost"><i class="fa-solid fa-chevron-left"></i></button>
+                <button id="nextMonth" class="btn btn-icon btn-ghost"><i class="fa-solid fa-chevron-right"></i></button>
+              </div>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-[11px] text-slate-500 mb-1">
+              <div class="text-center">Sun</div><div class="text-center">Mon</div><div class="text-center">Tue</div><div class="text-center">Wed</div><div class="text-center">Thu</div><div class="text-center">Fri</div><div class="text-center">Sat</div>
+            </div>
+            <div id="calendarDays" class="grid grid-cols-7 gap-1 text-sm"></div>
+          </div>
+
+          <div class="card card-inset">
+            <div class="section-header"><div class="section-title">KPI Snapshot</div></div>
+            <div id="kpiList" class="space-y-3"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Shift + Attendance (example refactor) -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="card card-inset">
+          <div class="section-header"><div class="section-title">Shift Schedule (Today)</div></div>
+          <div class="scroll-area rounded-xl border border-slate-200 dark:border-slate-700">
+            <table class="table zebra">
+              <thead><tr><th>Guard</th><th>Area</th><th>Start</th><th>End</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Miguel Santos</td><td>Warehouse A</td><td>07:00</td><td>15:00</td><td class="text-emerald-600 font-semibold">On Duty</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card card-inset">
+          <div class="section-header"><div class="section-title">Your Attendance</div>
+            <div class="flex gap-2">
+              <button id="btnCheckIn" class="btn btn-primary"><i class="fa-solid fa-arrow-right-to-bracket"></i>Check In</button>
+              <button id="btnCheckOut" class="btn btn-ghost"><i class="fa-solid fa-arrow-right-from-bracket"></i>Check Out</button>
+            </div>
+          </div>
+          <div id="attendanceList" class="space-y-3">
+            <p class="text-xs card-subtle">No attendance yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- The rest of your original sections (Messaging, Leave, Incidents, Exam, Modals) can stay as-is.
+           This file focuses on the visual shell & components you can copy into your page. -->
+    </main>
+  </div>
+
+  <!-- THEME TOGGLE (works app-wide) -->
+  <script>
+    (function () {
+      const STORAGE_KEY = 'seekyu-theme';
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initial = saved || (systemDark ? 'dark' : 'light');
+      applyTheme(initial);
+      function setIcon(theme){ if(!icon) return; icon.className = 'fa-solid ' + (theme==='dark' ? 'fa-sun' : 'fa-moon'); }
+      function applyTheme(theme){ const isDark = theme==='dark'; root.classList.toggle('dark', isDark); localStorage.setItem(STORAGE_KEY, isDark?'dark':'light'); setIcon(theme); }
+      btn?.addEventListener('click', ()=> applyTheme(root.classList.contains('dark')?'light':'dark'));
+    })();
+  </script>
+
+  <!-- Sidebar collapse & simple demo data renderers -->
+  <script>
+    // Sidebar collapse
+    document.getElementById('collapseSidebar')?.addEventListener('click', () => {
+      const sb = document.getElementById('sidebar');
+      sb.classList.toggle('collapsed');
+      const icon = event.currentTarget.querySelector('i');
+      icon.classList.toggle('fa-chevron-left');
+      icon.classList.toggle('fa-chevron-right');
+    });
+
+    // Bulletin slides
+    (function(){
+      const data = [
+        {title:'Holiday Notice', body:'Office closed on Sept 25 for local holiday.', image:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1400&auto=format&fit=crop'},
+        {title:'New SOP', body:'Updated patrol SOP v2.1 uploaded. Read and acknowledge.', image:'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1400&auto=format&fit=crop'},
+        {title:'Safety Tip', body:'Wear non-slip shoes during rainy season.', image:'https://images.unsplash.com/photo-1508873535684-277a3cbcc4e5?q=80&w=1400&auto=format&fit=crop'}
+      ];
+      const wrap = document.getElementById('bulletin');
+      const dots = document.getElementById('bulletinDots');
+      if(!wrap) return;
+      wrap.innerHTML = '';
+      data.forEach((b,i)=>{
+        const slide = document.createElement('div');
+        slide.className = 'min-w-full snap-center relative';
+        slide.innerHTML = `
+          <img src="${b.image}" class="w-full h-56 md:h-64 object-cover"/>
+          <div class="absolute left-4 bottom-4 bg-black/50 text-white p-3 rounded-lg max-w-[80%]">
+            <div class="font-bold">${b.title}</div>
+            <div class="text-xs opacity-90">${b.body}</div>
+          </div>`;
+        wrap.appendChild(slide);
+        const d = document.createElement('button');
+        d.className = 'w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600';
+        d.addEventListener('click', ()=> wrap.scrollTo({left: i*wrap.clientWidth, behavior:'smooth'}));
+        dots?.appendChild(d);
+      });
+    })();
+
+    // Calendar (minimal)
+    (function(){
+      const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+      let curr = new Date();
+      const calMonthEl = document.getElementById('calendarMonth');
+      const days = document.getElementById('calendarDays');
+      function draw(d){
+        if(!days) return;
+        days.innerHTML='';
+        const y=d.getFullYear(), m=d.getMonth();
+        calMonthEl && (calMonthEl.textContent = monthNames[m] + ' ' + y);
+        const start = new Date(y,m,1).getDay();
+        const total = new Date(y,m+1,0).getDate();
+        for(let i=0;i<start;i++){ const s=document.createElement('div'); s.className='h-7'; days.appendChild(s); }
+        const today=new Date();
+        for(let day=1; day<=total; day++){
+          const cell=document.createElement('div');
+          cell.className='h-8 grid place-items-center rounded-md text-slate-700 dark:text-slate-200';
+          if(day===today.getDate() && m===today.getMonth() && y===today.getFullYear()){
+            cell.className += ' bg-indigo-600 text-white font-semibold';
+          } else {
+            cell.className += ' hover:bg-slate-100 dark:hover:bg-slate-800';
+          }
+          cell.textContent=day;
+          days.appendChild(cell);
+        }
+      }
+      draw(curr);
+      document.getElementById('prevMonth')?.addEventListener('click',()=>{ curr=new Date(curr.getFullYear(), curr.getMonth()-1, 1); draw(curr); });
+      document.getElementById('nextMonth')?.addEventListener('click',()=>{ curr=new Date(curr.getFullYear(), curr.getMonth()+1, 1); draw(curr); });
+    })();
+
+    // KPI sample
+    (function(){
+      const kpis=[
+        {name:'Professional conduct', score:92, desc:'Adherence to code of conduct.'},
+        {name:'Operational effectiveness', score:78, desc:'Task efficiency & compliance.'},
+        {name:'Situational awareness', score:85, desc:'Detect, assess, respond quickly.'}
+      ];
+      const list=document.getElementById('kpiList');
+      if(!list) return;
+      list.innerHTML='';
+      kpis.forEach(k=>{
+        const wrap=document.createElement('div');
+        wrap.className='p-3 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700';
+        wrap.innerHTML = `
+          <div class='flex items-center justify-between'>
+            <div>
+              <div class='text-sm font-semibold'>${k.name}</div>
+              <div class='text-xs card-subtle'>${k.desc}</div>
+            </div>
+            <div class='font-bold'>${k.score}%</div>
+          </div>
+          <div class='mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden'>
+            <div class='h-full bg-indigo-600' style='width:${Math.max(0,Math.min(100,k.score))}%'></div>
+          </div>`;
+        list.appendChild(wrap);
+      });
+    })();
+
+    // Attendance demo (minimal, keeps IDs compatible)
+    (function(){
+      const list=document.getElementById('attendanceList');
+      const btnIn=document.getElementById('btnCheckIn');
+      const btnOut=document.getElementById('btnCheckOut');
+      if(!list||!btnIn||!btnOut) return;
+      let current=null;
+      function fmt(d){return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});}    
+      btnOut.disabled=true;
+      btnIn.addEventListener('click',()=>{
+        const now=new Date();
+        list.querySelector('p')?.remove();
+        const card=document.createElement('div');
+        card.className='p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700';
+        card.innerHTML=`
+          <div class='flex justify-between'>
+            <div>
+              <div class='text-sm font-semibold'>${now.toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'})}</div>
+              <div class='text-xs card-subtle'>Time In: <span class='text-emerald-600'>${fmt(now)}</span></div>
+              <div class='text-xs card-subtle'>Time Out: <span class='timeOut text-slate-400'>-</span></div>
+            </div>
+            <div class='text-xs text-slate-400'>Now</div>
+          </div>`;
+        list.prepend(card);
+        current=card.querySelector('.timeOut');
+        btnIn.disabled=true; btnOut.disabled=false;
+      });
+      btnOut.addEventListener('click',()=>{
+        if(!current) return;
+        current.textContent = fmt(new Date());
+        current.classList.remove('text-slate-400');
+        current.classList.add('text-red-600');
+        current=null; btnIn.disabled=false; btnOut.disabled=true;
+      });
+    })();
+  </script>
+</body>
+</html>
