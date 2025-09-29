@@ -1,590 +1,1620 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeekYu Client Dashboard</title>
-  <link rel="stylesheet" href="styles/Client.css" />
-  <script src="scripts/Messaging.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SeekYu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    .sidebar { transition: all 0.3s ease; }
+    .sidebar-item.active { background-color: #3b82f6; color: white; }
+    .sidebar-item.active:hover { background-color: #2563eb; }
+    .content-section { display: none; }
+    .content-section.active { display: block; }
+    .calendar-grid { grid-template-columns: repeat(7, 1fr); }
+    .day-cell { height: 2.25rem; display:flex; align-items:center; justify-content:center; }
+    .modal-backdrop { background: rgba(15, 23, 42, 0.6); }
+
+    /* carousel */
+    .bulletin-card { min-width: 320px; max-width: 100%; }
+    .group:hover .kpi-desc { opacity: 1; }
+
+    /* small helpful rules */
+    #bulletinWrap { min-height: 16rem; }
+    #bulletinTrack { will-change: transform; }
+    </style>
 </head>
-<body>
-  <div class="app-container">
+<body class="bg-gray-100 min-h-screen flex">
     <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="logo">SeekYu</div>
-      <nav>
-        <ul>
-          <li><button onclick="showSection('dashboard')" class="active">Dashboard</button></li>
-          <li><button onclick="showSection('incident-reports')">Incident Reports</button></li>
-          <li><button onclick="showSection('messaging-mgmt')">Send Message</button></li>
-          <li><button onclick="showSection('kpi-evaluation')">KPI Evaluation</button></li>
-          <li><button onclick="showSection('deployment')">Deployment Request</button></li>
-          <li><button onclick="location.href='Index.html'">Logout</button></li>
-        </ul>
-      </nav>
-    </aside>
-
-    <div class="content">
-      <!-- Dashboard -->
-      <div id="dashboard" class="section active">
-        <div class="dashboard-header">
-          <div>
-            <h1>Client Dashboard</h1>
-            <p class="muted">Overview of security operations and guard activities.</p>
-          </div>
-
-          <div class="header-actions">
-            <div class="notification-dropdown">
-              <button id="notifToggle" class="icon-btn" aria-expanded="false">
-                Notifications <span id="notifCount" class="badge">3</span>
-              </button>
-              <div id="notifList" class="dropdown hidden">
-                <ul>
-                  <li><strong>Incident Report:</strong> Unauthorized access reported at ABC Mall. <span class="time">3h</span></li>
-                  <li><strong>Guard Update:</strong> New guard assigned to your location. <span class="time">1d</span></li>
-                  <li><strong>Schedule Change:</strong> Security schedule updated for next week. <span class="time">2d</span></li>
-                </ul>
-                <div class="dropdown-actions"><a href="Notif-Client.html" id="viewAllNotifs" class="small-btn">View all</a></div>
-              </div>
-            </div>
-
-            <div class="profile-summary">
-              <img src="https://via.placeholder.com/48" alt="Client avatar" class="avatar">
-              <div>
-                <div class="name">Client User</div>
-                <div class="role muted">Client Administrator</div>
-              </div>
-            </div>
-          </div>
+  <div id="sidebar" class="sidebar bg-gray-800 text-white w-64 min-h-screen flex flex-col">
+    <!-- Logo & Profile -->
+    <div class="p-5 border-b border-gray-700">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center">
+          <i class="fas fa-shield-alt text-blue-400 text-2xl mr-3"></i>
+          <span class="text-xl font-semibold">SeekYu</span>
         </div>
-
-        <!-- Dashboard layout -->
-        <div class="dashboard-layout">
-          <div class="dashboard-main">
-
-            <!-- Guard Tracking -->
-            <section class="guard-tracking card">
-              <h2>Security Guard Tracking</h2>
-              <p class="muted">Monitor deployments and status of guards at your locations.</p>
-              <div class="dshbrdtracking-grid">
-                <div class="dshbrdtracking-list">
-                  <h3>Guards Overview</h3>
-                  <table class="compact">
-                    <thead>
-                      <tr><th>Name</th><th>ID</th><th>Area</th><th>Status</th><th>Last Seen</th></tr>
-                    </thead>
-                    <tbody id="dshbrdguardTableBody">
-                      <tr><td>Juan Dela Cruz</td><td>SG001</td><td>ABC Mall</td><td><span class="status present">Present</span></td><td>10:42</td></tr>
-                      <tr><td>Maria Santos</td><td>SG045</td><td>Towerville</td><td><span class="status on-leave">On Leave</span></td><td>—</td></tr>
-                      <tr><td>Ramon Villanueva</td><td>SG078</td><td>Client A HQ</td><td><span class="status late">Late</span></td><td>09:35</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div class="tracking-stats">
-                  <h3>Deployment Summary</h3>
-                  <div class="stat-row"><span>Total Guards</span><strong id="statPresent">12</strong></div>
-                  <div class="stat-row"><span>Active Now</span><strong id="statAbsent">8</strong></div>
-                  <div class="stat-row"><span>On Break</span><strong id="statLate">2</strong></div>
-                  <div class="stat-row"><span>Off Duty</span><strong id="statOnLeave">2</strong></div>
-
-                  <h4>Recent Updates</h4>
-                  <ul id="recentAlerts" class="alerts-list">
-                    <li>SG078 — Late arrival (09:35)</li>
-                    <li>New guard assigned to East Wing</li>
-                    <li>Incident reported near loading dock</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
-            <!-- KPI Monitoring -->
-            <section class="dashboard-kpi card">
-              <h3>KPI Monitoring</h3>
-              <div class="kpi-grid">
-                <div class="kpi-box">
-                  <h4>Attendance</h4>
-                  <p class="kpi-value positive">95%</p>
-                </div>
-                <div class="kpi-box">
-                  <h4>Punctuality</h4>
-                  <p class="kpi-value positive">88%</p>
-                </div>
-                <div class="kpi-box">
-                  <h4>Performance</h4>
-                  <p class="kpi-value positive">92%</p>
-                </div>
-                <div class="kpi-box">
-                  <h4>Training & Skills</h4>
-                  <p class="kpi-value positive">92%</p>
-                </div>
-              </div>
-            </section>
-          </div>
-        </div>
+        <button id="sidebar-toggle" class="text-gray-400 hover:text-white lg:hidden" title="Close sidebar menu">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
 
-      <!-- Incident Reports -->
-      <div id="incident-reports" class="section">
-        <h1>Incident Reports</h1>
-        <p>Review security incidents reported at your locations.</p>
-        <input type="text" id="incidentSearch" placeholder="Search incident reports..." class="search-input">
-
-        <div class="scrollable-content">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Guard Name</th>
-                <th>Guard ID</th>
-                <th>Type of Incident</th>
-                <th>Actions Taken</th>
-                <th>Location</th>
-                <th>Persons Involved</th>
-                <th>Evidence</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>2025-08-20</td>
-                <td>14:30</td>
-                <td>Juan Dela Cruz</td>
-                <td>SG001</td>
-                <td>Unauthorized Access</td>
-                <td>Escorted Individual Off Premises</td>
-                <td>ABC Mall - Loading Dock</td>
-                <td>Unknown Male</td>
-                <td><a href="#" class="view-evidence">View Image</a></td>
-                <td><button class="view-report-btn" data-report-id="r1">View</button></td>
-              </tr>
-              <tr>
-                <td>2025-08-19</td>
-                <td>22:15</td>
-                <td>Maria Santos</td>
-                <td>SG045</td>
-                <td>Theft</td>
-                <td>Apprehended Suscept</td>
-                <td>Main Entrance</td>
-                <td>John Smith</td>
-                <td><a href="#" class="view-evidence">View Image</a></td>
-                <td><button class="view-report-btn" data-report-id="r2">View</button></td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Profile block -->
+      <div class="flex items-center space-x-3">
+        <div class="relative">
+          <img id="profilePic" src="https://i.pravatar.cc/100?img=3" alt="Profile" class="w-14 h-14 rounded-full object-cover border-2 border-gray-700"/>
+          <button id="editProfileBtn" title="Edit profile" class="absolute bottom-0 right-0 bg-gray-700 hover:bg-gray-600 p-1 rounded-full text-xs">
+            <i class="fas fa-pen"></i>
+          </button>
+        </div>
+        <div>
+          <div id="profileName" class="text-sm font-semibold">User name</div>
+          <div id="profileRole" class="text-xs text-gray-300 mt-1">Guard Head</div>
+          <button id="editProfileSmall" class="text-xs text-gray-300 hover:text-white mt-1">Edit profile</button>
         </div>
       </div>
-
-      <!-- Messaging Management -->
-      <div id="messaging-mgmt" class="section">
-        <h1>Messaging</h1>
-
-        <!-- Sub-navigation -->
-        <div class="sub-nav">
-          <button id="inboxBtn">Inbox</button>
-          <button id="composeBtn">Compose</button>
-        </div>
-
-        <!-- Inbox Section -->
-        <div id="inbox-section" class="sub-section active">
-          <input type="text" id="messageSearch" placeholder="Search messages...">
-
-          <table class="message-table" id="messageTable">
-            <thead>
-              <tr>
-                <th>Sender</th>
-                <th>Subject</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr data-id="1">
-                <td>Admin</td>
-                <td>Shift Schedule Update</td>
-                <td>2025-08-25</td>
-                <td>
-                  <button class="view-message-btn" data-from="Admin" data-subject="Shift Schedule Update" data-date="2025-08-25" data-body="Your shift schedule has been updated. Please check the system for details.">View</button>
-                  <button class="delete-message-btn">Delete</button>
-                </td>
-              </tr>
-              <tr data-id="2">
-                <td>Client A</td>
-                <td>Incident Feedback</td>
-                <td>2025-08-22</td>
-                <td>
-                  <button class="view-message-btn" data-from="Client A" data-subject="Incident Feedback" data-date="2025-08-22" data-body="Feedback regarding the incident you reported.">View</button>
-                  <button class="delete-message-btn">Delete</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Compose Section -->
-        <div id="compose-section" class="sub-section">
-          <form id="composeForm" class="compose-form">
-            <label for="recipient">To:</label>
-            <input type="text" id="recipient" name="recipient" placeholder="Enter recipient name" required>
-
-            <label for="subject">Subject:</label>
-            <input type="text" id="subject" name="subject" placeholder="Enter subject" required>
-
-            <label for="message">Message:</label>
-            <textarea id="message" name="message" rows="5" placeholder="Write your message..." required></textarea>
-
-            <button type="submit">Send Message</button>
-          </form>
-        </div>
-      </div>
-
-      <!-- KPI Evaluation -->
-      <div id="kpi-evaluation" class="section">
-        <h1>KPI Evaluation</h1>
-        <p>Evaluate performance of security guards deployed at your locations.</p>
-
-        <table border="1" cellpadding="8" cellspacing="0">
-          <thead>
-            <tr>
-              <th>Employee ID</th>
-              <th>Name</th>
-              <th>Position</th>
-              <th>Deployment Location</th>
-              <th>Last Evaluation Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>SG001</td>
-              <td>Juan Dela Cruz</td>
-              <td>Security Guard</td>
-              <td>ABC Mall</td>
-              <td>2025-08-15</td>
-              <td>
-                <button class="action-btn" onclick="openEvaluationForm('SG001')">Evaluate KPI</button>
-                <button class="view-btn" onclick="openViewScore('SG001')">View KPI Score</button>
-              </td>
-            </tr>
-            <tr>
-              <td>SG002</td>
-              <td>Maria Santos</td>
-              <td>Head Security Guard</td>
-              <td>XYZ Tower</td>
-              <td>2025-08-10</td>
-              <td>
-                <button class="action-btn" onclick="openEvaluationForm('SG002')">Evaluate KPI</button>
-                <button class="view-btn" onclick="openViewScore('SG002')">View KPI Score</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Deployment Request -->
-      <div id="deployment" class="section">
-        <h1>Deployment Request</h1>
-        <p>Request additional security personnel for your locations.</p>
+    </div>
         
-        <form id="deploymentForm" class="deployment-form">
-          <h3>Client Information</h3>
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4">
+            <div class="px-4 space-y-1">
+                <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Main Menu</div>
+                
+                <button onclick="showSection('dashboard')" class="sidebar-item active w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-home mr-3 text-lg text-blue-400"></i>
+                    <span>Dashboard</span>
+                </button>
+                
+                <button onclick="showSection('guard-mgmt')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-clipboard-list mr-3 text-lg text-green-400"></i>
+                    <span>Guard Management</span>
+                    <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">2</span>
+                </button>
+                
+                <button onclick="showSection('messaging-mgmt')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-comment mr-3 text-lg text-indigo-400"></i>
+                    <span>Send Message</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">3</span>
+                </button>
 
+                <button onclick="showSection('attendance-monitor')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-clock mr-3 text-lg text-emerald-400"></i>
+                    <span>Attendance Monitoring</span>
+               </button>
+            </div>
+            
+
+            <div class="px-4 space-y-1 mt-8">
+                <div class="text-gray-400 text-xs uppercase tracking-wider font-medium px-4 mb-3">Reports & Analytics</div>
+               <button onclick="showSection('incident-reports')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-exclamation-circle mr-3 text-lg text-orange-400"></i>
+                    <span>Incident Reports</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">1</span>
+               </button>
+
+               <button onclick="showSection('leave-requests')" class="sidebar-item w-full text-left flex items-center px-4 py-3 text-gray-200 hover:bg-gray-700 rounded-lg group">
+                    <i class="fas fa-calendar-alt mr-3 text-lg text-pink-400"></i>
+                    <span>Leave Requests</span>
+                    <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">2</span>
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Logout Button -->
+        <div class="p-4 border-t border-gray-700">
+            <button onclick="location.href='Index.html'" class="w-full flex items-center justify-center px-4 py-3 text-gray-200 hover:bg-red-700 hover:text-white rounded-lg bg-red-600">
+                <i class="fas fa-sign-out-alt mr-3"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+    
+
+
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+            <!-- Mobile Header -->
+    <div class="bg-white shadow-sm p-4 flex items-center justify-between lg:hidden">
+      <button id="mobile-sidebar-toggle" class="text-gray-600 hover:text-gray-900" title="Open sidebar menu">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+      <h1 class="text-xl font-semibold">Dashboard</h1>
+      <div class="flex items-center">
+        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+          <i class="fas fa-user text-gray-600"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Sections (all inside same container) -->
+    <div class="p-6 flex-1">
+      <!-- Dashboard -->
+      <div id="dashboard" class="content-section active">
+        <h1 class="text-2xl font-bold text-gray-800 mt-3">Welcome, Client</h1>
+        <p class="text-gray-600 mb-6">Here's a summary of your security operations.</p>
+        
+
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Left: Bulletin & Activity -->
+          <div class="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Bulletin Board</h2>
+
+            <div id="bulletinWrap" class="relative">
+              <div class="overflow-hidden rounded-lg">
+                <div id="bulletinTrack" class="flex gap-4 transition-transform duration-500">
+                  <!-- injected by JS -->
+                </div>
+              </div>
+
+              <div class="absolute left-2 top-1/2 -translate-y-1/2">
+                <button id="bulletPrev" class="p-2 rounded bg-white shadow" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+              </div>
+              <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                <button id="bulletNext" class="p-2 rounded bg-white shadow" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+              </div>
+
+              <div id="bulletIndicators" class="absolute left-1/2 -translate-x-1/2 bottom-3 flex gap-2"></div>
+            </div>
+<!-- Shift Schedule (Today) -->
+<div class="mt-6 bg-white rounded-lg shadow-sm p-6">
+  <h3 class="text-lg font-semibold text-gray-800 mb-4">Shift Schedule (Today)</h3>
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Guard</th>
+          <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Area</th>
+          <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Start</th>
+          <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">End</th>
+          <th class="px-4 py-2 text-left font-medium text-gray-600 border-b">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2 border-b">Miguel Santos</td>
+          <td class="px-4 py-2 border-b">Warehouse A</td>
+          <td class="px-4 py-2 border-b">07:00</td>
+          <td class="px-4 py-2 border-b">15:00</td>
+          <td class="px-4 py-2 border-b text-green-600 font-medium">On Duty</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Attendance Records -->
+<div class="mt-6 bg-white rounded-lg shadow-sm p-6">
+  <h3 class="text-lg font-semibold text-gray-800 mb-4">Your Attendance Records</h3>
+
+  <!-- Logs will appear here -->
+  <div id="attendanceList" class="space-y-3 mb-4">
+    <p class="text-xs text-gray-500">No attendance yet.</p>
+  </div>
+</div>
+            <hr class="my-4" />
+            <h3 class="text-lg font-semibold text-gray-800 mb-2">Recent Activity</h3>
+            <div id="recentActivity" class="border-t border-gray-100 pt-4">
+              <div class="flex items-start mb-4">
+                <div class="bg-blue-100 p-2 rounded-full"><i class="fas fa-user-plus text-blue-600"></i></div>
+                <div class="ml-4">
+                  <p class="text-gray-800"><span class="font-medium">John Doe</span> registered as a new security guard</p>
+                  <p class="text-sm text-gray-500">2 hours ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Notifications, Calendar, KPI -->
+          <div class="bg-white rounded-lg shadow-sm p-6">
+            <aside class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-4">
+              <h3 class="text-lg font-semibold text-gray-800 mb-3">Notifications</h3>
+              <ul id="notifList" class="space-y-2 max-h-40 overflow-y-auto mb-4">
+                <li class="p-3 rounded-lg bg-gray-50 border border-gray-100">
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <div class="text-sm font-medium text-gray-800">Holiday Notice</div>
+                      <div class="text-xs text-gray-500">Office closed on Sept 25 for local holiday.</div>
+                    </div>
+                    <div class="text-xs text-gray-400 ml-3">2d</div>
+                  </div>
+                </li>
+              </ul>
+
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <div class="text-sm font-semibold" id="calendarMonth">Month Year</div>
+                  <div class="flex items-center space-x-2">
+                    <button id="prevMonth" class="p-2 rounded hover:bg-gray-100" title="Previous month"><i class="fas fa-chevron-left"></i></button>
+                    <button id="nextMonth" class="p-2 rounded hover:bg-gray-100" title="Next month"><i class="fas fa-chevron-right"></i></button>
+                  </div>
+                </div>
+
+                <div class="grid calendar-grid gap-1 text-xs text-gray-600 mb-2">
+                  <div class="text-center font-medium">Sun</div><div class="text-center font-medium">Mon</div>
+                  <div class="text-center font-medium">Tue</div><div class="text-center font-medium">Wed</div>
+                  <div class="text-center font-medium">Thu</div><div class="text-center font-medium">Fri</div>
+                  <div class="text-center font-medium">Sat</div>
+                </div>
+
+                <div id="calendarDays" class="grid calendar-grid gap-1 text-sm text-gray-700"></div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+            
+            <!-- Other Sections (initially hidden) -->
+
+
+<!-- NEW: Attendance Monitoring report (Reports & Analytics) -->
+      <div id="attendance-monitor" class="content-section">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 class="text-lg font-semibold">Attendance Monitoring</h2>
+              <p class="text-sm text-gray-500">The time-in and time-out of security guards in their deployed area are displayed here.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <input id="amSearch" type="search" placeholder="Search guard or area..." class="px-3 py-2 rounded border bg-slate-50" />
+              <input id="amFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+              <input id="amTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+              <select id="amAreaFilter" class="px-3 py-2 rounded border bg-slate-50">
+                <option value="">All areas</option>
+              </select>
+              <button id="amRefresh" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+              <button id="amExport" class="px-3 py-2 rounded bg-emerald-600 text-white">Export CSV</button>
+            </div>
+          </div>
+
+          <div class="overflow-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-gray-50 text-gray-600">
+                <tr>
+                  <th class="px-3 py-2 text-left">Guard</th>
+                  <th class="px-3 py-2 text-left">Area</th>
+                  <th class="px-3 py-2 text-left">Date</th>
+                  <th class="px-3 py-2 text-left">Time In</th>
+                  <th class="px-3 py-2 text-left">Time Out</th>
+                  <th class="px-3 py-2 text-left">Notes</th>
+                  <th class="px-3 py-2 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="amTbody" class="bg-white divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+<!-- REPLACED guard-mgmt: professional module starts here -->
+      <div id="guard-mgmt" class="content-section">
+        <div class="max-w-full">
+          <main class="max-w-6xl mx-auto p-0">
+            <header class="flex items-center justify-between mb-6">
+              <div>
+                <h1 class="text-2xl font-semibold">Guard Management</h1>
+                <p class="text-sm text-gray-500">Manage guards, evaluate KPIs and review attendance (Head Guard).</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <input id="gmSearch" type="search" placeholder="Search guards by name, area or ID..." class="px-3 py-2 rounded border bg-white shadow-sm w-72" />
+                <button id="gmAddBtn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"><i class="fas fa-plus"></i> Add Guard</button>
+                <button id="gmExportBtn" class="bg-slate-50 text-slate-800 px-3 py-2 rounded border hover:bg-slate-100">Export CSV</button>
+              </div>
+            </header>
+
+            <section class="bg-white rounded-lg shadow overflow-hidden">
+              <div class="p-4 border-b flex items-center justify-between">
+                <div class="text-sm text-gray-600">Guards — <span id="gmCount">0</span></div>
+                <div class="text-xs text-gray-400">Tip: Click "Evaluate" to rate KPI or "Attendance" to view logs.</div>
+              </div>
+
+              <div class="overflow-auto">
+                <table class="min-w-full text-sm table-auto">
+                  <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                      <th class="px-4 py-3 text-left">Name</th>
+                      <th class="px-4 py-3 text-left">Area</th>
+                      <th class="px-4 py-3 text-left">Avg KPI</th>
+                      <th class="px-4 py-3 text-left">Last Evaluated</th>
+                      <th class="px-4 py-3 text-left">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="gmTbody" class="divide-y bg-white"></tbody>
+                </table>
+              </div>
+            </section>
+          </main>
+        </div>
+
+        <!-- Add / Edit Guard Modal -->
+        <div id="gmModalGuard" class="fixed inset-0 hidden items-center justify-center z-40">
+          <div class="absolute inset-0 modal-backdrop" data-close></div>
+          <div class="bg-white rounded-lg shadow-lg w-full max-w-lg z-50">
+            <form id="gmFormGuard" class="p-6">
+              <h2 class="text-lg font-semibold mb-3" id="gmModalGuardTitle">Add Guard</h2>
+              <input type="hidden" id="gmGuardId" />
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label class="text-xs text-gray-600">Full name <span class="text-red-500">*</span></label>
+                  <input id="gmGuardName" required class="w-full px-3 py-2 rounded border bg-slate-50" />
+                </div>
+                <div>
+                  <label class="text-xs text-gray-600">Area / Post</label>
+                  <input id="gmGuardArea" class="w-full px-3 py-2 rounded border bg-slate-50" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label class="text-xs text-gray-600">Employee ID</label>
+                  <input id="gmGuardEmpId" placeholder="auto-generated" class="w-full px-3 py-2 rounded border bg-slate-50" />
+                </div>
+                <div>
+                  <label class="text-xs text-gray-600">Contact (optional)</label>
+                  <input id="gmGuardContact" class="w-full px-3 py-2 rounded border bg-slate-50" />
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-2">
+                <button type="button" data-close class="px-4 py-2 rounded border bg-white">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Save Guard</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- KPI Modal -->
+        <div id="gmModalKpi" class="fixed inset-0 hidden items-center justify-center z-40">
+          <div class="absolute inset-0 modal-backdrop" data-close></div>
+          <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl z-50">
+            <form id="gmFormKpi" class="p-6">
+              <h2 class="text-lg font-semibold mb-3">Evaluate KPI — <span id="gmKpiGuardName"></span></h2>
+              <input type="hidden" id="gmKpiGuardId" />
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                <div>
+                  <label class="text-xs text-gray-600">Professional conduct</label>
+                  <select id="gmKpiProfessional" class="w-full px-3 py-2 rounded border bg-slate-50">
+                    <option value="1">1 — Poor</option>
+                    <option value="2">2 — Fair</option>
+                    <option value="3" selected>3 — Good</option>
+                    <option value="4">4 — Very Good</option>
+                    <option value="5">5 — Excellent</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-gray-600">Operational effectiveness</label>
+                  <select id="gmKpiOperational" class="w-full px-3 py-2 rounded border bg-slate-50">
+                    <option value="1">1 — Poor</option>
+                    <option value="2">2 — Fair</option>
+                    <option value="3" selected>3 — Good</option>
+                    <option value="4">4 — Very Good</option>
+                    <option value="5">5 — Excellent</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-xs text-gray-600">Situational awareness & response</label>
+                  <select id="gmKpiSituational" class="w-full px-3 py-2 rounded border bg-slate-50">
+                    <option value="1">1 — Poor</option>
+                    <option value="2">2 — Fair</option>
+                    <option value="3" selected>3 — Good</option>
+                    <option value="4">4 — Very Good</option>
+                    <option value="5">5 — Excellent</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="text-xs text-gray-600">Notes (optional)</label>
+                <textarea id="gmKpiNotes" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+              </div>
+
+              <div class="flex justify-end gap-2">
+                <button type="button" data-close class="px-4 py-2 rounded border bg-white">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Save Evaluation</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Attendance Modal -->
+        <div id="gmModalAttendance" class="fixed inset-0 hidden items-center justify-center z-40">
+          <div class="absolute inset-0 modal-backdrop" data-close></div>
+          <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl z-50 overflow-auto">
+            <div class="p-6">
+              <div class="flex items-start justify-between mb-3">
+                <h2 class="text-lg font-semibold">Attendance — <span id="gmAttGuardName"></span></h2>
+                <button data-close class="text-gray-500">✕ Close</button>
+              </div>
+
+              <div class="mb-4 flex gap-2 items-center">
+                <button id="gmBtnTimeIn" class="px-3 py-2 rounded bg-green-600 text-white">Record Time-In</button>
+                <button id="gmBtnTimeOut" class="px-3 py-2 rounded bg-red-600 text-white">Record Time-Out</button>
+                <button id="gmBtnExportAtt" class="px-3 py-2 rounded bg-slate-100">Export Guard CSV</button>
+              </div>
+
+              <div class="overflow-auto">
+                <table class="min-w-full text-sm">
+                  <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                      <th class="px-3 py-2 text-left">Date</th>
+                      <th class="px-3 py-2 text-left">Time In</th>
+                      <th class="px-3 py-2 text-left">Time Out</th>
+                      <th class="px-3 py-2 text-left">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody id="gmAttendanceTbody" class="bg-white divide-y"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+            <!-- Messaging Section -->
+<div id="messaging-mgmt" class="content-section">
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Messaging Management</h1>
+
+    <!-- Sub-navigation -->
+    <div class="mt-4">
+      <div class="flex gap-2 mb-4">
+        <button id="inboxBtn" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Inbox</button>
+        <button id="composeBtn" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">Compose</button>
+      </div>
+
+      <!-- Inbox Section -->
+      <div id="inbox-section" class="bg-white rounded-lg shadow-sm p-4">
+        <div class="flex items-center gap-3 mb-4">
+          <input type="text" id="messageSearch" placeholder="Search messages..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+          <button id="refreshBtn" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="text-left text-slate-500">
+              <tr>
+                <th class="py-2">Sender</th>
+                <th class="py-2">Subject</th>
+                <th class="py-2">Date</th>
+                <th class="py-2">Action</th>
+              </tr>
+            </thead>
+            <tbody id="messageTable" class="divide-y">
+              <!-- Example row -->
+              <tr>
+                <td class="py-2">Admin</td>
+                <td class="py-2">Welcome to SeekYu</td>
+                <td class="py-2">2025-09-13</td>
+                <td class="py-2">
+                  <button class="viewBtn text-blue-600 hover:underline" 
+                    data-sender="Admin" 
+                    data-recipient="You" 
+                    data-subject="Welcome to SeekYu" 
+                    data-date="2025-09-13" 
+                    data-body="This is a sample welcome message.">View</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Compose Section -->
+      <div id="compose-section" class="hidden bg-white rounded-lg shadow-sm p-4 mt-4">
+        <form id="composeForm" class="space-y-3">
           <div>
-            <label for="companyName">Company/Client Name:</label>
-            <input type="text" id="companyName" name="companyName" required>
+            <label class="block text-sm text-slate-600">To:</label>
+            <input type="text" id="recipient" name="recipient" required class="w-full px-3 py-2 rounded border bg-slate-50" />
           </div>
 
           <div>
-            <label for="contactPerson">Contact Person:</label>
-            <input type="text" id="contactPerson" name="contactPerson" required>
+            <label class="block text-sm text-slate-600">Subject:</label>
+            <input type="text" id="subject" name="subject" required class="w-full px-3 py-2 rounded border bg-slate-50" />
           </div>
 
           <div>
-            <label for="contactNumber">Contact Number:</label>
-            <input type="tel" id="contactNumber" name="contactNumber" required>
+            <label class="block text-sm text-slate-600">Message:</label>
+            <textarea id="message" name="message" rows="5" required class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
           </div>
 
-          <div>
-            <label for="location">Deployment Location:</label>
-            <input type="text" id="location" name="location" required>
+          <div class="flex gap-2">
+            <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Send Message</button>
+            <button type="button" id="cancelCompose" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
           </div>
-
-          <h3>Deployment Details</h3>
-
-          <div>
-            <label for="numGuards">Number of Guards Required:</label>
-            <input type="number" id="numGuards" name="numGuards" min="1" required>
-          </div>
-
-          <div>
-            <label for="position">Position:</label>
-            <select id="position" name="position" required>
-              <option value="">Select Position</option>
-              <option value="Security Guard">Security Guard</option>
-              <option value="Head Security Guard">Head Security Guard</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="startDate">Deployment Start Date:</label>
-            <input type="date" id="startDate" name="startDate" required>
-          </div>
-
-          <div>
-            <label for="shiftSchedule">Shift Schedule:</label>
-            <select id="shiftSchedule" name="shiftSchedule" required>
-              <option value="">Select Schedule</option>
-              <option value="Day Shift (8 AM - 4 PM)">Day Shift (8 AM - 4 PM)</option>
-              <option value="Night Shift (8 PM - 4 AM)">Night Shift (8 PM - 4 AM)</option>
-              <option value="12-Hour Shift">12-Hour Shift</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="duration">Deployment Duration:</label>
-            <input type="text" id="duration" name="duration" placeholder="e.g., 3 months, 1 year" required>
-          </div>
-
-          <h3>Additional Notes</h3>
-
-          <div>
-            <label for="remarks">Special Instructions / Remarks:</label>
-            <textarea id="remarks" name="remarks" rows="4"></textarea>
-          </div>
-
-          <button type="submit" class="action-btn">Submit Request</button>
         </form>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Incident Report Popup -->
-  <div id="incident-popup" class="popup" role="dialog" aria-modal="true" aria-labelledby="incident-popup-title">
-    <div class="popup-content" role="document">
-      <button class="close-btn" aria-label="Close incident" onclick="hidePopup('incident-popup')">&times;</button>
-      <h2 id="incident-popup-title">Incident Report Details</h2>
-      <p><strong>Date:</strong> <span id="reportDate"></span></p>
-      <p><strong>Time:</strong> <span id="reportTime"></span></p>
-      <p><strong>Guard:</strong> <span id="reportGuard"></span></p>
-      <p><strong>Type of Incident:</strong> <span id="reportType"></span></p>
-      <p><strong>Actions Taken:</strong> <span id="reportActions"></span></p>
-      <p><strong>Location:</strong> <span id="reportLocation"></span></p>
-      <p><strong>Persons Involved:</strong> <span id="reportPersons"></span></p>
-      <p><strong>Evidence:</strong> <a href="#" id="reportEvidence" target="_blank">View</a></p>
+<!-- Popup for Viewing Message -->
+<div id="message-popup" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white rounded-lg max-w-lg w-full p-5">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Message Details</h2>
+      <button id="closePopup" class="text-slate-500 hover:text-slate-800">✕</button>
+    </div>
+
+    <p class="text-sm"><strong>From:</strong> <span id="popupSender">-</span></p>
+    <p class="text-sm"><strong>To:</strong> <span id="popupRecipient">-</span></p>
+    <p class="text-sm"><strong>Subject:</strong> <span id="popupSubject">-</span></p>
+    <p class="text-sm"><strong>Date:</strong> <span id="popupDate">-</span></p>
+
+    <div class="mt-3">
+      <p id="popupBody" class="whitespace-pre-wrap text-sm text-slate-700"></p>
+    </div>
+
+    <div class="mt-4 flex gap-2 justify-end">
+      <button id="replyBtn" class="px-3 py-2 rounded bg-emerald-600 text-white">Reply</button>
+      <button id="deleteBtn" class="px-3 py-2 rounded bg-red-600 text-white">Delete</button>
+      <button id="closePopup2" class="px-3 py-2 rounded bg-slate-200">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- INCIDENT REPORTS - VIEW ONLY -->
+<div id="incident-reports" class="content-section">
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Incident Reports</h1>
+      <div class="flex gap-2">
+        <button id="irTabViewOnly" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">View Reports</button>
+      </div>
+    </div>
+
+    <!-- View Reports (only) -->
+    <div id="ir-view-only-section" class="mt-0">
+      <div class="flex items-center gap-3 mb-4">
+        <input id="reportsSearch" placeholder="Search by reporter, ID, location, subject..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+        <select id="filterRole" class="px-3 py-2 rounded border bg-slate-50">
+          <option value="">All Roles</option>
+          <option>Security Guard</option>
+          <option>Head Guard</option>
+        </select>
+        <select id="filterType" class="px-3 py-2 rounded border bg-slate-50">
+          <option value="">All Types</option>
+          <option>Trespassing</option><option>Theft / Burglary</option><option>Vandalism</option><option>Fire / Smoke</option><option>Assault</option><option>Safety Hazard</option><option>False Fire Alarm</option><option>Accident</option><option>Other</option>
+        </select>
+        <input id="filterFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+        <input id="filterTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+        <button id="refreshReports" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+      </div>
+
+      <div class="overflow-x-auto bg-white rounded border">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50 text-left text-slate-600">
+            <tr>
+              <th class="py-3 px-3">Report ID</th>
+              <th class="py-3 px-3">Date</th>
+              <th class="py-3 px-3">Reporter</th>
+              <th class="py-3 px-3">Role</th>
+              <th class="py-3 px-3">Type</th>
+              <th class="py-3 px-3">Location</th>
+              <th class="py-3 px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reportsTable" class="divide-y"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Report Details Modal (view-only) -->
+<div id="reportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white rounded-lg max-w-3xl w-full p-5 overflow-y-auto max-h-[90vh]">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Incident Report Details</h2>
+      <button id="closeReportModal" class="text-slate-500">✕</button>
+    </div>
+    <div id="reportDetails" class="space-y-2 text-sm text-slate-700"></div>
+    <div class="mt-4 flex justify-end gap-2">
+      <button id="exportReportBtn" class="px-3 py-2 rounded bg-blue-600 text-white">Export (JSON)</button>
+      <button id="closeReportModal2" class="px-3 py-2 rounded bg-slate-200">Close</button>
+    </div>
+  </div>
+</div>
+
+            <!-- Leave Requests (Higher-ups view) - role-aware with working Approve/Reject -->
+<div id="leave-requests" class="content-section max-w-6xl mx-auto">
+<div class="bg-white rounded-lg shadow-sm p-6">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h1 class="text-2xl font-bold text-gray-800">Leave Requests (Admin)</h1>
+<p class="text-gray-600">Review and manage leave requests submitted by users.</p>
+</div>
+
+
+<!-- DEMO: role / user switcher (replace with real session UI) -->
+<div class="flex items-center gap-3">
+<label class="text-sm text-slate-600">Act as:</label>
+<select id="demoUserSelect" class="px-3 py-2 rounded border bg-slate-50 text-sm"></select>
+<button id="exportAllLeaves" class="px-3 py-2 rounded bg-slate-100 border text-sm">Export All (JSON)</button>
+</div>
+</div>
+
+
+<!-- Filters -->
+<div class="flex gap-3 items-center mb-4">
+<input id="adminLeaveSearch" placeholder="Search ID, name, type, reason..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+<select id="adminFilterStatus" class="px-3 py-2 rounded border bg-slate-50">
+<option value="">All Status</option>
+<option>Pending</option>
+<option>Approved</option>
+<option>Rejected</option>
+</select>
+<input id="adminFilterFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+<input id="adminFilterTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+<button id="adminRefresh" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+</div>
+
+
+<!-- Table -->
+<div class="overflow-x-auto bg-white rounded border">
+<table class="min-w-full text-sm">
+<thead class="bg-slate-50 text-left text-slate-600">
+<tr>
+<th class="py-3 px-3">Request ID</th>
+<th class="py-3 px-3">Name</th>
+<th class="py-3 px-3">Range</th>
+<th class="py-3 px-3">Type</th>
+<th class="py-3 px-3">Status</th>
+<th class="py-3 px-3">Submitted</th>
+<th class="py-3 px-3">Approver / Remarks</th>
+<th class="py-3 px-3">Actions</th>
+</tr>
+</thead>
+<tbody id="adminLeaveTable" class="divide-y"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+<!-- Admin modal: view + action -->
+<div id="adminLeaveModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+<div class="bg-white rounded-lg max-w-2xl w-full p-5">
+<div class="flex items-start justify-between mb-3">
+<h2 class="text-lg font-semibold">Leave Request Details</h2>
+<button id="closeAdminLeaveModal" class="text-slate-500">✕</button>
+</div>
+
+
+<div id="adminLeaveDetails" class="text-sm text-slate-700 space-y-2"></div>
+
+
+<hr class="my-3" />
+
+
+<div id="adminActionArea" class="space-y-3">
+<label class="block text-sm text-slate-600">Approver Remarks (required to Approve/Reject)</label>
+<textarea id="adminRemarks" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+
+
+<div class="flex justify-end gap-2">
+<button id="adminRejectBtn" class="px-3 py-2 rounded bg-red-600 text-white">Reject</button>
+<button id="adminApproveBtn" class="px-3 py-2 rounded bg-emerald-600 text-white">Approve</button>
+<button id="adminCloseBtn" class="px-3 py-2 rounded bg-slate-200">Close</button>
+</div>
+</div>
+
+
+<div class="mt-3 text-xs text-slate-500">
+<em>Note: Only users with roles <strong>Admin</strong>, <strong>Manager</strong> or <strong>HR</strong> can Approve/Reject.</em>
+</div>
+</div>
+</div>
+
+<!-- Attendance Monitoring (Client) -->
+<div id="attendance-monitor" class="content-section bg-white rounded-lg shadow-sm p-6">
+  <h1 class="text-2xl font-bold text-gray-800 mb-3">Attendance Monitoring</h1>
+  <p class="text-sm text-gray-600 mb-4">Client-side demo — stores data in <code>localStorage</code>. Suitable for prototyping.</p>
+
+  <div class="flex flex-col md:flex-row md:items-center gap-3 mb-4">
+    <div class="flex-1 flex gap-2">
+      <select id="am_actAs" class="px-3 py-2 rounded border bg-slate-50 text-sm w-48"></select>
+      <button id="am_btnCheckIn" class="px-4 py-2 rounded bg-emerald-600 text-white">Check In</button>
+      <button id="am_btnCheckOut" class="px-4 py-2 rounded bg-red-600 text-white">Check Out</button>
+      <button id="am_btnAdd" class="px-4 py-2 rounded bg-slate-100 border">Add Record</button>
+    </div>
+
+    <div class="flex gap-2 items-center">
+      <button id="am_exportJson" class="px-3 py-2 rounded bg-slate-100 border text-sm">Export JSON</button>
+      <button id="am_exportCsv" class="px-3 py-2 rounded bg-slate-100 border text-sm">Export CSV</button>
     </div>
   </div>
 
-  <!-- KPI Evaluation Popup -->
-  <div id="kpi-popup" class="popup" role="dialog" aria-modal="true" aria-labelledby="kpi-popup-title">
-    <div class="popup-content">
-      <button class="close-btn" aria-label="Close KPI evaluation" onclick="hidePopup('kpi-popup')">&times;</button>
-      <h2 id="kpi-popup-title">KPI Evaluation Form</h2>
-      <form id="kpiEvaluationForm">
-        <input type="hidden" id="employeeId" name="employeeId" value="">
-        <label for="attendance">Attendance (1-5)</label>
-        <input id="attendance" name="attendance" type="number" min="1" max="5" required>
-        <label for="discipline">Discipline (1-5)</label>
-        <input id="discipline" name="discipline" type="number" min="1" max="5" required>
-        <label for="alertness">Alertness (1-5)</label>
-        <input id="alertness" name="alertness" type="number" min="1" max="5" required>
-        <label for="communication">Communication (1-5)</label>
-        <input id="communication" name="communication" type="number" min="1" max="5" required>
-        <div style="margin-top:12px;display:flex;gap:8px;">
-          <button type="submit" class="action-btn">Submit Evaluation</button>
-          <button type="button" class="action-btn" onclick="hidePopup('kpi-popup')">Cancel</button>
+  <div class="flex gap-3 items-center mb-4">
+    <input id="am_search" placeholder="Search name, id, remarks..." class="flex-1 px-3 py-2 rounded border bg-white" />
+    <input id="am_from" type="date" class="px-3 py-2 rounded border bg-white" />
+    <input id="am_to" type="date" class="px-3 py-2 rounded border bg-white" />
+    <select id="am_filterUser" class="px-3 py-2 rounded border bg-white">
+      <option value="">All Users</option>
+    </select>
+    <button id="am_refresh" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-slate-50 text-left text-slate-600">
+        <tr>
+          <th class="py-2 px-3">ID</th>
+          <th class="py-2 px-3">User</th>
+          <th class="py-2 px-3">Type</th>
+          <th class="py-2 px-3">Timestamp</th>
+          <th class="py-2 px-3">Remarks</th>
+          <th class="py-2 px-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="am_recordsTable" class="divide-y"></tbody>
+    </table>
+  </div>
+
+  <div class="mt-3 text-sm text-slate-600">
+    <strong>Summary:</strong> <span id="am_summary"></span>
+  </div>
+
+  <!-- Modal (Add/Edit) -->
+  <div id="am_modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+    <div class="bg-white rounded-lg w-full max-w-lg p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h3 id="am_modalTitle" class="font-semibold">Add Attendance Record</h3>
+        <button id="am_closeModal" class="text-slate-500">✕</button>
+      </div>
+
+      <div class="space-y-3">
+        <label class="block text-sm">User</label>
+        <select id="am_modalUser" class="w-full px-3 py-2 rounded border bg-slate-50"></select>
+
+        <label class="block text-sm">Type</label>
+        <select id="am_modalType" class="w-full px-3 py-2 rounded border bg-slate-50">
+          <option value="check-in">Check In</option>
+          <option value="check-out">Check Out</option>
+        </select>
+
+        <label class="block text-sm">Timestamp</label>
+        <input id="am_modalTimestamp" type="datetime-local" class="w-full px-3 py-2 rounded border bg-slate-50" />
+
+        <label class="block text-sm">Remarks</label>
+        <input id="am_modalRemarks" class="w-full px-3 py-2 rounded border bg-slate-50" />
+
+        <div class="flex justify-end gap-2">
+          <button id="am_modalSave" class="px-4 py-2 rounded bg-emerald-600 text-white">Save</button>
+          <button id="am_modalCancel" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+            <!-- Add other sections similarly -->
+            
+        </div>
+    </div>
+<!-- Popup Modal -->
+<div id="popup-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center hidden z-50">
+  <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3">
+    <div class="p-6">
+      <h3 class="text-xl font-semibold text-gray-800" id="popup-title">Popup Title</h3>
+      <p class="text-gray-600 mt-2" id="popup-content">This is the popup content. You can put any information here.</p>
+    </div>
+    <div class="flex justify-end p-6 border-t border-gray-200">
+      <button id="close-popup" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- KPI Modal -->
+  <div id="kpiModal" class="fixed inset-0 z-50 hidden items-center justify-center">
+    <div class="absolute inset-0 bg-black/50" onclick="closeKpiModal()"></div>
+    <div class="bg-white rounded-lg max-w-2xl w-full z-10 p-6">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-semibold">Evaluate Guard — <span id="kpiModalGuardName"></span></h2>
+        <button onclick="closeKpiModal()" class="text-slate-500">✕</button>
+      </div>
+      <form id="kpiForm" class="space-y-4">
+        <input type="hidden" id="kpiGuardId" />
+        <div>
+          <label class="block text-sm font-medium">Professional conduct (1-5)</label>
+          <select id="kpi_professional" class="w-32 px-3 py-2 rounded border bg-slate-50" title="Professional conduct">
+            <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium" title="Operational effectiveness">Operational effectiveness (1-5)</label>
+          <select id="kpi_operational" class="w-32 px-3 py-2 rounded border bg-slate-50" title="Operational effectiveness">
+            <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium" title="Situational awareness & response">Situational awareness & response (1-5)</label>
+          <select id="kpi_situational" class="w-32 px-3 py-2 rounded border bg-slate-50" title="Situational awareness & response">
+            <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium" title="Notes">Notes</label>
+          <textarea id="kpi_notes" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50" title="Notes"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Save Evaluation</button>
+          <button type="button" onclick="closeKpiModal()" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- KPI Score View Popup -->
-  <div id="kpiScorePopup" class="popup" role="dialog" aria-modal="true" aria-labelledby="kpi-score-popup-title">
-    <div class="popup-content" role="document">
-      <button class="close-btn" aria-label="Close KPI score" onclick="hidePopup('kpiScorePopup')">&times;</button>
-      <h2 id="kpi-score-popup-title">KPI Scores</h2>
-      <div id="scoreDetails"></div>
-      <div style="margin-top:12px;text-align:right;">
-        <button type="button" class="action-btn" onclick="hidePopup('kpiScorePopup')">Close</button>
-      </div>
+<!-- Edit Profile Modal (simplified: full name, email, phone, avatar) -->
+    <div id="editProfileModal" class="fixed inset-0 hidden items-center justify-center z-50">
+        <div class="modal-backdrop absolute inset-0"></div>
+        <div class="relative bg-white w-full max-w-2xl mx-4 rounded-lg shadow-xl overflow-hidden">
+            <div class="p-4 border-b flex items-center justify-between">
+                <h3 class="text-lg font-semibold">Edit Profile (HR)</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700" title="Close modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <form id="profileForm" class="space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <img id="modalAvatar" src="https://i.pravatar.cc/100?img=3" class="w-20 h-20 rounded-full object-cover border" alt="avatar"/>
+                            <div class="mt-2">
+                                <label for="modalFile" class="sr-only">Upload profile image</label>
+                                <input id="modalFile" type="file" accept="image/*" class="hidden" title="Upload profile image" />
+                                <button type="button" id="changeAvatarBtn" class="text-xs px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 mt-2"><i class="fas fa-image mr-1"></i> Change</button>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 grid grid-cols-2 gap-3">
+                            <div class="col-span-2">
+                                <label class="text-xs font-medium text-gray-600">Full name *</label>
+                                <input id="inputFullName" required class="w-full mt-1 px-3 py-2 border rounded bg-gray-50" placeholder="Enter your full name" title="Full name" />
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-medium text-gray-600">Email *</label>
+                                <input id="inputEmail" type="email" required class="w-full mt-1 px-3 py-2 border rounded bg-gray-50" placeholder="Enter your email" title="Email" />
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-medium text-gray-600">Phone</label>
+                                <input id="inputPhone" class="w-full mt-1 px-3 py-2 border rounded bg-gray-50" placeholder="Enter your phone number" title="Phone" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-3 pt-2 border-t">
+                        <button type="button" id="cancelProfile" class="px-4 py-2 rounded border">Cancel</button>
+                        <button type="submit" id="saveProfile" class="px-4 py-2 rounded bg-blue-600 text-white">Save Profile</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
-
-  <!-- Message Popup -->
-  <div id="message-popup" class="popup" aria-modal="true" role="dialog" aria-labelledby="message-popup-title">
-    <div class="popup-content" role="document">
-      <button class="close-btn" aria-label="Close message" onclick="hidePopup('message-popup')">&times;</button>
-      <h2 id="message-popup-title">Message Details</h2>
-      <p><strong>From:</strong> <span id="popupSender"></span></p>
-      <p><strong>Subject:</strong> <span id="popupSubject"></span></p>
-      <p><strong>Date:</strong> <span id="popupDate"></span></p>
-      <p><strong>Message:</strong></p>
-      <div id="popupBody" style="white-space:pre-wrap; margin-top: 10px; padding: 10px; background-color: #222; border-radius: 4px;"></div>
-      <div class="popup-actions">
-        <button onclick="hidePopup('message-popup')">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Section navigation
-    function showSection(sectionId) {
-      document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
-      });
-      document.getElementById(sectionId).classList.add('active');
-      
-      // Update sidebar buttons
-      document.querySelectorAll('.sidebar button').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      document.querySelector(`.sidebar button[onclick="showSection('${sectionId}')"]`).classList.add('active');
+<!-- Replace your existing <script>...</script> with this block -->
+<script>
+// ---------------------------
+// General UI and section handling
+// ---------------------------
+  
+document.addEventListener('DOMContentLoaded', function () {
+  // Sidebar mobile toggle (kept similar to your original)
+  const mobileToggle = document.getElementById('mobile-sidebar-toggle');
+  mobileToggle?.addEventListener('click', function() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('-ml-64');
+    sidebar.classList.toggle('ml-0');
+    const toggleIcon = document.querySelector('#sidebar-toggle i');
+    if (sidebar.classList.contains('-ml-64')) {
+      toggleIcon.classList.remove('fa-times'); toggleIcon.classList.add('fa-bars');
+    } else {
+      toggleIcon.classList.remove('fa-bars'); toggleIcon.classList.add('fa-times');
     }
+  });
 
-    // Message sub-navigation
-    document.getElementById('inboxBtn').addEventListener('click', function() {
-      document.getElementById('inboxBtn').classList.add('active');
-      document.getElementById('composeBtn').classList.remove('active');
-      document.getElementById('inbox-section').classList.add('active');
-      document.getElementById('compose-section').classList.remove('active');
+  // --- Section switching (keeps your showSection logic but safer) ---
+  window.showSection = function(sectionId, clickedBtn = null) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+    const target = document.getElementById(sectionId);
+    if (target) target.classList.add('active');
+
+    // mark button active if provided
+    if (clickedBtn) clickedBtn.classList.add('active');
+
+    if (window.innerWidth < 1024) {
+      document.querySelector('.sidebar')?.classList.add('-ml-64');
+      const icon = document.querySelector('#sidebar-toggle i');
+      if (icon) { icon.classList.remove('fa-times'); icon.classList.add('fa-bars'); }
+    }
+  };
+
+}); // <-- Add this closing brace for document.addEventListener
+
+  // If sidebar buttons use inline onclick (your layout), ensure the Messaging button opens inbox first
+  const messagingSidebarBtn = Array.from(document.querySelectorAll('button')).find(b => b.getAttribute('onclick')?.includes("showSection('messaging-mgmt')"));
+  if (messagingSidebarBtn) {
+    messagingSidebarBtn.addEventListener('click', function (ev) {
+      // use the safer showSection, and pass the clicked button to be marked active
+      showSection('messaging-mgmt', messagingSidebarBtn);
+      showInbox();
     });
+  }
 
-    document.getElementById('composeBtn').addEventListener('click', function() {
-      document.getElementById('composeBtn').classList.add('active');
-      document.getElementById('inboxBtn').classList.remove('active');
-      document.getElementById('compose-section').classList.add('active');
-      document.getElementById('inbox-section').classList.remove('active');
+  // --- Messaging UI elements ---
+  const inboxBtn = document.getElementById('inboxBtn');
+  const composeBtn = document.getElementById('composeBtn');
+  const inboxSection = document.getElementById('inbox-section');
+  const composeSection = document.getElementById('compose-section');
+  const cancelCompose = document.getElementById('cancelCompose');
+  const composeForm = document.getElementById('composeForm');
+  const messageTable = document.getElementById('messageTable');
+  const messagePopup = document.getElementById('message-popup');
+  const popupSender = document.getElementById('popupSender');
+  const popupRecipient = document.getElementById('popupRecipient');
+  const popupSubject = document.getElementById('popupSubject');
+  const popupDate = document.getElementById('popupDate');
+  const popupBody = document.getElementById('popupBody');
+  const replyBtn = document.getElementById('replyBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const closePopupBtns = [document.getElementById('closePopup'), document.getElementById('closePopup2')];
+
+  // In-memory messages store for frontend demo (id increments)
+  let messages = [
+    {
+      id: 1,
+      sender: 'Admin',
+      recipient: 'You',
+      subject: 'Welcome to SeekYu',
+      date: '2025-09-13',
+      body: 'This is a sample welcome message.'
+    }
+  ];
+  let nextMessageId = 2;
+  let currentViewedMessageId = null; // id of message currently shown in popup
+
+  function renderInbox() {
+    messageTable.innerHTML = '';
+    for (const msg of messages.slice().reverse()) { // show newest first
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="py-2">${escapeHtml(msg.sender)}</td>
+        <td class="py-2">${escapeHtml(msg.subject)}</td>
+        <td class="py-2">${escapeHtml(msg.date)}</td>
+        <td class="py-2">
+          <button class="viewBtn text-blue-600 hover:underline" data-id="${msg.id}">View</button>
+          <button class="delInlineBtn ml-3 text-red-600 hover:underline" data-id="${msg.id}">Delete</button>
+        </td>`;
+      messageTable.appendChild(tr);
+    }
+  }
+
+  // Simple HTML escape
+  function escapeHtml(s) {
+    if (!s && s !== 0) return '';
+    return String(s).replace(/[&<>"'`=\/]/g, function(ch) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch];
     });
+  }
 
-    // Popup functions
-    function showPopup(id) {
-      document.getElementById(id).classList.add('active');
-      document.body.style.overflow = 'hidden'; // Prevent scrolling when popup is open
-      
-      // Add event listener to close when clicking outside
-      setTimeout(() => {
-        document.getElementById(id).addEventListener('click', outsideClickListener);
-      }, 10);
+  // Inbox/Compose toggles
+  function showInbox() {
+    inboxSection.classList.remove('hidden');
+    composeSection.classList.add('hidden');
+    inboxBtn.classList.add('bg-indigo-600','text-white');
+    inboxBtn.classList.remove('bg-slate-200','text-gray-800');
+    composeBtn.classList.remove('bg-indigo-600','text-white');
+    composeBtn.classList.add('bg-slate-200','text-gray-800');
+  }
+  function showCompose() {
+    composeSection.classList.remove('hidden');
+    inboxSection.classList.add('hidden');
+    composeBtn.classList.add('bg-indigo-600','text-white');
+    composeBtn.classList.remove('bg-slate-200','text-gray-800');
+    inboxBtn.classList.remove('bg-indigo-600','text-white');
+    inboxBtn.classList.add('bg-slate-200','text-gray-800');
+  }
+  inboxBtn?.addEventListener('click', showInbox);
+  composeBtn?.addEventListener('click', showCompose);
+  cancelCompose?.addEventListener('click', showInbox);
+
+  // Open a message in popup (delegated)
+  document.addEventListener('click', function(e) {
+    // view inline from table
+    if (e.target && e.target.classList.contains('viewBtn')) {
+      const id = Number(e.target.dataset.id);
+      const msg = messages.find(m => m.id === id);
+      if (!msg) return;
+      currentViewedMessageId = id;
+      popupSender.textContent = msg.sender;
+      popupRecipient.textContent = msg.recipient;
+      popupSubject.textContent = msg.subject;
+      popupDate.textContent = msg.date;
+      popupBody.textContent = msg.body;
+      messagePopup.classList.remove('hidden');
     }
 
-    function hidePopup(id) {
-      document.getElementById(id).classList.remove('active');
-      document.body.style.overflow = ''; // Re-enable scrolling
-      
-      // Remove outside click listener
-      document.getElementById(id).removeEventListener('click', outsideClickListener);
-    }
-
-    function outsideClickListener(e) {
-      if (e.target === this) {
-        hidePopup(this.id);
+    // inline delete button in table (asks confirm)
+    if (e.target && e.target.classList.contains('delInlineBtn')) {
+      const id = Number(e.target.dataset.id);
+      if (!confirm('Delete this message?')) return;
+      messages = messages.filter(m => m.id !== id);
+      renderInbox();
+      // if deleted message is currently open in popup, close popup
+      if (currentViewedMessageId === id) {
+        currentViewedMessageId = null;
+        messagePopup.classList.add('hidden');
       }
     }
+  });
 
-    // Incident report view button - fixed to show correct data
-    document.querySelectorAll('.view-report-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const row = this.closest('tr');
-        const cells = row.querySelectorAll('td');
-        
-        document.getElementById('reportDate').textContent = cells[0].textContent;
-        document.getElementById('reportTime').textContent = cells[1].textContent;
-        document.getElementById('reportGuard').textContent = `${cells[2].textContent} (${cells[3].textContent})`;
-        document.getElementById('reportType').textContent = cells[4].textContent;
-        document.getElementById('reportActions').textContent = cells[5].textContent;
-        document.getElementById('reportLocation').textContent = cells[6].textContent;
-        document.getElementById('reportPersons').textContent = cells[7].textContent;
-        
-        // Set evidence link
-        const evidenceLink = cells[8].querySelector('a');
-        if (evidenceLink) {
-          document.getElementById('reportEvidence').href = evidenceLink.href;
-          document.getElementById('reportEvidence').textContent = evidenceLink.textContent;
-        }
-        
-        showPopup('incident-popup');
-      });
-    });
+  // Reply button: prefill compose form and open compose
+  replyBtn?.addEventListener('click', function() {
+    if (!currentViewedMessageId) return;
+    const msg = messages.find(m => m.id === currentViewedMessageId);
+    if (!msg) return;
+    // open messaging section and compose
+    showSection('messaging-mgmt');
+    showCompose();
 
-    // KPI Evaluation functions
-    function openEvaluationForm(empId) {
-      document.getElementById('employeeId').value = empId;
-      showPopup('kpi-popup');
+    // prefill
+    const recipientInput = document.getElementById('recipient');
+    const subjectInput = document.getElementById('subject');
+    const bodyTextarea = document.getElementById('message');
+
+    if (recipientInput) recipientInput.value = msg.sender || '';
+    if (subjectInput) {
+      // if subject already starts with Re:, keep it
+      subjectInput.value = msg.subject && !/^Re:/i.test(msg.subject) ? `Re: ${msg.subject}` : msg.subject || '';
+    }
+    if (bodyTextarea) {
+      bodyTextarea.value = `\n\n--- Original Message ---\nFrom: ${msg.sender}\nDate: ${msg.date}\nSubject: ${msg.subject}\n\n${msg.body}`;
+      bodyTextarea.focus();
+      // put cursor at start of textarea for user to type reply
+      bodyTextarea.setSelectionRange(0, 0);
     }
 
-    function openViewScore(empId) {
-      // Example: load scores dynamically (replace with real data fetch)
-      const scores = {
-        SG001: { 
-          attendance: 4.5, 
-          discipline: 4.2, 
-          alertness: 4.7, 
-          communication: 4.4,
-          responseTime: 4.6,
-          professionalism: 4.8
-        },
-        SG002: { 
-          attendance: 4.8, 
-          discipline: 4.5, 
-          alertness: 4.6, 
-          communication: 4.3,
-          responseTime: 4.7,
-          professionalism: 4.9
-        }
-      };
-      const s = scores[empId];
-      document.getElementById('scoreDetails').innerHTML = `
-        <p><strong>Attendance:</strong> ${s.attendance}/5</p>
-        <p><strong>Discipline:</strong> ${s.discipline}/5</p>
-        <p><strong>Alertness:</strong> ${s.alertness}/5</p>
-        <p><strong>Communication:</strong> ${s.communication}/5</p>
-        <p><strong>Response Time:</strong> ${s.responseTime}/5</p>
-        <p><strong>Professionalism:</strong> ${s.professionalism}/5</p>
-        <p><strong>Overall Score:</strong> ${((s.attendance + s.discipline + s.alertness + s.communication + s.responseTime + s.professionalism) / 6).toFixed(1)}/5</p>
+    // close popup after replying to reduce UI noise
+    messagePopup.classList.add('hidden');
+  });
+
+  // Delete button (from popup) - removes the message and closes popup
+  deleteBtn?.addEventListener('click', function() {
+    if (!currentViewedMessageId) return;
+    if (!confirm('Delete this message? This cannot be undone in this demo.')) return;
+    messages = messages.filter(m => m.id !== currentViewedMessageId);
+    currentViewedMessageId = null;
+    messagePopup.classList.add('hidden');
+    renderInbox();
+  });
+
+  // Close popup buttons
+  closePopupBtns.forEach(btn => btn?.addEventListener('click', function(){ messagePopup.classList.add('hidden'); currentViewedMessageId = null; }));
+
+  // Clicking outside popup content closes it
+  messagePopup?.addEventListener('click', function(e) {
+    if (e.target === messagePopup) {
+      messagePopup.classList.add('hidden');
+      currentViewedMessageId = null;
+    }
+  });
+
+  // Compose handler (frontend-only simulation)
+  composeForm?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const recipient = document.getElementById('recipient').value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const body = document.getElementById('message').value.trim();
+    if (!recipient || !subject || !body) {
+      alert('Please fill out all fields.');
+      return;
+    }
+    const newMsg = {
+      id: nextMessageId++,
+      sender: 'You', // outgoing: from current user
+      recipient,
+      subject,
+      date: new Date().toISOString().split('T')[0],
+      body
+    };
+    // For demo, add to messages store (so it appears in inbox)
+    messages.push(newMsg);
+    renderInbox();
+    // Reset form and show inbox
+    composeForm.reset();
+    showInbox();
+    alert('Message sent (demo mode). In a real app this would call your backend API.');
+  });
+
+  // initial render: show inbox first
+  renderInbox();
+  showInbox();
+
+  // Utility: refresh button (just re-render here)
+  document.getElementById('refreshBtn')?.addEventListener('click', function(){ renderInbox(); });
+
+  // Search (very basic filter by subject/sender)
+  document.getElementById('messageSearch')?.addEventListener('input', function() {
+    const q = this.value.trim().toLowerCase();
+    const rows = messageTable.querySelectorAll('tr');
+    rows.forEach(r => {
+      const txt = r.textContent.toLowerCase();
+      r.style.display = txt.includes(q) ? '' : 'none';
+    });
+  });
+
+
+// ---------------------------
+// Modal open / actions
+// ---------------------------
+let currentModalId = null;
+document.addEventListener('click', function(e){
+const t = e.target;
+if (t.matches('.viewAdminLeave')) {
+const id = t.dataset.id;
+const req = requests.find(x => x.id === id);
+if (!req) return alert('Request not found.');
+openModalFor(req);
+}
+});
+
+
+function openModalFor(req) {
+currentModalId = req.id;
+detailsEl.innerHTML = `
+<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+<div><strong>Request ID:</strong> ${req.id}</div>
+<div><strong>Submitted:</strong> ${req.submittedAt}</div>
+<div><strong>Name:</strong> ${escapeHtml(req.name)}</div>
+<div><strong>Account ID:</strong> ${escapeHtml(req.accountId || '-')}</div>
+<div><strong>Role:</strong> ${escapeHtml(req.role)}</div>
+<div><strong>Email:</strong> ${escapeHtml(req.email || '')}</div>
+<div><strong>Range:</strong> ${req.start} → ${req.end}</div>
+<div><strong>Type:</strong> ${escapeHtml(req.type)}</div>
+<div class="md:col-span-2"><strong>Reason:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(req.reason)}</div></div>
+</div>
+
+
+<hr class="my-2" />
+
+
+<div>
+<strong>Status:</strong> ${req.status} <br/>
+<strong>Approver:</strong> ${escapeHtml(req.approver || '-')} <br/>
+<strong>Approver Remarks:</strong> <div class="mt-1 whitespace-pre-wrap">${escapeHtml(req.approverRemarks || '')}</div>
+</div>
+`;
+
+
+const canAct = ALLOWED_APPROVER_ROLES.includes(currentAdmin.role) && req.status === 'Pending';
+approveBtn.disabled = !canAct;
+rejectBtn.disabled = !canAct;
+remarksEl.value = req.approverRemarks || '';
+modal.classList.remove('hidden');
+}
+
+
+function performAction(action) {
+if (!currentModalId) return;
+const remarks = (remarksEl.value || '').trim();
+if (!remarks) return alert('Please add approver remarks before approving/rejecting.');
+const idx = requests.findIndex(x => x.id === currentModalId);
+if (idx === -1) return alert('Request not found.');
+if (!ALLOWED_APPROVER_ROLES.includes(currentAdmin.role)) return alert('You are not authorized to perform this action.');
+if (requests[idx].status !== 'Pending') return alert('Only Pending requests can be actioned.');
+
+
+requests[idx].status = action === 'approve' ? 'Approved' : 'Rejected';
+requests[idx].approver = currentAdmin.name;
+requests[idx].approverRemarks = remarks;
+requests[idx].updatedAt = new Date().toISOString().split('T')[0];
+saveRequests(requests);
+modal.classList.add('hidden');
+currentModalId = null;
+renderTable();
+alert(`Request ${requests[idx].id} ${requests[idx].status}.`);
+}
+
+
+approveBtn.addEventListener('click', ()=> performAction('approve'));
+rejectBtn.addEventListener('click', ()=> {
+if (!confirm('Reject this request?')) return;
+performAction('reject');
+});
+
+
+// close modal
+closeModalBtn.addEventListener('click', ()=> { modal.classList.add('hidden'); currentModalId = null; });
+adminCloseBtn.addEventListener('click', ()=> { modal.classList.add('hidden'); currentModalId = null; });
+
+
+// filters / search
+[searchEl, statusFilter, fromFilter, toFilter].forEach(el => { if (el) el.addEventListener('input', renderTable); });
+refreshBtn.addEventListener('click', renderTable);
+
+
+// export all
+exportAllBtn.addEventListener('click', function(){
+if (!requests.length) return alert('No requests to export.');
+const blob = new Blob([JSON.stringify(requests, null, 2)], {type:'application/json'});
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url;
+a.download = `leave_requests_all.json`;
+document.body.appendChild(a);
+a.click();
+a.remove();
+URL.revokeObjectURL(url);
+});
+
+
+// small helpers
+window._LeaveAdmin = {
+list: ()=> requests,
+setUser: (id)=> { const u = demoUsers.find(x=> x.id===Number(id)); if (u) { currentAdmin = u; demoUserSelect.value = u.id; renderTable(); } }
+};
+
+
+// initial render
+renderTable();
+
+(function(){
+  const LS_GUARDS = 'gm:guards:v1';
+  const LS_ATT  = 'gm:attendance:v1';
+
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const uid = (p='id') => p + '_' + Math.random().toString(36).slice(2,9);
+  const isoToday = () => new Date().toISOString().slice(0,10); // yyyy-mm-dd
+  const todayStrForDisplay = (iso) => {
+    try { return new Date(iso).toLocaleDateString('en-PH'); }
+    catch(e){ return iso; }
+  };
+  const timeNow = () => new Date().toLocaleTimeString('en-PH', {hour:'2-digit', minute:'2-digit'});
+
+  function loadGuards(){ try{ return JSON.parse(localStorage.getItem(LS_GUARDS) || '[]'); } catch(e){ return []; } }
+  function saveGuards(list){ localStorage.setItem(LS_GUARDS, JSON.stringify(list)); }
+  function loadAttendance(){ try{ return JSON.parse(localStorage.getItem(LS_ATT) || '[]'); } catch(e){ return []; } }
+  function saveAttendance(list){ localStorage.setItem(LS_ATT, JSON.stringify(list)); }
+
+  // Seed sample if empty
+  if (!loadGuards().length) {
+    saveGuards([
+      { id: uid('g'), name: 'Miguel Santos', area: 'Warehouse A', empId: 'G-1001', contact: '', kpis: [] },
+      { id: uid('g'), name: 'John Doe', area: 'Main Gate', empId: 'G-1002', contact: '', kpis: [] }
+    ]);
+  }
+
+  // DOM refs (Guard Management)
+  const tbody = $('#gmTbody');
+  const countEl = $('#gmCount');
+  const searchInput = $('#gmSearch');
+
+  const modalGuard = $('#gmModalGuard');
+  const formGuard = $('#gmFormGuard');
+  const modalKpi = $('#gmModalKpi');
+  const formKpi = $('#gmFormKpi');
+  const modalAttendance = $('#gmModalAttendance');
+
+  // DOM refs (Attendance Monitoring report)
+  const amSearch = $('#amSearch');
+  const amFrom = $('#amFrom');
+  const amTo = $('#amTo');
+  const amAreaFilter = $('#amAreaFilter');
+  const amTbody = $('#amTbody');
+  const amRefresh = $('#amRefresh');
+  const amExport = $('#amExport');
+
+  // small UI utilities
+  function openModal(el){ el.classList.remove('hidden'); el.classList.add('flex'); }
+  function closeModal(el){ el.classList.add('hidden'); el.classList.remove('flex'); }
+  document.addEventListener('click', (e)=>{
+    if (e.target.matches('[data-close]') || e.target.closest('[data-close]')){
+      const modal = e.target.closest('.fixed'); if (modal) closeModal(modal);
+    }
+  });
+
+  // safe escape
+  function escapeHtml(s=''){ return String(s).replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c])); }
+
+  // compute avg KPI
+  function computeAvgKpi(guard){
+    if (!guard.kpis || !guard.kpis.length) return null;
+    const sum = guard.kpis.reduce((s,r)=> s + ((r.professional + r.operational + r.situational)/15*100), 0);
+    return Math.round(sum / guard.kpis.length);
+  }
+
+  // render guards table
+  function renderGuards(filter=''){
+    const q = (filter||'').trim().toLowerCase();
+    const guards = loadGuards().filter(g => {
+      if (!q) return true;
+      return (g.name||'').toLowerCase().includes(q) || (g.area||'').toLowerCase().includes(q) || (g.empId||'').toLowerCase().includes(q);
+    });
+    countEl.textContent = guards.length;
+    tbody.innerHTML = guards.map(g => {
+      const avg = computeAvgKpi(g);
+      return `
+        <tr tabindex="0" data-id="${g.id}">
+          <td class="px-4 py-3">${escapeHtml(g.name)}<div class="text-xs text-slate-400">${escapeHtml(g.empId||'')}</div></td>
+          <td class="px-4 py-3">${escapeHtml(g.area||'—')}</td>
+          <td class="px-4 py-3">${avg !== null ? avg + '%' : '<span class="text-xs text-gray-400">Not evaluated</span>'}</td>
+          <td class="px-4 py-3">${g.kpis && g.kpis.length ? todayStrForDisplay(g.kpis[g.kpis.length-1].date) : '—'}</td>
+          <td class="px-4 py-3">
+            <div class="flex gap-2">
+              <button class="btn-evaluate bg-indigo-600 text-white text-xs px-2 py-1 rounded" data-id="${g.id}"><i class="fas fa-star"></i> Evaluate</button>
+              <button class="btn-attendance bg-slate-100 text-xs px-2 py-1 rounded" data-id="${g.id}">Attendance</button>
+              <button class="btn-edit bg-white border text-xs px-2 py-1 rounded" data-id="${g.id}">Edit</button>
+              <button class="btn-delete bg-red-600 text-white text-xs px-2 py-1 rounded" data-id="${g.id}">Remove</button>
+            </div>
+          </td>
+        </tr>
       `;
-      showPopup('kpiScorePopup');
-    }
+    }).join('') || `<tr><td colspan="5" class="px-4 py-6 text-center text-sm text-gray-500">No guards found.</td></tr>`;
+  }
 
-    // Form submission handling
-    document.getElementById('deploymentForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      alert('Deployment request submitted successfully!');
-      this.reset();
+  // Add guard
+  $('#gmAddBtn').addEventListener('click', () => {
+    $('#gmModalGuardTitle').textContent = 'Add Guard';
+    formGuard.reset(); $('#gmGuardId').value = '';
+    openModal(modalGuard);
+  });
+
+  formGuard.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const id = $('#gmGuardId').value || uid('g');
+    const name = $('#gmGuardName').value.trim();
+    const area = $('#gmGuardArea').value.trim();
+    const empId = $('#gmGuardEmpId').value.trim() || ('G-' + Math.floor(1000 + Math.random()*9000));
+    const contact = $('#gmGuardContact').value.trim();
+    if (!name) return alert('Please enter guard full name.');
+
+    const guards = loadGuards();
+    const exists = guards.find(x => x.id === id);
+    if (exists){ Object.assign(exists, { name, area, empId, contact }); }
+    else { guards.push({ id, name, area, empId, contact, kpis: [] }); }
+    saveGuards(guards);
+    closeModal(modalGuard);
+    populateAreaFilters(); // update filters when guards change
+    renderGuards(searchInput.value);
+  });
+
+  // Delegated row actions
+  tbody.addEventListener('click', (e) => {
+    const btn = e.target.closest('button'); if (!btn) return;
+    const id = btn.dataset.id;
+    if (btn.classList.contains('btn-evaluate')) return openKpi(id);
+    if (btn.classList.contains('btn-attendance')) return openAttendance(id);
+    if (btn.classList.contains('btn-edit')) return openEdit(id);
+    if (btn.classList.contains('btn-delete')) return removeGuard(id);
+  });
+
+  function openEdit(id){
+    const guards = loadGuards(); const g = guards.find(x=>x.id===id); if (!g) return;
+    $('#gmModalGuardTitle').textContent = 'Edit Guard';
+    $('#gmGuardId').value = g.id; $('#gmGuardName').value = g.name; $('#gmGuardArea').value = g.area || '';
+    $('#gmGuardEmpId').value = g.empId || ''; $('#gmGuardContact').value = g.contact || '';
+    openModal(modalGuard);
+  }
+
+  function removeGuard(id){
+    if (!confirm('Remove guard permanently? This will also remove their KPI records and attendance.')) return;
+    let guards = loadGuards(); guards = guards.filter(g=>g.id!==id); saveGuards(guards);
+    let att = loadAttendance(); att = att.filter(a=>a.guardId!==id); saveAttendance(att);
+    populateAreaFilters();
+    renderGuards(searchInput.value);
+    renderAttendanceMonitor();
+  }
+
+  // KPI flow
+  function openKpi(id){
+    const g = loadGuards().find(x=>x.id===id); if (!g) return alert('Guard not found');
+    $('#gmKpiGuardName').textContent = g.name; $('#gmKpiGuardId').value = g.id;
+    $('#gmKpiProfessional').value = '3'; $('#gmKpiOperational').value = '3'; $('#gmKpiSituational').value = '3'; $('#gmKpiNotes').value = '';
+    openModal(modalKpi);
+  }
+
+  formKpi.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const gid = $('#gmKpiGuardId').value; const g = loadGuards().find(x=>x.id===gid); if (!g) return alert('Guard not found');
+    const rec = {
+      id: uid('k'),
+      date: new Date().toISOString(), // keep kpi date as full ISO
+      professional: Number($('#gmKpiProfessional').value),
+      operational: Number($('#gmKpiOperational').value),
+      situational: Number($('#gmKpiSituational').value),
+      notes: $('#gmKpiNotes').value.trim()
+    };
+    g.kpis = g.kpis || [];
+    g.kpis.push(rec);
+    const guards = loadGuards(); const idx = guards.findIndex(x=>x.id===g.id); guards[idx] = g; saveGuards(guards);
+    closeModal(modalKpi);
+    renderGuards(searchInput.value);
+    alert('KPI evaluation saved.');
+  });
+
+  // Attendance flow (per-guard modal)
+  let currentAttendanceGuard = null;
+
+  function openAttendance(id){
+    const g = loadGuards().find(x=>x.id===id); if (!g) return;
+    currentAttendanceGuard = g.id; $('#gmAttGuardName').textContent = g.name;
+    renderAttendanceTable(g.id);
+    openModal(modalAttendance);
+  }
+
+  function renderAttendanceTable(guardId){
+    const rows = loadAttendance().filter(a=>a.guardId===guardId)
+      .sort((a,b)=> new Date(b.date) - new Date(a.date));
+    const tbodyA = $('#gmAttendanceTbody');
+    tbodyA.innerHTML = rows.map(r=>`<tr>
+      <td class="px-3 py-2">${escapeHtml(todayStrForDisplay(r.date))}</td>
+      <td class="px-3 py-2">${escapeHtml(r.timeIn||'')}</td>
+      <td class="px-3 py-2">${escapeHtml(r.timeOut||'')}</td>
+      <td class="px-3 py-2 text-sm text-gray-500">${escapeHtml(r.notes||'')}</td>
+    </tr>`).join('') || '<tr><td colspan="4" class="px-3 py-6 text-center text-sm text-gray-400">No attendance records.</td></tr>';
+  }
+
+  $('#gmBtnTimeIn').addEventListener('click', () => {
+    if (!currentAttendanceGuard) return alert('No guard selected');
+    const att = loadAttendance(); const date = isoToday();
+    let rec = att.find(a=>a.guardId===currentAttendanceGuard && a.date===date);
+    const t = timeNow();
+    if (rec){ rec.timeIn = rec.timeIn || t; }
+    else { att.push({ id: uid('a'), guardId: currentAttendanceGuard, date, timeIn: t, timeOut: null, notes: '' }); }
+    saveAttendance(att); renderAttendanceTable(currentAttendanceGuard); renderAttendanceMonitor();
+  });
+
+  $('#gmBtnTimeOut').addEventListener('click', () => {
+    if (!currentAttendanceGuard) return alert('No guard selected');
+    const att = loadAttendance(); const date = isoToday();
+    let rec = att.find(a=>a.guardId===currentAttendanceGuard && a.date===date);
+    const t = timeNow();
+    if (!rec){ return alert('No check-in for today. Use Time-In first or add a record.'); }
+    rec.timeOut = rec.timeOut || t; saveAttendance(att); renderAttendanceTable(currentAttendanceGuard); renderAttendanceMonitor();
+  });
+
+  // Export functions
+  $('#gmExportBtn').addEventListener('click', () => {
+    const guards = loadGuards();
+    if (!guards.length) return alert('No guards to export');
+    const rows = [['ID','Name','Area','EmployeeID','Contact','AvgKPI']];
+    guards.forEach(g => rows.push([g.id,g.name,g.area,g.empId||'',g.contact||'', (computeAvgKpi(g)||'')]));
+    downloadCSV(rows, 'guards_export.csv');
+  });
+  $('#gmBtnExportAtt').addEventListener('click', () => {
+    if (!currentAttendanceGuard) return alert('No guard selected');
+    const att = loadAttendance().filter(a=>a.guardId===currentAttendanceGuard);
+    const rows = [['RecordID','Date','TimeIn','TimeOut','Notes']];
+    att.forEach(a => rows.push([a.id,todayStrForDisplay(a.date),a.timeIn||'',a.timeOut||'',a.notes||'']));
+    downloadCSV(rows, 'attendance_'+currentAttendanceGuard+'.csv');
+  });
+
+  function downloadCSV(rows, filename){
+    const csv = rows.map(r => r.map(cell => '"' + String(cell).replace(/"/g,'""') + '"').join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
+  }
+
+  // Search
+  searchInput.addEventListener('input', (e)=> renderGuards(e.target.value));
+
+  // --- Attendance Monitoring (report) ---
+
+  // populate area filter options
+  function populateAreaFilters(){
+    const guards = loadGuards();
+    const areas = Array.from(new Set(guards.map(g => g.area || '').filter(Boolean))).sort();
+    amAreaFilter.innerHTML = '<option value=\"\">All areas</option>' + areas.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+  }
+
+  // render the attendance monitor table
+  function renderAttendanceMonitor(){
+    const guards = loadGuards();
+    const attendance = loadAttendance().slice().sort((a,b)=> {
+      if (a.date === b.date) return (a.guardId||'').localeCompare(b.guardId||'');
+      return new Date(b.date) - new Date(a.date);
     });
 
-    document.getElementById('kpiEvaluationForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const empId = document.getElementById('employeeId').value;
-      alert(`KPI evaluation for ${empId} submitted successfully!`);
-      hidePopup('kpi-popup');
-      this.reset();
-    });
+    const q = (amSearch.value||'').trim().toLowerCase();
+    const fromIso = amFrom.value ? amFrom.value : null; // already yyyy-mm-dd
+    const toIso = amTo.value ? amTo.value : null;
+    const areaFilter = (amAreaFilter.value || '').trim().toLowerCase();
 
-    // Notification dropdown toggle
-    document.getElementById('notifToggle').addEventListener('click', function(e) {
-      e.stopPropagation();
-      const dropdown = document.getElementById('notifList');
-      dropdown.classList.toggle('hidden');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-      const notifToggle = document.getElementById('notifToggle');
-      const notifList = document.getElementById('notifList');
-      
-      if (!notifToggle.contains(e.target) && !notifList.contains(e.target)) {
-        notifList.classList.add('hidden');
+    const rows = attendance.filter(rec => {
+      const g = guards.find(x=>x.id===rec.guardId) || {};
+      if (q) {
+        const hay = `${g.name||''} ${g.area||''}`.toLowerCase();
+        if (!hay.includes(q)) return false;
       }
+      if (areaFilter) {
+        if (!g.area || g.area.toLowerCase() !== areaFilter) return false;
+      }
+      if (fromIso) {
+        if (rec.date < fromIso) return false; // compare ISO strings
+      }
+      if (toIso) {
+        if (rec.date > toIso) return false;
+      }
+      return true;
     });
 
-    // Incident search
-    document.getElementById('incidentSearch')?.addEventListener('keyup', function() {
-      const filter = this.value.toLowerCase();
-      document.querySelectorAll('#incident-reports table tbody tr').forEach(row => {
-        row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
-      });
+    amTbody.innerHTML = rows.map(r => {
+      const g = guards.find(x=>x.id===r.guardId) || { name: 'Unknown', area: '' };
+      return `<tr>
+        <td class="px-3 py-2">${escapeHtml(g.name)}</td>
+        <td class="px-3 py-2">${escapeHtml(g.area||'—')}</td>
+        <td class="px-3 py-2">${escapeHtml(todayStrForDisplay(r.date))}</td>
+        <td class="px-3 py-2">${escapeHtml(r.timeIn||'')}</td>
+        <td class="px-3 py-2">${escapeHtml(r.timeOut||'')}</td>
+        <td class="px-3 py-2 text-sm text-gray-600">${escapeHtml(r.notes||'')}</td>
+        <td class="px-3 py-2"><button class="am-edit text-xs px-2 py-1 rounded bg-slate-100" data-id="${r.id}">Edit</button></td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="7" class="px-3 py-6 text-center text-sm text-gray-400">No attendance records for selected filters.</td></tr>`;
+  }
+
+  // edit attendance record from report (prompt quick edit)
+  amTbody.addEventListener('click', (e) => {
+    const btn = e.target.closest('.am-edit'); if (!btn) return;
+    const id = btn.dataset.id;
+    const att = loadAttendance();
+    const rec = att.find(x=>x.id===id);
+    if (!rec) return alert('Record not found.');
+    const newIn = prompt('Edit Time In (HH:MM) — leave blank to keep', rec.timeIn || '');
+    const newOut = prompt('Edit Time Out (HH:MM) — leave blank to keep', rec.timeOut || '');
+    const notes = prompt('Notes (optional)', rec.notes || '');
+    if (newIn !== null && newIn !== '') rec.timeIn = newIn;
+    if (newOut !== null && newOut !== '') rec.timeOut = newOut;
+    if (notes !== null) rec.notes = notes;
+    saveAttendance(att);
+    renderAttendanceMonitor();
+    renderAttendanceTable(rec.guardId); // update per-guard modal if open
+  });
+
+  // filters and export handlers
+  amRefresh.addEventListener('click', renderAttendanceMonitor);
+  amSearch.addEventListener('input', renderAttendanceMonitor);
+  amAreaFilter.addEventListener('change', renderAttendanceMonitor);
+  amFrom.addEventListener('change', renderAttendanceMonitor);
+  amTo.addEventListener('change', renderAttendanceMonitor);
+
+  amExport.addEventListener('click', () => {
+    const rows = [['RecordID','Guard','Area','Date','TimeIn','TimeOut','Notes']];
+    const trNodes = Array.from(amTbody.querySelectorAll('tr'));
+    if (!trNodes.length) return alert('No rows to export.');
+    trNodes.forEach(tr => {
+      const cells = tr.querySelectorAll('td');
+      if (cells.length < 6) return;
+      rows.push([ '', cells[0].textContent, cells[1].textContent, cells[2].textContent, cells[3].textContent, cells[4].textContent, cells[5].textContent ]);
     });
-  </script>
+    downloadCSV(rows, 'attendance_monitor_export.csv');
+  });
+
+  // initial population of area filter and initial render
+  function initAM(){
+    populateAreaFilters();
+    // default date range: show last 7 days
+    const today = new Date();
+    const prior = new Date(); prior.setDate(today.getDate() - 7);
+    amTo.value = today.toISOString().slice(0,10);
+    amFrom.value = prior.toISOString().slice(0,10);
+    renderAttendanceMonitor();
+  }
+
+  // expose some functions used elsewhere
+  window.renderAttendanceMonitor = renderAttendanceMonitor;
+
+  // Initial render for GM
+  renderGuards();
+  initAM();
+
+  // Expose basic function to reload
+  window.gmReload = () => { renderGuards(searchInput.value); renderAttendanceMonitor(); };
+
+})();
+</script>
 </body>
 </html>
-
