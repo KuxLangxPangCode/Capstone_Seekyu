@@ -55,6 +55,10 @@
     .sidebar { transition: width .25s ease; }
     .sidebar.collapsed { width: 76px; }
     .sidebar.collapsed .label { display:none; }
+    /* hide labels & badges when collapsed */
+    .sidebar.collapsed .label { display: none !important; }
+    .sidebar.collapsed .badge { display: none !important; }
+
 
     /* Header bar */
     .appbar { position: sticky; top: 0; z-index: 40; backdrop-filter: saturate(180%) blur(8px); background: rgba(255,255,255,.75); border-bottom: 1px solid #e5e7eb; }
@@ -115,11 +119,10 @@
         <i class="fa-solid fa-circle-exclamation text-orange-400 w-5 text-center"></i><span class="label">Incident Reports</span>
         <span class="ml-auto badge">1</span>
       </button>
-    </nav>
-
-    <div class="p-3 border-t border-gray-800">
-      <button class="w-full btn btn-primary justify-center"><i class="fa-solid fa-right-from-bracket"></i><span class="label">Logout</span></button>
-    </div>
+        <div class="p-3 border-t border-gray-800">
+      <button class="w-full btn btn-primary justify-center" onclick="location.href='homepage.html'"><i class="fa-solid fa-right-from-bracket"></i><span class="label">Logout</span></button>
+        </div>
+    </nav> 
   </aside>
 
   <!-- MAIN -->
@@ -145,6 +148,7 @@
     <!-- CONTENT -->
     <main class="content-shell w-full px-4 py-6 space-y-6">
       <!-- Top stats -->
+       <div data-section="dashboard" class="section">
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="stat"><div class="text-xs text-slate-500">On-duty Guards</div><div class="text-2xl font-extrabold">18</div></div>
         <div class="stat"><div class="text-xs text-slate-500">Open Incidents</div><div class="text-2xl font-extrabold">3</div></div>
@@ -230,7 +234,7 @@
             <table class="table zebra">
               <thead><tr><th>Guard</th><th>Area</th><th>Start</th><th>End</th><th>Status</th></tr></thead>
               <tbody>
-                <tr><td>Miguel Santos</td><td>Warehouse A</td><td>07:00</td><td>15:00</td><td class="text-emerald-600 font-semibold">On Duty</td></tr>
+                <tr><td>You</td><td>Warehouse A</td><td>07:00</td><td>15:00</td><td class="text-emerald-600 font-semibold">On Duty</td></tr>
               </tbody>
             </table>
           </div>
@@ -247,11 +251,469 @@
           </div>
         </div>
       </section>
+    </div>
+      
+          <!-- Messaging section -->
+<div data-section="messaging" class="section hidden">
+  <div class="card card-inset">
+    <div class="section-header">
+      <div class="section-title">Send Message</div>
+    </div>
+
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold">Messaging Management</h2>
+        <div class="flex gap-2">
+          <button id="inboxBtn" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Inbox</button>
+          <button id="composeBtn" class="px-3 py-2 rounded bg-slate-200 text-slate-800 text-sm">Compose</button>
+        </div>
+      </div>
+
+      <div id="inbox-section" class="space-y-3">
+        <div class="flex items-center gap-3">
+          <input type="text" id="messageSearch" placeholder="Search messages..." class="flex-1 px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+          <button id="refreshBtn" class="px-3 py-2 rounded bg-white border border-slate-200">Refresh</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="clean min-w-full text-sm">
+            <thead>
+              <tr><th>Sender</th><th>Subject</th><th>Date</th><th>Action</th></tr>
+            </thead>
+            <tbody id="messageTable" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="compose-section" class="hidden mt-4">
+        <form id="composeForm" class="space-y-3">
+          <div>
+            <label class="block text-sm text-slate-600">To</label>
+            <input id="recipient" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Subject</label>
+            <input id="subject" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600">Message</label>
+            <textarea id="message" rows="5" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50"></textarea>
+          </div>
+          <div class="flex gap-2">
+            <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Send</button>
+            <button type="button" id="cancelCompose" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leave request section -->
+<div data-section="leave" class="section hidden">
+  <div class="card card-inset">
+    <div class="section-header">
+      <div class="section-title">Request Leave</div>
+    </div>
+
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Request Leave</h1>
+        <div class="flex gap-2">
+          <button id="leaveTabNew" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">New Request</button>
+          <button id="leaveTabMy" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">My Requests</button>
+        </div>
+      </div>
+
+      <!-- New Request Form -->
+      <div id="leave-new-section">
+        <form id="leaveForm" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm text-slate-600">Full Name</label>
+              <input id="leave_name" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600">Employee / Account ID</label>
+              <input id="leave_accountId" class="w-full px-3 py-2 rounded border bg-slate-50 font-mono" readonly />
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600">Role</label>
+              <input id="leave_role" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600">E-mail</label>
+              <input id="leave_email" type="email" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-sm text-slate-600">Start Date</label>
+              <input id="leave_start" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600">End Date</label>
+              <input id="leave_end" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600">Type</label>
+              <select id="leave_type" class="w-full px-3 py-2 rounded border bg-slate-50" required>
+                <option value="">Select type</option>
+                <option>Vacation</option>
+                <option>Sick</option>
+                <option>Emergency</option>
+                <option>Bereavement</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600">Reason</label>
+            <textarea id="leave_reason" rows="4" class="w-full px-3 py-2 rounded border bg-slate-50" required></textarea>
+          </div>
+
+          <div class="flex gap-2">
+            <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Submit Request</button>
+            <button type="reset" id="leaveReset" class="px-4 py-2 rounded bg-slate-200">Reset</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- My Requests (table) -->
+      <div id="leave-my-section" class="hidden mt-6">
+        <div class="flex items-center gap-3 mb-4">
+          <input id="leaveSearch" placeholder="Search by ID, type or reason..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+          <select id="leaveFilterStatus" class="px-3 py-2 rounded border bg-slate-50">
+            <option value="">All Status</option>
+            <option>Pending</option>
+            <option>Approved</option>
+            <option>Rejected</option>
+          </select>
+          <input id="leaveFilterFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+          <input id="leaveFilterTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+          <button id="leaveRefresh" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+        </div>
+
+        <div class="overflow-x-auto bg-white rounded border">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 text-left text-slate-600">
+              <tr>
+                <th class="py-3 px-3">Request ID</th>
+                <th class="py-3 px-3">Range</th>
+                <th class="py-3 px-3">Type</th>
+                <th class="py-3 px-3">Status</th>
+                <th class="py-3 px-3">Submitted</th>
+                <th class="py-3 px-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="leaveTable" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="leaveEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white rounded-lg max-w-lg w-full p-5">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Edit Leave Request</h2>
+      <button id="closeLeaveEdit" class="text-slate-500">✕</button>
+    </div>
+
+    <form id="leaveEditForm" class="space-y-3">
+      <input type="hidden" id="editRequestId" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm text-slate-600">Start Date</label>
+          <input id="edit_start" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required title="StartDateINp"/>
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600">End Date</label>
+          <input id="edit_end" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required title="EndDateInp"/>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm text-slate-600">Type</label>
+        <select id="edit_type" class="w-full px-3 py-2 rounded border bg-slate-50" required title="EditTypeInp">
+          <option>Vacation</option><option>Sick</option><option>Emergency</option><option>Bereavement</option><option>Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm text-slate-600" title="reasonInput">Reason</label>
+        <textarea id="edit_reason" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50" required title="EditReason"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button type="submit" class="px-3 py-2 rounded bg-indigo-600 text-white">Save</button>
+        <button type="button" id="cancelLeaveEdit" class="px-3 py-2 rounded bg-slate-200">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Exam section -->
+<div data-section="exam" class="section hidden">
+  <div class="card card-inset">
+    <div class="section-header"><div class="section-title">Take Exam</div></div>
+    <p class="card-subtle">Exam interface goes here.</p>
+  </div>
+</div>
+
+<!-- Incidents (theme-ready: light / dark) -->
+<div data-section="incidents" class="section hidden">
+  <div class="card card-inset">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-slate-100">Incident Reports</h1>
+      <div class="flex gap-2">
+        <!-- active/inactive styling handled in JS -->
+        <button id="irTabSubmit" class="px-3 py-2 rounded text-sm bg-indigo-600 text-white">Submit Report</button>
+        <button id="irTabView" class="px-3 py-2 rounded text-sm bg-slate-200 text-gray-800 dark:bg-slate-700 dark:text-slate-200">View Reports</button>
+      </div>
+    </div>
+
+    <!-- Submit form -->
+    <div id="ir-submit-section">
+      <form id="incidentForm" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Full Name</label>
+            <input id="ir_fullName" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Employee ID / License No.</label>
+            <input id="ir_employeeId" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Role</label>
+            <select id="ir_role" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required>
+              <option value="">Select role</option>
+              <option>Security Guard</option>
+              <option>Head Guard</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Shift Date</label>
+            <input id="ir_shiftDate" type="date" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Shift Start Time</label>
+            <input id="ir_shiftStart" type="time" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"/>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Shift End Time</label>
+            <input id="ir_shiftEnd" type="time" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"/>
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Contact Phone</label>
+            <input id="ir_contact" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"/>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">E-Mail Address</label>
+            <input id="ir_email" type="email" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"/>
+          </div>
+        </div>
+
+        <hr class="my-2 border-slate-200 dark:border-slate-700" />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Date of Incident</label>
+            <input id="ir_date" type="date" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Time of Incident</label>
+            <input id="ir_time" type="time" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Location of Incident</label>
+            <input id="ir_location" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Incident Type</label>
+            <select id="ir_type" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required>
+              <option value="">Select type</option>
+              <option>Trespassing</option>
+              <option>Theft / Burglary</option>
+              <option>Vandalism</option>
+              <option>Fire / Smoke</option>
+              <option>Assault</option>
+              <option>Safety Hazard</option>
+              <option>False Fire Alarm</option>
+              <option>Accident</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Description of Incident</label>
+            <textarea id="ir_description" rows="5" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500" placeholder="Describe what happened, sequence of events..." required></textarea>
+          </div>
+        </div>
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
+        <!-- Parties involved -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Parties Involved</h3>
+            <button type="button" id="irAddPerson" class="px-2 py-1 text-xs bg-slate-200 rounded dark:bg-slate-700 dark:text-slate-200">Add Person</button>
+          </div>
+          <div id="ir_parties" class="space-y-3"></div>
+        </div>
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
+        <div>
+          <h3 class="text-sm font-semibold mb-2 text-slate-800 dark:text-slate-100">Injuries and Medical Services</h3>
+          <div class="flex items-center gap-4 mb-2">
+            <label class="text-sm text-slate-800 dark:text-slate-200"><input type="radio" name="ir_injuries" value="Yes" /> Yes</label>
+            <label class="text-sm text-slate-800 dark:text-slate-200"><input type="radio" name="ir_injuries" value="No" checked /> No</label>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">If yes, describe injuries</label>
+            <textarea id="ir_injuries_desc" rows="2" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"></textarea>
+          </div>
+          <div class="mt-2">
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Was medical treatment provided?</label>
+            <select id="ir_medical_provided" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200">
+              <option value="">Select</option>
+              <option>Yes</option>
+              <option>No</option>
+              <option>Refused</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
+        <div>
+          <h3 class="text-sm font-semibold mb-2 text-slate-800 dark:text-slate-100">Actions Taken</h3>
+          <div class="flex gap-4 mb-2">
+            <label class="text-sm text-slate-800 dark:text-slate-200"><input id="ir_police_notified" type="checkbox" /> Police Notified</label>
+            <label class="text-sm text-slate-800 dark:text-slate-200"><input id="ir_medical_contacted" type="checkbox" /> Medical Services Contacted</label>
+            <label class="text-sm text-slate-800 dark:text-slate-200"><input id="ir_scene_secured" type="checkbox" /> Scene Secured</label>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Other actions taken</label>
+            <textarea id="ir_actions" rows="2" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"></textarea>
+          </div>
+        </div>
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
+        <div>
+          <h3 class="text-sm font-semibold mb-2 text-slate-800 dark:text-slate-100">Evidence Collected</h3>
+          <div class="flex gap-3 flex-wrap mb-2 text-slate-800 dark:text-slate-200">
+            <label class="text-sm"><input id="ir_e_photos" type="checkbox" /> Photos</label>
+            <label class="text-sm"><input id="ir_e_videos" type="checkbox" /> Video Footage</label>
+            <label class="text-sm"><input id="ir_e_witness" type="checkbox" /> Witness Statements</label>
+            <label class="text-sm"><input id="ir_e_physical" type="checkbox" /> Physical Items</label>
+          </div>
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Other Evidence</label>
+            <input id="ir_e_other" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" />
+          </div>
+        </div>
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
+        <div>
+          <label class="block text-sm text-slate-600 dark:text-slate-300">Additional Remarks</label>
+          <textarea id="ir_remarks" rows="3" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"></textarea>
+        </div>
+
+        <div class="flex gap-2">
+          <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Submit Report</button>
+          <button type="reset" class="px-4 py-2 rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200">Reset</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- View Reports -->
+    <div id="ir-view-section" class="hidden mt-6">
+      <div class="flex items-center gap-3 mb-4">
+        <input id="reportsSearch" placeholder="Search by reporter, ID, location, subject..." class="flex-1 px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" />
+        <select id="filterRole" class="px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200">
+          <option value="">All Roles</option>
+          <option>Security Guard</option>
+          <option>Head Guard</option>
+        </select>
+        <select id="filterType" class="px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200">
+          <option value="">All Types</option>
+          <option>Trespassing</option><option>Theft / Burglary</option><option>Vandalism</option><option>Fire / Smoke</option><option>Assault</option><option>Safety Hazard</option><option>False Fire Alarm</option><option>Accident</option><option>Other</option>
+        </select>
+        <input id="filterFrom" type="date" class="px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" />
+        <input id="filterTo" type="date" class="px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" />
+        <button id="refreshReports" class="px-3 py-2 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Refresh</button>
+      </div>
+
+      <div class="overflow-x-auto bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50 dark:bg-slate-800 text-left text-slate-600 dark:text-slate-300">
+            <tr>
+              <th class="py-3 px-3">Report ID</th>
+              <th class="py-3 px-3">Date</th>
+              <th class="py-3 px-3">Reporter</th>
+              <th class="py-3 px-3">Role</th>
+              <th class="py-3 px-3">Type</th>
+              <th class="py-3 px-3">Location</th>
+              <th class="py-3 px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reportsTable" class="divide-y bg-white dark:bg-transparent"></tbody>
+        </table>
+      </div>
+    </div>
+    <!-- END: Incident Reports Content -->
+  </div>
+</div>
+
+<!-- Report Details Modal (theme-ready) -->
+<div id="reportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white dark:bg-slate-900 rounded-lg max-w-3xl w-full p-5 overflow-y-auto max-h-[90vh] text-slate-700 dark:text-slate-200">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Incident Report Details</h2>
+      <button id="closeReportModal" class="text-slate-500 dark:text-slate-300">✕</button>
+    </div>
+    <div id="reportDetails" class="space-y-2 text-sm"></div>
+    <div class="mt-4 flex justify-end gap-2">
+      <button id="exportReportBtn" class="px-3 py-2 rounded bg-blue-600 text-white">Export (JSON)</button>
+      <button id="closeReportModal2" class="px-3 py-2 rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Report Details Modal -->
+<div id="reportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white rounded-lg max-w-3xl w-full p-5 overflow-y-auto max-h-[90vh]">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Incident Report Details</h2>
+      <button id="closeReportModal" class="text-slate-500">✕</button>
+    </div>
+    <div id="reportDetails" class="space-y-2 text-sm text-slate-700"></div>
+    <div class="mt-4 flex justify-end gap-2">
+      <button id="exportReportBtn" class="px-3 py-2 rounded bg-blue-600 text-white">Export (JSON)</button>
+      <button id="closeReportModal2" class="px-3 py-2 rounded bg-slate-200">Close</button>
+    </div>
+  </div>
+</div>
+
 
       <!-- The rest of your original sections (Messaging, Leave, Incidents, Exam, Modals) can stay as-is.
            This file focuses on the visual shell & components you can copy into your page. -->
     </main>
   </div>
+  <!-- END MAIN -->
+
+  <!-- inside <main class="content-shell ..."> -->
 
   <!-- THEME TOGGLE (works app-wide) -->
   <script>
@@ -405,5 +867,434 @@
       });
     })();
   </script>
+
+  <script>
+(function(){
+  const NAV_SELECTOR = '[data-target]';
+  const SECTION_SELECTOR = '[data-section]';
+  const STORAGE_KEY = 'seekyu-active-section';
+
+  const navButtons = Array.from(document.querySelectorAll(NAV_SELECTOR));
+  const sections = Array.from(document.querySelectorAll(SECTION_SELECTOR));
+  const appTitleEl = document.querySelector('.heading-hero') || document.querySelector('.section-title') || document.querySelector('header h1');
+
+  if(!navButtons.length || !sections.length) return;
+
+  function setActiveSection(name, pushHistory = false){
+    // hide/show sections
+    sections.forEach(s => {
+      if(s.dataset.section === name) s.classList.remove('hidden');
+      else s.classList.add('hidden');
+    });
+
+    // update nav button active state + aria-current
+    navButtons.forEach(btn => {
+      if(btn.dataset.target === name){
+        btn.classList.add('bg-gray-800'); // visual active state (tweak classes if you want)
+        btn.setAttribute('aria-current', 'true');
+      } else {
+        btn.classList.remove('bg-gray-800');
+        btn.removeAttribute('aria-current');
+      }
+    });
+
+    // update top heading (if present)
+    if(appTitleEl){
+      // try to use the label text inside the nav button (or fall back to capitalized key)
+      const matchBtn = navButtons.find(b => b.dataset.target === name);
+      const labelText = matchBtn?.querySelector('.label')?.textContent?.trim() || name.charAt(0).toUpperCase() + name.slice(1);
+      appTitleEl.textContent = labelText;
+    }
+
+    // persist selection
+    localStorage.setItem(STORAGE_KEY, name);
+
+    // optional: update URL hash for browser history
+    if(pushHistory) history.pushState({section: name}, '', '#' + name);
+  }
+
+  // wire clicks
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = btn.dataset.target;
+      setActiveSection(target, true);
+    });
+  });
+
+  // handle browser back/forward (reads from history state or hash)
+  window.addEventListener('popstate', (ev) => {
+    const stateName = ev.state?.section || location.hash?.replace('#','');
+    if(stateName) setActiveSection(stateName, false);
+  });
+
+  // on load: restore last visited or default to dashboard
+  const saved = localStorage.getItem(STORAGE_KEY) || location.hash?.replace('#','') || 'dashboard';
+  // validate saved exists among sections
+  const valid = sections.some(s => s.dataset.section === saved) ? saved : sections[0].dataset.section;
+  setActiveSection(valid, false);
+})();
+</script>
+
+<script>
+/* --- Incident Reports Section --- */
+document.addEventListener('DOMContentLoaded', function () {
+  // Basic element refs (some pages may not include the incidents section)
+  const tabSubmit = document.getElementById('irTabSubmit');
+  const tabView = document.getElementById('irTabView');
+  const submitSection = document.getElementById('ir-submit-section');
+  const viewSection = document.getElementById('ir-view-section');
+  const partiesContainer = document.getElementById('ir_parties');
+  const addPersonBtn = document.getElementById('irAddPerson');
+  const incidentForm = document.getElementById('incidentForm');
+  const reportsTable = document.getElementById('reportsTable');
+  const reportModal = document.getElementById('reportModal');
+  const reportDetails = document.getElementById('reportDetails');
+  const exportReportBtn = document.getElementById('exportReportBtn');
+
+  // If core elements don't exist, stop early (safe no-op)
+  if (!submitSection || !viewSection || !partiesContainer || !incidentForm || !reportsTable || !reportModal || !reportDetails) {
+    // Not present on this page — nothing to do
+    return;
+  }
+
+  // Tab switching safely (guards if tabs missing)
+  function irActivateTab(tab) {
+    const tabs = [tabSubmit, tabView].filter(Boolean);
+    tabs.forEach(t => { t.classList.remove('bg-indigo-600','text-white'); t.classList.add('bg-slate-200','text-gray-800'); });
+    if (!tab) return;
+    tab.classList.remove('bg-slate-200','text-gray-800');
+    tab.classList.add('bg-indigo-600','text-white');
+
+    // show/hide sections
+    submitSection.classList.add('hidden');
+    viewSection.classList.add('hidden');
+    if (tab === tabSubmit) submitSection.classList.remove('hidden');
+    if (tab === tabView) viewSection.classList.remove('hidden');
+  }
+  tabSubmit?.addEventListener('click', ()=> irActivateTab(tabSubmit));
+  tabView?.addEventListener('click', ()=> irActivateTab(tabView));
+  // default: show Submit if available, else View
+  irActivateTab(tabSubmit || tabView);
+
+  // Parties: unified creator
+  function createPartyBlock(data = {}) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'p-3 border rounded bg-slate-50 relative';
+    wrapper.innerHTML = `
+      <button type="button" class="irRemovePerson absolute top-2 right-2 text-sm text-red-600">Remove</button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div><label class="block text-xs text-slate-600">Full Name</label><input name="party_name" class="w-full px-2 py-1 rounded border" value="${escapeAttr(data.name||'')}" /></div>
+        <div><label class="block text-xs text-slate-600">Role (Suspect/Victim/Witness/Other)</label><input name="party_role" class="w-full px-2 py-1 rounded border" value="${escapeAttr(data.role||'')}" /></div>
+        <div><label class="block text-xs text-slate-600">Contact</label><input name="party_contact" class="w-full px-2 py-1 rounded border" value="${escapeAttr(data.contact||'')}" /></div>
+        <div><label class="block text-xs text-slate-600">ID Type & No.</label><input name="party_id" class="w-full px-2 py-1 rounded border" value="${escapeAttr(data.id||'')}" /></div>
+        <div class="md:col-span-2"><label class="block text-xs text-slate-600">Involvement Description</label><textarea name="party_desc" rows="2" class="w-full px-2 py-1 rounded border">${escapeHtml(data.desc||'')}</textarea></div>
+      </div>`;
+    partiesContainer.appendChild(wrapper);
+
+    // attach remove handler
+    const btn = wrapper.querySelector('.irRemovePerson');
+    btn?.addEventListener('click', () => wrapper.remove());
+    return wrapper;
+  }
+
+  // ensure at least one party block exists
+  if (partiesContainer.children.length === 0) createPartyBlock({});
+
+  addPersonBtn?.addEventListener('click', () => createPartyBlock({}));
+
+  // In-memory store (demo)
+  let reports = [
+    // sample
+    {
+      id: 'IR-0001',
+      reporterName: 'John Guard',
+      employeeId: 'SG-1001',
+      role: 'Security Guard',
+      shiftDate: '2025-09-12',
+      shiftStart: '08:00', shiftEnd: '16:00',
+      contact: '09171234567', email: 'john.guard@example.com',
+      incidentDate: '2025-09-12', incidentTime: '17:30',
+      location: 'Client #3829 - Main Gate',
+      type: 'Accident',
+      description: 'Guard slipped on wet floor during patrol. Minor bruises.',
+      parties: [{name:'Jane Doe', role:'Witness', contact:'09170001111', id:'DL-12345', desc:'Saw slip near gate'}],
+      injuries: 'Yes',
+      injuries_desc: 'Bruise on left arm',
+      medical_provided: 'Yes',
+      police_notified: false,
+      medical_contacted: true,
+      scene_secured: true,
+      actions: 'Assisted guard, called medics, logged incident.',
+      evidence: {photos:true, videos:false, witness:true, physical:false, other:''},
+      remarks: 'Install wet-floor signage.',
+      createdAt: '2025-09-12'
+    }
+  ];
+  let nextReportSeq = reports.length + 1;
+
+  // form submission
+  incidentForm.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    // required fields
+    const reporterName = (document.getElementById('ir_fullName')?.value || '').trim();
+    const employeeId = (document.getElementById('ir_employeeId')?.value || '').trim();
+    const role = (document.getElementById('ir_role')?.value || '').trim();
+    const incidentDate = (document.getElementById('ir_date')?.value || '').trim();
+    const incidentTime = (document.getElementById('ir_time')?.value || '').trim();
+    const location = (document.getElementById('ir_location')?.value || '').trim();
+    const type = (document.getElementById('ir_type')?.value || '').trim();
+    const description = (document.getElementById('ir_description')?.value || '').trim();
+
+    if (!reporterName || !employeeId || !role || !incidentDate || !incidentTime || !location || !type || !description) {
+      alert('Please fill all required fields.');
+      return;
+    }
+
+    // collect parties
+    const partyNodes = Array.from(partiesContainer.querySelectorAll('> div'));
+    const parties = partyNodes.map(node => ({
+      name: (node.querySelector('[name="party_name"]')?.value || '').trim(),
+      role: (node.querySelector('[name="party_role"]')?.value || '').trim(),
+      contact: (node.querySelector('[name="party_contact"]')?.value || '').trim(),
+      id: (node.querySelector('[name="party_id"]')?.value || '').trim(),
+      desc: (node.querySelector('[name="party_desc"]')?.value || '').trim()
+    })).filter(p => p.name || p.role || p.contact || p.id || p.desc);
+
+    const injuries = document.querySelector('input[name="ir_injuries"]:checked')?.value || 'No';
+    const injuries_desc = (document.getElementById('ir_injuries_desc')?.value || '').trim();
+    const medical_provided = (document.getElementById('ir_medical_provided')?.value || '').trim();
+    const police_notified = !!document.getElementById('ir_police_notified')?.checked;
+    const medical_contacted = !!document.getElementById('ir_medical_contacted')?.checked;
+    const scene_secured = !!document.getElementById('ir_scene_secured')?.checked;
+    const actions = (document.getElementById('ir_actions')?.value || '').trim();
+    const evidence = {
+      photos: !!document.getElementById('ir_e_photos')?.checked,
+      videos: !!document.getElementById('ir_e_videos')?.checked,
+      witness: !!document.getElementById('ir_e_witness')?.checked,
+      physical: !!document.getElementById('ir_e_physical')?.checked,
+      other: (document.getElementById('ir_e_other')?.value || '').trim()
+    };
+    const remarks = (document.getElementById('ir_remarks')?.value || '').trim();
+
+    // report id
+    const id = `IR-${String(nextReportSeq).padStart(4,'0')}`;
+    nextReportSeq++;
+
+    const report = {
+      id,
+      reporterName,
+      employeeId,
+      role,
+      shiftDate: document.getElementById('ir_shiftDate')?.value || '',
+      shiftStart: document.getElementById('ir_shiftStart')?.value || '',
+      shiftEnd: document.getElementById('ir_shiftEnd')?.value || '',
+      contact: document.getElementById('ir_contact')?.value || '',
+      email: document.getElementById('ir_email')?.value || '',
+      incidentDate,
+      incidentTime,
+      location,
+      type,
+      description,
+      parties,
+      injuries,
+      injuries_desc,
+      medical_provided,
+      police_notified,
+      medical_contacted,
+      scene_secured,
+      actions,
+      evidence,
+      remarks,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    reports.push(report);
+    incidentForm.reset();
+    // reset parties to a single blank block
+    partiesContainer.innerHTML = '';
+    createPartyBlock({});
+    alert('Incident report submitted (demo). In production this should POST to your backend.');
+    // switch to view tab & render
+    irActivateTab(tabView);
+    renderReports();
+  });
+
+  // render reports list
+  function renderReports() {
+    reportsTable.innerHTML = '';
+    const qEl = document.getElementById('reportsSearch');
+    const q = (qEl?.value || '').toLowerCase();
+    const roleFilter = (document.getElementById('filterRole')?.value || '');
+    const typeFilter = (document.getElementById('filterType')?.value || '');
+    const from = (document.getElementById('filterFrom')?.value || '');
+    const to = (document.getElementById('filterTo')?.value || '');
+
+    const filtered = reports.slice().reverse().filter(r => {
+      if (roleFilter && r.role !== roleFilter) return false;
+      if (typeFilter && r.type !== typeFilter) return false;
+      if (from && r.incidentDate < from) return false;
+      if (to && r.incidentDate > to) return false;
+      if (!q) return true;
+      const hay = (r.id + ' ' + r.reporterName + ' ' + r.employeeId + ' ' + r.location + ' ' + r.type + ' ' + r.description).toLowerCase();
+      return hay.includes(q);
+    });
+
+    if (filtered.length === 0) {
+      reportsTable.innerHTML = '<tr><td class="py-4 px-3 text-slate-500" colspan="7">No reports found.</td></tr>';
+      return;
+    }
+
+    for (const r of filtered) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="py-2 px-3 font-mono text-sm">${r.id}</td>
+        <td class="py-2 px-3">${r.incidentDate} ${r.incidentTime}</td>
+        <td class="py-2 px-3">${escapeHtml(r.reporterName)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.role)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.type)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.location)}</td>
+        <td class="py-2 px-3">
+          <button class="viewReportBtn text-blue-600 hover:underline" data-id="${r.id}">View</button>
+        </td>`;
+      reportsTable.appendChild(tr);
+    }
+  }
+
+  // helper escape functions
+  function escapeHtml(s){ if (!s && s !== 0) return ''; return String(s).replace(/[&<>"'`=\/]/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch]; }); }
+  function escapeAttr(s){ return (s===undefined||s===null)?'':String(s).replace(/"/g,'&quot;'); }
+
+  // wire filters/search
+  ['reportsSearch','filterRole','filterType','filterFrom','filterTo'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', renderReports);
+  });
+  document.getElementById('refreshReports')?.addEventListener('click', renderReports);
+
+  // current opened report id (used for export)
+  let currentReportId = null;
+
+  // open modal with full details
+  function openReportModal(report) {
+    if (!report) return;
+    currentReportId = report.id;
+    reportDetails.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div><strong>Report ID:</strong> ${escapeHtml(report.id)}</div>
+        <div><strong>Created:</strong> ${escapeHtml(report.createdAt)}</div>
+        <div><strong>Reporter:</strong> ${escapeHtml(report.reporterName)}</div>
+        <div><strong>Employee ID:</strong> ${escapeHtml(report.employeeId)}</div>
+        <div><strong>Role:</strong> ${escapeHtml(report.role)}</div>
+        <div><strong>Contact:</strong> ${escapeHtml(report.contact)}</div>
+        <div><strong>Email:</strong> ${escapeHtml(report.email)}</div>
+        <div><strong>Shift Date / Start-End:</strong> ${escapeHtml(report.shiftDate)} ${escapeHtml(report.shiftStart||'')} - ${escapeHtml(report.shiftEnd||'')}</div>
+        <div><strong>Incident Date / Time:</strong> ${escapeHtml(report.incidentDate)} ${escapeHtml(report.incidentTime)}</div>
+        <div class="md:col-span-2"><strong>Location:</strong> ${escapeHtml(report.location)}</div>
+        <div class="md:col-span-2"><strong>Type:</strong> ${escapeHtml(report.type)}</div>
+        <div class="md:col-span-2"><strong>Description:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.description)}</div></div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Parties Involved</h4>
+        ${report.parties && report.parties.length ? report.parties.map(p=>`
+          <div class="p-2 border rounded mt-2">
+            <div><strong>Name:</strong> ${escapeHtml(p.name)}</div>
+            <div><strong>Role:</strong> ${escapeHtml(p.role)}</div>
+            <div><strong>Contact:</strong> ${escapeHtml(p.contact)}</div>
+            <div><strong>ID:</strong> ${escapeHtml(p.id)}</div>
+            <div><strong>Involvement:</strong> ${escapeHtml(p.desc)}</div>
+          </div>`).join('') : '<div class="text-slate-500">No parties recorded.</div>'}
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Injuries & Medical</h4>
+        <div><strong>Were there injuries?</strong> ${escapeHtml(report.injuries)}</div>
+        <div><strong>Injuries description:</strong> ${escapeHtml(report.injuries_desc)}</div>
+        <div><strong>Medical provided:</strong> ${escapeHtml(report.medical_provided)}</div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Actions Taken</h4>
+        <div><strong>Police notified:</strong> ${report.police_notified ? 'Yes' : 'No'}</div>
+        <div><strong>Medical contacted:</strong> ${report.medical_contacted ? 'Yes' : 'No'}</div>
+        <div><strong>Scene secured:</strong> ${report.scene_secured ? 'Yes' : 'No'}</div>
+        <div class="mt-2"><strong>Other actions:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.actions)}</div></div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Evidence</h4>
+        <div><strong>Photos:</strong> ${report.evidence.photos ? 'Yes' : 'No'}</div>
+        <div><strong>Videos:</strong> ${report.evidence.videos ? 'Yes' : 'No'}</div>
+        <div><strong>Witness statements:</strong> ${report.evidence.witness ? 'Yes' : 'No'}</div>
+        <div><strong>Physical items:</strong> ${report.evidence.physical ? 'Yes' : 'No'}</div>
+        <div><strong>Other:</strong> ${escapeHtml(report.evidence.other)}</div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div><strong>Additional Remarks:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.remarks)}</div></div>
+    `;
+    reportModal.classList.remove('hidden');
+  }
+
+  // delegated click for view buttons
+  document.addEventListener('click', function(e){
+    const target = e.target;
+    if (target && target.closest && target.closest('.viewReportBtn')) {
+      const btn = target.closest('.viewReportBtn');
+      const id = btn.dataset.id;
+      const r = reports.find(x => x.id === id);
+      if (r) openReportModal(r);
+    }
+  });
+
+  // close modal handlers
+  document.getElementById('closeReportModal')?.addEventListener('click', ()=> { reportModal.classList.add('hidden'); currentReportId = null; });
+  document.getElementById('closeReportModal2')?.addEventListener('click', ()=> { reportModal.classList.add('hidden'); currentReportId = null; });
+  reportModal.addEventListener('click', function(e){ if (e.target === reportModal) { reportModal.classList.add('hidden'); currentReportId = null; } });
+
+  // export report JSON
+  exportReportBtn?.addEventListener('click', function(){
+    if (!currentReportId) return alert('No report selected for export.');
+    const r = reports.find(x => x.id === currentReportId);
+    if (!r) return alert('Report not found.');
+    const blob = new Blob([JSON.stringify(r, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${r.id}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  // wire search/filter inputs (already added above, but ensure refresh button exists)
+  document.getElementById('refreshReports')?.addEventListener('click', renderReports);
+
+  // If there's a sidebar button that opens 'incident-reports', prefer to open view tab
+  const incidentSidebarBtn = Array.from(document.querySelectorAll('button, a')).find(b => (b.getAttribute && b.getAttribute('onclick') || '').includes("showSection('incident-reports')"));
+  if (incidentSidebarBtn) {
+    incidentSidebarBtn.addEventListener('click', function(){
+      // showSection may be defined elsewhere; call if present
+      if (typeof showSection === 'function') showSection('incident-reports', incidentSidebarBtn);
+      irActivateTab(tabView);
+      renderReports();
+    });
+  }
+
+  // initial render
+  renderReports();
+});
+</script>
 </body>
 </html>
