@@ -381,13 +381,17 @@
       </section>
 
       <!-- 9) Consent -->
-      <section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
-        <h2 class="text-lg font-semibold">9) Consent</h2>
-        <label class="mt-3 flex items-start gap-3">
-          <input id="consent" type="checkbox" class="mt-1" />
-          <span class="text-sm text-slate-700">I confirm the information provided is true and I agree to MJL Security Agency’s processing of my data for recruitment purposes.</span>
-        </label>
-      </section>
+<section class="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft">
+  <h2 class="text-lg font-semibold">9) Consent</h2>
+
+  <label class="mt-3 flex items-start gap-3">
+    <input id="consent" type="checkbox" class="mt-1" />
+    <span class="text-sm text-slate-700">
+      I confirm the information provided is true and I agree to MJL Security Agency’s processing of my data for recruitment purposes.
+      <a href="#" id="ppLink" class="ml-2 underline text-brand-accent">Read Privacy & Policy</a>
+    </span>
+  </label>
+</section>
 
       <!-- Actions -->
       <div class="flex items-center justify-between">
@@ -424,6 +428,40 @@
     </div>
   </footer>
 
+<!-- PRIVACY MODAL — centered in middle of screen -->
+<div id="ppModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="ppTitle">
+  <!-- overlay -->
+  <div id="ppOverlay" class="absolute inset-0 bg-black/60"></div>
+
+  <!-- centered container -->
+  <div class="relative max-w-3xl w-full mx-auto">
+    <!-- modal content -->
+    <div class="relative bg-white rounded-2xl p-6 ring-1 ring-slate-200 shadow-soft overflow-auto max-h-[80vh]">
+      <div class="flex items-start justify-between">
+        <h3 id="ppTitle" class="text-lg font-semibold">Privacy & Policy — MJL Security Agency</h3>
+        <button id="ppClose" class="text-slate-500 hover:text-slate-800" aria-label="Close privacy dialog">✕</button>
+      </div>
+
+      <div class="mt-4 text-sm text-slate-700 space-y-3">
+        <p><strong>Who we are</strong><br/>MJL Security Agency Inc. partners with <a href="https://seekyu.com" target="_blank" rel="noopener noreferrer" class="underline">Seekyu</a> for recruitment and HRIS. We operate in the Philippines and process applicant data to manage recruitment.</p>
+
+        <p><strong>What we collect</strong><br/>Contact information, application documents (résumé, IDs), and usage data such as IP and device info. Files uploaded (PDF) are used for verification and recruitment processing.</p>
+
+        <p><strong>How we use it</strong><br/>To process applications, contact you, comply with legal obligations (Data Privacy Act RA 10173), and improve services.</p>
+
+        <p><strong>Your rights</strong><br/>You may request access, rectification, or deletion as allowed by law. Contact: <a href="mailto:privacy@seekyu.com" class="underline">privacy@seekyu.com</a> or <a href="mailto:contact@mjlsecurity.ph" class="underline">contact@mjlsecurity.ph</a>.</p>
+
+        <p class="text-xs text-slate-500">This is a summary. Open the full policy to see retention periods, third-party disclosures, and international transfer safeguards.</p>
+      </div>
+
+      <div class="mt-6 flex gap-3 justify-end">
+        <a href="homepage.html#privacy" target="#privacy" class="px-4 py-2 rounded-lg bg-white border hover:bg-slate-50 text-sm">Open full policy</a>
+        <button id="ppAccept" class="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm">I Agree</button>
+      </div>
+    </div>
+  </div>
+</div>
+   
   <script>
     // Year
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -765,6 +803,52 @@
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+
+    // --- Privacy modal behavior ---
+// expects $ helper (document.querySelector) already defined in your script
+const ppLink = $('#ppLink');
+const ppModal = document.getElementById('ppModal');
+const ppOverlay = document.getElementById('ppOverlay');
+const ppCloseBtn = $('#ppClose');
+const ppAcceptBtn = $('#ppAccept');
+const consentCheckbox = $('#consent');
+
+function openPpModal(e) {
+  if (e) e.preventDefault();
+  ppModal.classList.remove('hidden');
+  // trap scroll on background
+  document.documentElement.style.overflow = 'hidden';
+  // focus first focusable in modal (Accept button)
+  ppAcceptBtn?.focus();
+}
+
+function closePpModal() {
+  ppModal.classList.add('hidden');
+  document.documentElement.style.overflow = '';
+  // return focus to the link for accessibility
+  ppLink?.focus();
+}
+
+if (ppLink) ppLink.addEventListener('click', openPpModal);
+if (ppCloseBtn) ppCloseBtn.addEventListener('click', closePpModal);
+if (ppOverlay) ppOverlay.addEventListener('click', closePpModal);
+
+// Accept button sets the consent checkbox and closes modal
+if (ppAcceptBtn) {
+  ppAcceptBtn.addEventListener('click', () => {
+    if (consentCheckbox) consentCheckbox.checked = true;
+    closePpModal();
+    // move focus to the checkbox so keyboard users see state change
+    consentCheckbox?.focus();
+  });
+}
+
+// close on escape
+document.addEventListener('keydown', (ev) => {
+  if (!ppModal || ppModal.classList.contains('hidden')) return;
+  if (ev.key === 'Escape') closePpModal();
+});
+
   </script>
 </body>
 </html>
