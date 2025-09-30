@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SeekYu · Super Admin Dashboard (Clean UI)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --ink: #0f172a; /* slate-900 */
+      --muted: #64748b; /* slate-500 */
+      --ring: #e2e8f0; /* slate-200 */
+      --brand: #4f46e5; /* indigo-600 */
+    }
+    html, body { height: 100%; }
+    body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+
+    /* --- Sidebar --- */
+    .sidebar { transition: transform .25s ease; }
+    .nav-item { position: relative; }
+    .nav-item.active { color: #111827; font-weight: 600; }
+    .nav-item.active .nav-pill { opacity: 1; transform: scaleY(1); }
+    .nav-pill { position:absolute; left:-12px; top:8px; bottom:8px; width:4px; border-radius:9999px; background:#4f46e5; opacity:0; transform:scaleY(.4); transition: .2s; }
+
+    /* --- Cards --- */
+    .card { background: var(--card); border: 1px solid var(--ring); border-radius: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .card-soft { background: #fafbff; border: 1px dashed #e5e7eb; }
+
+    /* --- Right column sticky --- */
+    @media (min-width:1024px){ .sticky-col { position: sticky; top: 84px; height: fit-content; } }
+
+    /* --- Table polish --- */
+    table.clean thead { background: #f8fafc; }
+    table.clean th { font-weight: 600; color: #475569; }
+    table.clean td, table.clean th { padding: .65rem .75rem; }
+
+    /* --- Scrollbars (subtle) --- */
+    * { scrollbar-width: thin; scrollbar-color: #cbd5e1 #f8fafc; }
+    *::-webkit-scrollbar{ height:8px; width:8px; }
+    *::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:8px; }
+    *::-webkit-scrollbar-track{ background:#f8fafc; }
+
+    /* --- Calendar --- */
+    .calendar-grid { display:grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap:.25rem; }
+    .day-cell { height: 2.25rem; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size: .875rem; }
+
+    /* --- Dark theme palette & overrides --- */
+    html.dark {
+      color-scheme: dark;
+      --bg: #0b1220;        /* page background */
+      --card: #0f172a;      /* surfaces/cards */
+      --ink: #e2e8f0;       /* main text */
+      --muted: #94a3b8;     /* secondary text */
+      --ring: #1f2937;      /* borders */
+      --brand: #818cf8;     /* accent */
+    }
+
+    /* Sidebar collapse */
+    .sidebar { transition: width .25s ease; }
+    .sidebar.collapsed { width: 76px; }
+    .sidebar.collapsed .label { display: none; }
+    .sidebar.collapsed .nav-item span:not(.nav-pill) { display: none; }
+
+    /* Base page colors (override Tailwind bg/text classes safely) */
+    body { background: var(--bg) !important; color: var(--ink) !important; }
+
+    /* Cards & soft cards */
+    .card { background: var(--card); border-color: var(--ring); }
+    .card-soft { background: #0b1424; border-color: var(--ring); }
+
+    /* Shells / structural elements */
+    html.dark .sidebar { background: #0e172a; border-color: var(--ring); }
+    html.dark header { background: rgba(2,6,23,.85); backdrop-filter: saturate(1.2) blur(6px); border-color: var(--ring); }
+
+    /* Tables */
+    html.dark table.clean thead { background: #0e172a; }
+    html.dark table.clean th { color: var(--muted); }
+    html.dark table.clean td, html.dark table.clean th { border-color: var(--ring); }
+
+    /* Inputs, selects, textareas */
+    html.dark input, html.dark textarea, html.dark select {
+      background: #0b1424;
+      border-color: var(--ring);
+      color: var(--ink);
+    }
+    html.dark input::placeholder, html.dark textarea::placeholder { color: #94a3b8; }
+
+    /* Minor UI elements */
+    html.dark .nav-item.active { color: var(--ink); }
+    html.dark .nav-pill { background: var(--brand); }
+    html.dark .day-cell { color: var(--ink); }
+    html.dark .bg-slate-50 { background: #0b1424 !important; }
+    html.dark .border-slate-200 { border-color: var(--ring) !important; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <!-- Shell: Sidebar + Main -->
+  <div class="flex min-h-screen">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar bg-gray-900 text-white w-64 min-h-screen flex flex-col">
+      <!-- Sidebar top brand + collapse -->
+      <div class="p-4 flex items-center justify-between border-b border-gray-800">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-shield-alt text-indigo-400 text-xl"></i>
+          <span class="label font-bold">SeekYu</span>
+        </div>
+        <button id="collapseSidebar" class="btn btn-icon btn-ghost" title="Collapse sidebar">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      </div>
+
+      <!-- Sidebar: small profile quick actions -->
+      <div class="px-4 py-3 border-b border-gray-800">
+        <div class="flex items-center gap-3">
+          <img id="sidebarAvatar" src="https://i.pravatar.cc/100?img=3"
+              class="h-10 w-10 rounded-full object-cover ring-1 ring-white/10" alt="avatar">
+          <div class="min-w-0">
+            <div id="profileName" class="font-medium truncate">Miles P. Pirater</div>
+            <div id="profileRole" class="text-[11px] text-slate-400">Super Admin</div>
+            <button id="editProfileSmall" class="text-[11px] text-indigo-300 hover:text-indigo-200 mt-0.5">Edit profile</button>
+          </div>
+          <button id="editProfileBtn" class="ml-auto px-2 py-1 rounded-md bg-white/10 hover:bg-white/15 text-[11px]">
+            Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="p-4">
+        <div class="text-[11px] uppercase tracking-wider text-slate-500 px-2 mb-2">Main</div>
+        <ul class="space-y-1">
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3 active" onclick="showSection('dashboard', this)"><span class="nav-pill"></span><i class="fas fa-home text-indigo-500 w-5 text-center"></i><span>Dashboard</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('recruiting-mgmt', this)"><span class="nav-pill"></span><i class="fas fa-user-plus text-emerald-500 w-5 text-center"></i><span>Recruitment Management</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('client-mgmt', this)"><span class="nav-pill"></span><i class="fas fa-users text-amber-500 w-5 text-center"></i><span>Client Management</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('guard-mgmt', this)"><span class="nav-pill"></span><i class="fas fa-user-shield text-rose-500 w-5 text-center"></i><span>Security Guard Management</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('messaging-mgmt', this)"><span class="nav-pill"></span><i class="fas fa-comment text-indigo-400 w-5 text-center"></i><span>Send Message</span><span class="ml-auto inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500 text-white">3</span></button></li>
+        </ul>
+
+        <div class="text-[11px] uppercase tracking-wider text-slate-500 px-2 mt-5 mb-2">Reports</div>
+        <ul class="space-y-1">
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('attendance-monitoring', this)"><span class="nav-pill"></span><i class="fas fa-chart-line text-teal-500 w-5 text-center"></i><span>Attendance Monitoring</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('leave-requests', this)"><span class="nav-pill"></span><i class="fas fa-calendar-alt text-pink-500 w-5 text-center"></i><span>Leave Requests</span><span class="ml-auto inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-500 text-white">2</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('incident-reports', this)"><span class="nav-pill"></span><i class="fas fa-exclamation-circle text-orange-500 w-5 text-center"></i><span>Incident Reports</span><span class="ml-auto inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500 text-white">1</span></button></li>
+          <li><button class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 flex items-center gap-3" onclick="showSection('notification', this)"><span class="nav-pill"></span><i class="fas fa-bell text-yellow-500 w-5 text-center"></i><span>Notifications</span><span class="ml-auto inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-rose-500 text-white">1</span></button></li>
+        </ul>
+
+        <div class="mt-6 px-2">
+          <div class="p-3 border-t border-gray-800">
+            <button class="w-full btn btn-primary justify-center" onclick="location.href='homepage.html'">
+              <i class="fa-solid fa-right-from-bracket"></i><span class="label">Logout</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main area -->
+    <main class="flex-1 min-w-0">
+      <!-- APP BAR (integrated) -->
+      <header class="sticky top-0 z-30 bg-white/85 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[64px] flex items-center gap-3">
+          <!-- Mobile sidebar open -->
+          <button class="lg:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200" id="mobileOpen">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+
+          <!-- Title + dynamic greeting -->
+          <div class="min-w-0">
+            <h1 class="text-base md:text-lg font-semibold leading-tight">Dashboard</h1>
+            <div id="welcomeGreeting" class="text-xs md:text-sm text-slate-500"></div>
+          </div>
+
+          <div class="ml-auto flex items-center gap-2">
+            <!-- Search -->
+            <div class="hidden md:flex items-center border rounded-xl px-2 py-1 bg-white dark:bg-slate-900 dark:border-slate-700">
+              <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+              <input placeholder="Search…" class="outline-none bg-transparent text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 w-56"/>
+            </div>
+            <!-- Dark mode toggle -->
+            <button id="themeToggle" class="h-9 w-9 grid place-content-center rounded-md border border-slate-200 hover:bg-slate-100" title="Toggle dark mode">
+              <i id="themeIcon" class="fa-solid fa-moon"></i>
+            </button>
+            <!-- Bell -->
+            <button class="h-9 w-9 grid place-content-center rounded-full hover:bg-slate-100 text-slate-600">
+              <i class="fa-regular fa-bell"></i>
+            </button>
+            <!-- Avatar (top) -->
+            <div class="w-9 h-9 rounded-full overflow-hidden ring-2 ring-white/70">
+              <img id="profilePic" src="https://i.pravatar.cc/100?img=3" class="w-full h-full object-cover" alt="avatar"/>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="content-section active">
+          <!-- KPI cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="card p-4">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 grid place-content-center"><i class="fas fa-user-shield"></i></div>
+                <div>
+                  <div class="text-2xl font-semibold leading-tight">245</div>
+                  <div class="text-sm text-slate-500">Active Guards</div>
+                </div>
+                <span class="ml-auto text-emerald-600 text-xs font-medium">+3 this week</span>
+              </div>
+            </div>
+            <div class="card p-4">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-emerald-50 text-emerald-600 grid place-content-center"><i class="fas fa-building"></i></div>
+                <div>
+                  <div class="text-2xl font-semibold leading-tight">38</div>
+                  <div class="text-sm text-slate-500">Active Clients</div>
+                </div>
+                <span class="ml-auto text-emerald-600 text-xs font-medium">Stable</span>
+              </div>
+            </div>
+            <div class="card p-4">
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-lg bg-violet-50 text-violet-600 grid place-content-center"><i class="fas fa-clipboard-list"></i></div>
+                <div>
+                  <div class="text-2xl font-semibold leading-tight">12</div>
+                  <div class="text-sm text-slate-500">Pending Requests</div>
+                </div>
+                <span class="ml-auto text-amber-600 text-xs font-medium">5 urgent</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main grid: left content + right sticky column -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+              <!-- Bulletin Board -->
+              <div class="card p-5">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-lg font-semibold">Bulletin Board</h2>
+                  <button id="createBulletinBtn" class="px-3 py-2 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700"><i class="fa fa-plus mr-2"></i>Announcement</button>
+                </div>
+                <div class="relative overflow-hidden">
+                  <div id="bulletinTrack" class="flex gap-4 transition-transform duration-300 will-change-transform"></div>
+                  <button id="bulletPrev" aria-label="Previous" class="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 grid place-content-center rounded-full bg-white/90 border border-slate-200 shadow"><i class="fas fa-chevron-left text-sm"></i></button>
+                  <button id="bulletNext" aria-label="Next" class="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 grid place-content-center rounded-full bg-white/90 border border-slate-200 shadow"><i class="fas fa-chevron-right text-sm"></i></button>
+                </div>
+              </div>
+
+              <!-- Recent Activity -->
+              <div class="card p-5">
+                <h2 class="text-lg font-semibold mb-4">Recent Activity</h2>
+                <ol class="relative border-l border-slate-200 pl-5 space-y-5">
+                  <li class="group">
+                    <span class="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-blue-100 ring-4 ring-white border border-slate-200"></span>
+                    <div class="text-sm text-slate-700"><span class="font-medium">John Doe</span> registered as a new security guard</div>
+                    <div class="text-xs text-slate-500">2 hours ago</div>
+                  </li>
+                  <li class="group">
+                    <span class="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-emerald-100 ring-4 ring-white border border-slate-200"></span>
+                    <div class="text-sm text-slate-700">Shift <span class="font-medium">#3245</span> was completed successfully</div>
+                    <div class="text-xs text-slate-500">5 hours ago</div>
+                  </li>
+                  <li class="group">
+                    <span class="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-rose-100 ring-4 ring-white border border-slate-200"></span>
+                    <div class="text-sm text-slate-700">New incident report submitted for Client #3829</div>
+                    <div class="text-xs text-slate-500">Yesterday at 5:30 PM</div>
+                  </li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Right sticky column: Notifications + Calendar -->
+            <aside class="sticky-col space-y-6">
+              <div class="card p-5">
+                <div class="flex items-center justify-between mb-2">
+                  <h3 class="font-semibold">Notifications</h3>
+                  <button class="text-xs px-2 py-1 rounded border border-slate-200">Clear</button>
+                </div>
+                <ul id="notifList" class="space-y-2 max-h-44 overflow-y-auto">
+                  <li class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                    <div class="flex items-start justify-between">
+                      <div>
+                        <div class="text-sm font-medium">Holiday Notice</div>
+                        <div class="text-xs text-slate-500">Office closed on Sept 25 for local holiday.</div>
+                      </div>
+                      <div class="text-[11px] text-slate-400 ml-3">2d</div>
+                    </div>
+                  </li>
+                  <li class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                    <div class="flex items-start justify-between">
+                      <div>
+                        <div class="text-sm font-medium">New Leave Request</div>
+                        <div class="text-xs text-slate-500">John D. submitted a leave request.</div>
+                      </div>
+                      <div class="text-[11px] text-slate-400 ml-3">1d</div>
+                    </div>
+                  </li>
+                  <li class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                    <div class="flex items-start justify-between">
+                      <div>
+                        <div class="text-sm font-medium">Incident Report</div>
+                        <div class="text-xs text-slate-500">Incident #234 requires review.</div>
+                      </div>
+                      <div class="text-[11px] text-slate-400 ml-3">3h</div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="card p-5">
+                <div class="flex items-center justify-between mb-3">
+                  <div id="calendarMonth" class="text-sm font-semibold">Month Year</div>
+                  <div class="flex items-center gap-1">
+                    <button id="prevMonth" class="h-8 w-8 grid place-content-center rounded-md border border-slate-200 hover:bg-slate-50"><i class="fas fa-chevron-left text-sm"></i></button>
+                    <button id="nextMonth" class="h-8 w-8 grid place-content-center rounded-md border border-slate-200 hover:bg-slate-50"><i class="fas fa-chevron-right text-sm"></i></button>
+                  </div>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-[11px] text-slate-500 mb-2">
+                  <div class="text-center">Sun</div><div class="text-center">Mon</div><div class="text-center">Tue</div><div class="text-center">Wed</div><div class="text-center">Thu</div><div class="text-center">Fri</div><div class="text-center">Sat</div>
+                </div>
+                <div id="calendarDays" class="calendar-grid"></div>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- OTHER SECTIONS (kept) -->
+        <div id="recruiting-mgmt" class="content-section hidden">
+          <div class="card p-6">
+            <h2 class="text-xl font-semibold">Recruitment Management</h2>
+            <p class="text-slate-600 mt-1">Manage security guard recruitment, applications, and hiring processes.</p>
+          </div>
+        </div>
+
+        <div id="messaging-mgmt" class="content-section hidden">
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-semibold">Messaging Management</h2>
+              <div class="flex gap-2">
+                <button id="inboxBtn" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Inbox</button>
+                <button id="composeBtn" class="px-3 py-2 rounded bg-slate-200 text-slate-800 text-sm">Compose</button>
+              </div>
+            </div>
+
+            <div id="inbox-section" class="space-y-3">
+              <div class="flex items-center gap-3">
+                <input type="text" id="messageSearch" placeholder="Search messages..." class="flex-1 px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+                <button id="refreshBtn" class="px-3 py-2 rounded bg-white border border-slate-200">Refresh</button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="clean min-w-full text-sm">
+                  <thead>
+                    <tr><th>Sender</th><th>Subject</th><th>Date</th><th>Action</th></tr>
+                  </thead>
+                  <tbody id="messageTable" class="divide-y"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="compose-section" class="hidden mt-4">
+              <form id="composeForm" class="space-y-3">
+                <div>
+                  <label class="block text-sm text-slate-600">To</label>
+                  <input id="recipient" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-600">Subject</label>
+                  <input id="subject" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+                </div>
+                <div>
+                  <label class="block text-sm text-slate-600">Message</label>
+                  <textarea id="message" rows="5" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50"></textarea>
+                </div>
+                <div class="flex gap-2">
+                  <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Send</button>
+                  <button type="button" id="cancelCompose" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div id="client-mgmt" class="content-section hidden">
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h2 class="text-2xl font-semibold">Client Management</h2>
+                <p class="text-slate-600">Oversee client requests and deployed personnel. Records are created when a <strong>Client</strong> account is added.</p>
+              </div>
+              <input id="client_search" placeholder="Search clients..." class="px-3 py-2 rounded border border-slate-200 bg-slate-50 text-sm" />
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="clean min-w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+                <thead>
+                  <tr>
+                    <th>#</th><th>Client Name</th><th>Company</th><th>Contact</th><th>Location</th><th># Guards</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="client_clientsTable" class="divide-y bg-white"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Client Modals -->
+          <div id="client_viewClientModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+            <div class="card w-full max-w-2xl p-5">
+              <div class="flex items-start justify-between mb-3">
+                <h3 class="text-lg font-semibold">Client Profile</h3>
+                <button id="client_closeView" class="text-slate-500">✕</button>
+              </div>
+              <div id="client_viewClientBody" class="text-sm text-slate-700 space-y-2"></div>
+              <div class="mt-4 flex justify-end gap-2">
+                <button id="client_viewAssignBtn" class="px-3 py-2 rounded bg-indigo-600 text-white">Assign / Manage Personnel</button>
+                <button id="client_closeView2" class="px-3 py-2 rounded bg-slate-200">Close</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="client_editClientModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+            <div class="card w-full max-w-md p-5">
+              <div class="flex items-start justify-between mb-3">
+                <h3 class="text-lg font-semibold">Edit Client</h3>
+                <button id="client_closeEdit" class="text-slate-500">✕</button>
+              </div>
+              <form id="client_editClientForm" class="space-y-3">
+                <input type="hidden" id="client_editClientId" />
+                <div><label class="block text-sm text-slate-600">Contact Name</label><input id="client_editContactName" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                <div><label class="block text-sm text-slate-600">Company Name</label><input id="client_editCompany" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                <div><label class="block text-sm text-slate-600">Email</label><input id="client_editEmail" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                <div><label class="block text-sm text-slate-600">Phone</label><input id="client_editPhone" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                <div><label class="block text-sm text-slate-600">Job Title / Requested Role</label><input id="client_editJobTitle" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                <div><label class="block text-sm text-slate-600">Location</label><input id="client_editLocation" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div><label class="block text-sm text-slate-600">Number of Guards</label><input id="client_editNumGuards" type="number" min="0" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                  <div><label class="block text-sm text-slate-600">Shift Schedule</label><input id="client_editShift" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                  <div><label class="block text-sm text-slate-600">License Requirement</label><input id="client_editLicense" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                  <div><label class="block text-sm text-slate-600">Experience (yrs)</label><input id="client_editExperience" type="number" min="0" step="1" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                  <div><label class="block text-sm text-slate-600">Salary Offer (PHP)</label><input id="client_editSalary" type="number" min="0" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                  <div><label class="block text-sm text-slate-600">Contract Duration</label><input id="client_editDuration" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" /></div>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-3">
+                  <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Save</button>
+                  <button type="button" id="client_cancelEditForm" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div id="client_assignModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+            <div class="card w-full max-w-3xl p-5">
+              <div class="flex items-start justify-between mb-3"><h3 class="text-lg font-semibold">Assign / Remove Personnel</h3><button id="client_closeAssign" class="text-slate-500">✕</button></div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 class="text-sm font-medium">Deployed Personnel</h4>
+                  <div id="client_deployedList" class="mt-2 space-y-2 max-h-64 overflow-auto border rounded p-2 bg-slate-50"></div>
+                </div>
+                <div>
+                  <h4 class="text-sm font-medium">Available Guards</h4>
+                  <div id="client_availableList" class="mt-2 space-y-2 max-h-64 overflow-auto border rounded p-2 bg-white"></div>
+                </div>
+              </div>
+              <div class="mt-4 flex justify-between items-center">
+                <div class="text-xs text-slate-500">Select guards and click Assign. To remove, use the trash icon.</div>
+                <div class="flex gap-2">
+                  <button id="client_assignSelected" class="px-3 py-2 rounded bg-indigo-600 text-white">Assign Selected</button>
+                  <button id="client_closeAssign2" class="px-3 py-2 rounded bg-slate-200">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="guard-mgmt" class="content-section hidden">
+          <div class="card p-6"><h2 class="text-2xl font-semibold">Security Guard Management</h2><p class="text-slate-600">Manage guard profiles, schedules, and performance.</p></div>
+        </div>
+
+        <div id="leave-requests" class="content-section hidden">
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h2 class="text-2xl font-semibold">Leave Requests (Admin)</h2>
+                <p class="text-slate-600">Review and manage leave requests submitted by users.</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <label class="text-sm text-slate-600">Act as:</label>
+                <select id="demoUserSelect" class="px-3 py-2 rounded border border-slate-200 text-sm bg-slate-50"></select>
+                <button id="exportAllLeaves" class="px-3 py-2 rounded bg-white border border-slate-200 text-sm">Export All (JSON)</button>
+              </div>
+            </div>
+
+            <div class="flex gap-3 items-center mb-4">
+              <input id="adminLeaveSearch" placeholder="Search ID, name, type, reason..." class="flex-1 px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+              <select id="adminFilterStatus" class="px-3 py-2 rounded border border-slate-200 bg-slate-50"><option value="">All Status</option><option>Pending</option><option>Approved</option><option>Rejected</option></select>
+              <input id="adminFilterFrom" type="date" class="px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+              <input id="adminFilterTo" type="date" class="px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+              <button id="adminRefresh" class="px-3 py-2 rounded bg-white border border-slate-200">Refresh</button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="clean min-w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+                <thead><tr>
+                  <th>Request ID</th><th>Name</th><th>Role</th><th>Range</th><th>Type</th><th>Status</th><th>Submitted</th><th>Approver / Remarks</th><th>Actions</th>
+                </tr></thead>
+                <tbody id="adminLeaveTable" class="divide-y"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="incident-reports" class="content-section hidden">
+          <div class="card p-6">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-semibold">Incident Reports</h2>
+              <div class="flex gap-2"><button id="irTabViewOnly" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">View Reports</button></div>
+            </div>
+            <div id="ir-view-only-section">
+              <div class="flex items-center gap-3 mb-4">
+                <input id="reportsSearch" placeholder="Search by reporter, ID, location, subject..." class="flex-1 px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+                <select id="filterRole" class="px-3 py-2 rounded border border-slate-200 bg-slate-50"><option value="">All Roles</option><option>Security Guard</option><option>Head Guard</option></select>
+                <select id="filterType" class="px-3 py-2 rounded border border-slate-200 bg-slate-50"><option value="">All Types</option><option>Trespassing</option><option>Theft / Burglary</option><option>Vandalism</option><option>Fire / Smoke</option><option>Assault</option><option>Safety Hazard</option><option>False Fire Alarm</option><option>Accident</option><option>Other</option></select>
+                <input id="filterFrom" type="date" class="px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+                <input id="filterTo" type="date" class="px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+                <button id="refreshReports" class="px-3 py-2 rounded bg-white border border-slate-200">Refresh</button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="clean min-w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+                  <thead><tr>
+                    <th>Report ID</th><th>Date</th><th>Reporter</th><th>Role</th><th>Type</th><th>Location</th><th>Actions</th>
+                  </tr></thead>
+                  <tbody id="reportsTable" class="divide-y"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Shared Modals: Profile, Message, Report -->
+  <div id="editProfileModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div class="absolute inset-0 bg-black/50"></div>
+    <div class="card relative w-full max-w-2xl mx-4 p-6">
+      <div class="flex items-start justify-between mb-4"><h3 class="text-lg font-semibold">Edit Profile (HR)</h3><button id="closeModal" class="text-slate-500">✕</button></div>
+      <form id="profileForm" class="space-y-4">
+        <div class="flex items-center gap-4">
+          <div>
+            <img id="modalAvatar" src="https://i.pravatar.cc/100?img=3" class="h-20 w-20 rounded-full object-cover border border-slate-200"/>
+            <div class="mt-2"><input id="modalFile" type="file" accept="image/*" class="hidden"/><button type="button" id="changeAvatarBtn" class="text-xs px-3 py-1 rounded border border-slate-200">Change</button></div>
+          </div>
+          <div class="grid grid-cols-2 gap-3 flex-1">
+            <div class="col-span-2"><label class="text-xs text-slate-600">Full name *</label><input id="inputFullName" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50"/></div>
+            <div><label class="text-xs text-slate-600">Email *</label><input id="inputEmail" type="email" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50"/></div>
+            <div><label class="text-xs text-slate-600">Phone</label><input id="inputPhone" class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50"/></div>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 border-t pt-4"><button type="button" id="cancelProfile" class="px-4 py-2 rounded bg-white border border-slate-200">Cancel</button><button id="saveProfile" class="px-4 py-2 rounded bg-indigo-600 text-white">Save Profile</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="message-popup" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+    <div class="card w-full max-w-lg p-5">
+      <div class="flex items-start justify-between mb-3"><h2 class="text-lg font-semibold">Message Details</h2><button id="closePopup" class="text-slate-500">✕</button></div>
+      <p class="text-sm"><strong>From:</strong> <span id="popupSender">-</span></p>
+      <p class="text-sm"><strong>To:</strong> <span id="popupRecipient">-</span></p>
+      <p class="text-sm"><strong>Subject:</strong> <span id="popupSubject">-</span></p>
+      <p class="text-sm"><strong>Date:</strong> <span id="popupDate">-</span></p>
+      <div class="mt-3"><p id="popupBody" class="whitespace-pre-wrap text-sm text-slate-700"></p></div>
+      <div class="mt-4 flex gap-2 justify-end"><button id="replyBtn" class="px-3 py-2 rounded bg-emerald-600 text-white">Reply</button><button id="deleteBtn" class="px-3 py-2 rounded bg-rose-600 text-white">Delete</button><button id="closePopup2" class="px-3 py-2 rounded bg-slate-200">Close</button></div>
+    </div>
+  </div>
+
+  <div id="reportModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+    <div class="card w-full max-w-3xl p-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between mb-3"><h2 class="text-lg font-semibold">Incident Report Details</h2><button id="closeReportModal" class="text-slate-500">✕</button></div>
+      <div id="reportDetails" class="space-y-2 text-sm text-slate-700"></div>
+      <div class="mt-4 flex justify-end gap-2"><button id="exportReportBtn" class="px-3 py-2 rounded bg-indigo-600 text-white">Export (JSON)</button><button id="closeReportModal2" class="px-3 py-2 rounded bg-slate-200">Close</button></div>
+    </div>
+  </div>
+
+  <!-- Hidden file input kept -->
+  <input id="profileFile" type="file" accept="image/*" class="hidden" />
+
+  <!-- Scripts -->
+  <script>
+    // Sidebar collapse
+    document.getElementById('collapseSidebar')?.addEventListener('click', (event) => {
+      const sb = document.getElementById('sidebar');
+      sb.classList.toggle('collapsed');
+      const icon = event.currentTarget.querySelector('i');
+      icon.classList.toggle('fa-chevron-left');
+      icon.classList.toggle('fa-chevron-right');
+    });
+
+    // Section switcher
+    function showSection(sectionId, el){
+      document.querySelectorAll('.content-section').forEach(s=> s.classList.add('hidden'));
+      document.getElementById(sectionId)?.classList.remove('hidden');
+      document.querySelectorAll('.nav-item').forEach(n=> n.classList.remove('active'));
+      el?.classList?.add('active');
+    }
+
+    // Mobile sidebar open/close
+    document.getElementById('mobileOpen')?.addEventListener('click', ()=>{
+      const aside = document.querySelector('.sidebar');
+      aside.classList.toggle('hidden');
+    });
+
+    // Calendar
+    (function calendar(){
+      const monthEl = document.getElementById('calendarMonth');
+      const daysEl  = document.getElementById('calendarDays');
+      const prevBtn = document.getElementById('prevMonth');
+      const nextBtn = document.getElementById('nextMonth');
+      if (!monthEl || !daysEl) return;
+      let view = new Date(); view.setDate(1);
+      function fmt(d){ return d.toLocaleString(undefined, {month:'long', year:'numeric'}); }
+      function render(){
+        daysEl.innerHTML = ''; monthEl.textContent = fmt(view);
+        const first = new Date(view.getFullYear(), view.getMonth(), 1);
+        const pad = first.getDay();
+        const total = new Date(view.getFullYear(), view.getMonth()+1, 0).getDate();
+        for (let i=0;i<pad;i++){ const s = document.createElement('div'); s.className = 'day-cell text-slate-300'; daysEl.appendChild(s); }
+        const today = new Date(); today.setHours(0,0,0,0);
+        for (let d=1; d<=total; d++){
+          const cell = document.createElement('div');
+          const thisDate = new Date(view.getFullYear(), view.getMonth(), d);
+          cell.textContent = d;
+          cell.className = 'day-cell hover:bg-slate-100';
+          if (thisDate.toDateString() === today.toDateString()) cell.classList.add('bg-indigo-600','text-white','font-semibold');
+          daysEl.appendChild(cell);
+        }
+      }
+      prevBtn?.addEventListener('click', ()=>{ view.setMonth(view.getMonth()-1); render(); });
+      nextBtn?.addEventListener('click', ()=>{ view.setMonth(view.getMonth()+1); render(); });
+      render();
+    })();
+
+    // Messaging (demo)
+    const inboxBtn = document.getElementById('inboxBtn');
+    const composeBtn = document.getElementById('composeBtn');
+    const inboxSection = document.getElementById('inbox-section');
+    const composeSection = document.getElementById('compose-section');
+    const cancelCompose = document.getElementById('cancelCompose');
+    const composeForm = document.getElementById('composeForm');
+    const messageTable = document.getElementById('messageTable');
+    const messagePopup = document.getElementById('message-popup');
+    const popupSender = document.getElementById('popupSender');
+    const popupRecipient = document.getElementById('popupRecipient');
+    const popupSubject = document.getElementById('popupSubject');
+    const popupDate = document.getElementById('popupDate');
+    const popupBody = document.getElementById('popupBody');
+    const replyBtn = document.getElementById('replyBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const closePopupBtns = [document.getElementById('closePopup'), document.getElementById('closePopup2')];
+
+    function escapeHtml(s){ if (!s && s!==0) return ''; return String(s).replace(/[&<>"'`=\/]/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch])); }
+
+    let messages = [{ id:1, sender:'Admin', recipient:'You', subject:'Welcome to SeekYu', date:'2025-09-13', body:'This is a sample welcome message.' }];
+    let nextMessageId=2; let currentViewedMessageId=null;
+
+    function renderInbox(){
+      if (!messageTable) return;
+      messageTable.innerHTML='';
+      for(const msg of messages.slice().reverse()){
+        const tr=document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(msg.sender)}</td><td>${escapeHtml(msg.subject)}</td><td>${escapeHtml(msg.date)}</td><td><button class="viewBtn text-indigo-600 hover:underline" data-id="${msg.id}">View</button><button class="delInlineBtn ml-3 text-rose-600 hover:underline" data-id="${msg.id}">Delete</button></td>`;
+        messageTable.appendChild(tr);
+      }
+    }
+    function showInbox(){ if(!inboxSection||!composeSection) return; inboxSection.classList.remove('hidden'); composeSection.classList.add('hidden'); inboxBtn?.classList.add('bg-indigo-600','text-white'); composeBtn?.classList.remove('bg-indigo-600','text-white'); composeBtn?.classList.add('bg-slate-200'); }
+    function showCompose(){ if(!inboxSection||!composeSection) return; composeSection.classList.remove('hidden'); inboxSection.classList.add('hidden'); composeBtn?.classList.add('bg-indigo-600','text-white'); inboxBtn?.classList.remove('bg-indigo-600','text-white'); inboxBtn?.classList.add('bg-slate-200'); }
+    inboxBtn?.addEventListener('click', showInbox); composeBtn?.addEventListener('click', showCompose); cancelCompose?.addEventListener('click', showInbox);
+
+    document.addEventListener('click', function(e){
+      if (e.target?.classList.contains('viewBtn')){
+        const id=Number(e.target.dataset.id); const msg=messages.find(m=>m.id===id); if(!msg) return;
+        currentViewedMessageId=id; popupSender.textContent=msg.sender; popupRecipient.textContent=msg.recipient; popupSubject.textContent=msg.subject; popupDate.textContent=msg.date; popupBody.textContent=msg.body; messagePopup.classList.remove('hidden'); messagePopup.classList.add('flex');
+      }
+      if (e.target?.classList.contains('delInlineBtn')){
+        const id=Number(e.target.dataset.id); if(!confirm('Delete this message?')) return; messages=messages.filter(m=>m.id!==id); renderInbox(); if(currentViewedMessageId===id){ currentViewedMessageId=null; messagePopup.classList.add('hidden'); }
+      }
+    });
+
+    replyBtn?.addEventListener('click', function(){
+      if (!currentViewedMessageId) return; const msg=messages.find(m=>m.id===currentViewedMessageId); if(!msg) return;
+      showSection('messaging-mgmt', document.querySelector("button[onclick*=messaging-mgmt]")); showCompose();
+      const recipientInput=document.getElementById('recipient'); const subjectInput=document.getElementById('subject'); const bodyTextarea=document.getElementById('message');
+      if (recipientInput) recipientInput.value=msg.sender||'';
+      if (subjectInput) subjectInput.value = msg.subject && !/^Re:/i.test(msg.subject) ? `Re: ${msg.subject}` : (msg.subject||'');
+      if (bodyTextarea){ bodyTextarea.value = `\n\n--- Original Message ---\nFrom: ${msg.sender}\nDate: ${msg.date}\nSubject: ${msg.subject}\n\n${msg.body}`; bodyTextarea.focus(); bodyTextarea.setSelectionRange(0,0); }
+      messagePopup.classList.add('hidden');
+    });
+
+    deleteBtn?.addEventListener('click', function(){ if(!currentViewedMessageId) return; if(!confirm('Delete this message?')) return; messages=messages.filter(m=>m.id!==currentViewedMessageId); currentViewedMessageId=null; messagePopup.classList.add('hidden'); renderInbox(); });
+    closePopupBtns.forEach(b=> b?.addEventListener('click', ()=>{ messagePopup.classList.add('hidden'); currentViewedMessageId=null; }));
+    messagePopup?.addEventListener('click', e=> { if(e.target===messagePopup){ messagePopup.classList.add('hidden'); currentViewedMessageId=null; } });
+
+    document.getElementById('refreshBtn')?.addEventListener('click', renderInbox);
+    document.getElementById('messageSearch')?.addEventListener('input', function(){ const q=this.value.toLowerCase(); messageTable?.querySelectorAll('tr').forEach(r=>{ r.style.display = r.textContent.toLowerCase().includes(q)?'':'none'; }); });
+
+    renderInbox(); showInbox();
+
+    /* ---- INCIDENT REPORTS (view-only) ---- */
+    document.addEventListener('DOMContentLoaded', function(){
+      let reports=[{ id:'IR-0001', reporterName:'John Guard', employeeId:'SG-1001', role:'Security Guard', shiftDate:'2025-09-12', shiftStart:'08:00', shiftEnd:'16:00', contact:'09171234567', email:'john.guard@example.com', incidentDate:'2025-09-12', incidentTime:'17:30', location:'Client #3829 - Main Gate', type:'Accident', description:'Guard slipped on wet floor during patrol. Minor bruises.', parties:[{name:'Jane Doe', role:'Witness', contact:'09170001111', id:'DL-12345', desc:'Saw slip near gate'}], injuries:'Yes', injuries_desc:'Bruise on left arm', medical_provided:'Yes', police_notified:false, medical_contacted:true, scene_secured:true, actions:'Assisted guard, called medics, logged incident.', evidence:{photos:true, videos:false, witness:true, physical:false, other:''}, remarks:'Install wet-floor signage.', createdAt:'2025-09-12' }];
+      const reportsTable=document.getElementById('reportsTable');
+      function escapeHtml(s){ if (!s && s!==0) return ''; return String(s).replace(/[&<>"'`=\/]/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch])); }
+      function render(){
+        if(!reportsTable) return;
+        reportsTable.innerHTML='';
+        const q=(document.getElementById('reportsSearch')?.value||'').toLowerCase();
+        const role=document.getElementById('filterRole')?.value; const type=document.getElementById('filterType')?.value; const from=document.getElementById('filterFrom')?.value; const to=document.getElementById('filterTo')?.value;
+        const filtered = reports.slice().reverse().filter(r=>{
+          if (role && r.role!==role) return false; if (type && r.type!==type) return false; if (from && r.incidentDate<from) return false; if (to && r.incidentDate>to) return false; if (!q) return true; const hay=(r.id+' '+r.reporterName+' '+r.employeeId+' '+r.location+' '+r.type+' '+r.description).toLowerCase(); return hay.includes(q);
+        });
+        if (!filtered.length){ reportsTable.innerHTML='<tr><td class="py-4 px-3 text-slate-500" colspan="7">No reports found.</td></tr>'; return; }
+        for (const r of filtered){
+          const tr=document.createElement('tr');
+          tr.innerHTML=`<td class="font-mono">${r.id}</td><td>${escapeHtml(r.incidentDate)} ${escapeHtml(r.incidentTime)}</td><td>${escapeHtml(r.reporterName)}</td><td>${escapeHtml(r.role)}</td><td>${escapeHtml(r.type)}</td><td>${escapeHtml(r.location)}</td><td><button class="viewReportBtn text-indigo-600 hover:underline" data-id="${r.id}">View</button></td>`;
+          reportsTable.appendChild(tr);
+        }
+      }
+      ['reportsSearch','filterRole','filterType','filterFrom','filterTo'].forEach(id=>{ document.getElementById(id)?.addEventListener('input', render); });
+      document.getElementById('refreshReports')?.addEventListener('click', render);
+
+      const reportModal=document.getElementById('reportModal'); const reportDetails=document.getElementById('reportDetails');
+      function openReportModal(report){
+        reportDetails.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div><strong>Report ID:</strong> ${report.id}</div>
+            <div><strong>Created:</strong> ${report.createdAt}</div>
+            <div><strong>Reporter:</strong> ${escapeHtml(report.reporterName)}</div>
+            <div><strong>Employee ID:</strong> ${escapeHtml(report.employeeId)}</div>
+            <div><strong>Role:</strong> ${escapeHtml(report.role)}</div>
+            <div><strong>Contact:</strong> ${escapeHtml(report.contact)}</div>
+            <div><strong>Email:</strong> ${escapeHtml(report.email)}</div>
+            <div><strong>Shift Date / Start-End:</strong> ${report.shiftDate} ${report.shiftStart||''} - ${report.shiftEnd||''}</div>
+            <div><strong>Incident Date / Time:</strong> ${report.incidentDate} ${report.incidentTime}</div>
+            <div class="md:col-span-2"><strong>Location:</strong> ${escapeHtml(report.location)}</div>
+            <div class="md:col-span-2"><strong>Type:</strong> ${escapeHtml(report.type)}</div>
+            <div class="md:col-span-2"><strong>Description:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.description)}</div></div>
+          </div>
+          <hr class="my-2"/>
+          <div>
+            <h4 class="font-semibold">Parties Involved</h4>
+            ${report.parties && report.parties.length ? report.parties.map(p=>`<div class="p-2 border rounded mt-2"><div><strong>Name:</strong> ${escapeHtml(p.name)}</div><div><strong>Role:</strong> ${escapeHtml(p.role)}</div><div><strong>Contact:</strong> ${escapeHtml(p.contact)}</div><div><strong>ID:</strong> ${escapeHtml(p.id)}</div><div><strong>Involvement:</strong> ${escapeHtml(p.desc)}</div></div>`).join('') : '<div class="text-slate-500">No parties recorded.</div>'}
+          </div>
+          <hr class="my-2"/>
+          <div>
+            <h4 class="font-semibold">Injuries & Medical</h4>
+            <div><strong>Were there injuries?</strong> ${escapeHtml(report.injuries)}</div>
+            <div><strong>Injuries description:</strong> ${escapeHtml(report.injuries_desc)}</div>
+            <div><strong>Medical provided:</strong> ${escapeHtml(report.medical_provided)}</div>
+          </div>
+          <hr class="my-2"/>
+          <div>
+            <h4 class="font-semibold">Actions Taken</h4>
+            <div><strong>Police notified:</strong> ${report.police_notified ? 'Yes' : 'No'}</div>
+            <div><strong>Medical contacted:</strong> ${report.medical_contacted ? 'Yes' : 'No'}</div>
+            <div><strong>Scene secured:</strong> ${report.scene_secured ? 'Yes' : 'No'}</div>
+            <div class="mt-2"><strong>Other actions:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.actions)}</div></div>
+          </div>
+          <hr class="my-2"/>
+          <div>
+            <h4 class="font-semibold">Evidence</h4>
+            <div><strong>Photos:</strong> ${report.evidence && report.evidence.photos ? 'Yes' : 'No'}</div>
+            <div><strong>Videos:</strong> ${report.evidence && report.evidence.videos ? 'Yes' : 'No'}</div>
+            <div><strong>Witness statements:</strong> ${report.evidence && report.evidence.witness ? 'Yes' : 'No'}</div>
+            <div><strong>Physical items:</strong> ${report.evidence && report.evidence.physical ? 'Yes' : 'No'}</div>
+            <div><strong>Other:</strong> ${escapeHtml(report.evidence && report.evidence.other || '')}</div>
+          </div>
+          <hr class="my-2"/>
+          <div><strong>Additional Remarks:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.remarks)}</div></div>`;
+        reportModal.classList.remove('hidden'); reportModal.classList.add('flex');
+      }
+      document.addEventListener('click', function(e){ if (e.target?.classList.contains('viewReportBtn')){ const id=e.target.dataset.id; const r=reports.find(x=>x.id===id); if(r) openReportModal(r); } });
+      document.getElementById('closeReportModal')?.addEventListener('click', ()=> reportModal.classList.add('hidden'));
+      document.getElementById('closeReportModal2')?.addEventListener('click', ()=> reportModal.classList.add('hidden'));
+      reportModal?.addEventListener('click', e=>{ if(e.target===reportModal) reportModal.classList.add('hidden'); });
+      document.getElementById('exportReportBtn')?.addEventListener('click', function(){ const id=(reportDetails.textContent||'').match(/Report ID:\s*(IR-\d+)/)?.[1]; if(!id) return alert('Cannot determine report ID'); const r=reports.find(x=>x.id===id); if(!r) return alert('Report not found'); const blob=new Blob([JSON.stringify(r,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`${r.id}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+      render();
+    });
+
+    /* ---- LEAVE REQUESTS (admin demo) ---- */
+    (function(){
+      const STORAGE_KEY='seekyu_leave_requests_v1';
+      const ALLOWED=['Admin','Manager','HR'];
+      const demoUsers=[{id:9001,name:'Alice Manager',role:'Manager',email:'alice.manager@example.com'},{id:9002,name:'Bob HR',role:'HR',email:'bob.hr@example.com'},{id:9003,name:'Carol Admin',role:'Admin',email:'carol.admin@example.com'},{id:42,name:'John Guard',role:'Security Guard',email:'john.guard@example.com'},{id:43,name:'Mary Head',role:'Head Guard',email:'mary.head@example.com'}];
+      const $=id=>document.getElementById(id);
+      const demoUserSelect=$('demoUserSelect'); const exportAllBtn=$('exportAllLeaves'); const table=$('adminLeaveTable'); const searchEl=$('adminLeaveSearch'); const statusFilter=$('adminFilterStatus'); const fromFilter=$('adminFilterFrom'); const toFilter=$('adminFilterTo'); const refreshBtn=$('adminRefresh');
+
+      function load(){ const raw=localStorage.getItem(STORAGE_KEY); if(!raw){ const demo=[{id:'RL-0001',userId:42,accountId:'SG-1001',name:'John Guard',role:'Security Guard',email:'john.guard@example.com',start:'2025-10-01',end:'2025-10-05',type:'Vacation',reason:'Family trip',status:'Pending',submittedAt:'2025-09-10',updatedAt:'2025-09-10',approver:null,approverRemarks:''},{id:'RL-0002',userId:43,accountId:'SG-1002',name:'Mary Head',role:'Head Guard',email:'mary.head@example.com',start:'2025-09-20',end:'2025-09-22',type:'Sick',reason:'Medical',status:'Approved',submittedAt:'2025-09-08',updatedAt:'2025-09-09',approver:'Alice Manager',approverRemarks:'Approved for 3 days.'}]; localStorage.setItem(STORAGE_KEY, JSON.stringify(demo)); return demo;} return JSON.parse(raw); }
+      function save(arr){ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+      let requests=load(); let currentAdmin=demoUsers[0]; let currentModalId=null;
+
+      function populateUsers(){ if(!demoUserSelect) return; demoUserSelect.innerHTML=''; demoUsers.forEach(u=>{ const o=document.createElement('option'); o.value=u.id; o.textContent=`${u.name} — ${u.role}`; demoUserSelect.appendChild(o); }); demoUserSelect.value=currentAdmin.id; }
+      function escapeHtml(s){ if(!s && s!==0) return ''; return String(s).replace(/[&<>"'`=\/]/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch])); }
+
+      function render(){
+        if(!table) return;
+        table.innerHTML=''; const q=(searchEl?.value||'').toLowerCase(); const st=statusFilter?.value; const from=fromFilter?.value; const to=toFilter?.value;
+        const filtered=requests.slice().reverse().filter(r=>{ if(st && r.status!==st) return false; if(from && r.start<from) return false; if(to && r.end>to) return false; if(!q) return true; const hay=(r.id+' '+r.name+' '+r.accountId+' '+r.type+' '+r.reason).toLowerCase(); return hay.includes(q); });
+        if(!filtered.length){ table.innerHTML='<tr><td class="py-4 px-3 text-slate-500" colspan="9">No leave requests found.</td></tr>'; return; }
+        for(const r of filtered){
+          const tr=document.createElement('tr');
+          const approverText=r.approver?`${escapeHtml(r.approver)} — ${escapeHtml(r.approverRemarks||'')}`:'-';
+          tr.innerHTML=`<td class="font-mono">${r.id}</td><td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.role)}</td><td>${r.start} → ${r.end}</td><td>${escapeHtml(r.type)}</td><td>${r.status}</td><td>${r.submittedAt}</td><td><div class="max-w-sm truncate">${approverText}</div></td><td><button class="viewAdminLeave text-indigo-600 hover:underline" data-id="${r.id}">View</button></td>`;
+          table.appendChild(tr);
+        }
+      }
+
+      document.addEventListener('click', function(e){
+        if(e.target?.classList.contains('viewAdminLeave')){
+          const id=e.target.dataset.id; const req=requests.find(x=>x.id===id); if(!req) return;
+          openModal(req);
+        }
+      });
+
+      function openModal(req){
+        const modal=$('adminLeaveModal'); const detailsEl=$('adminLeaveDetails');
+        const remarksEl=$('adminRemarks'); const approveBtn=$('adminApproveBtn'); const rejectBtn=$('adminRejectBtn');
+        if(!modal||!detailsEl) return;
+        detailsEl.innerHTML=`<div class='grid grid-cols-1 md:grid-cols-2 gap-2'>
+          <div><strong>Request ID:</strong> ${req.id}</div><div><strong>Submitted:</strong> ${req.submittedAt}</div>
+          <div><strong>Name:</strong> ${escapeHtml(req.name)}</div><div><strong>Account ID:</strong> ${escapeHtml(req.accountId||'-')}</div>
+          <div><strong>Role:</strong> ${escapeHtml(req.role)}</div><div><strong>Email:</strong> ${escapeHtml(req.email||'')}</div>
+          <div><strong>Range:</strong> ${req.start} → ${req.end}</div><div><strong>Type:</strong> ${escapeHtml(req.type)}</div>
+          <div class='md:col-span-2'><strong>Reason:</strong><div class='mt-1 whitespace-pre-wrap'>${escapeHtml(req.reason)}</div></div></div>
+          <hr class='my-2'/><div><strong>Status:</strong> ${req.status}<br/><strong>Approver:</strong> ${escapeHtml(req.approver||'-')}<br/><strong>Approver Remarks:</strong><div class='mt-1 whitespace-pre-wrap'>${escapeHtml(req.approverRemarks||'')}</div></div>`;
+        const canAct=ALLOWED.includes(currentAdmin.role) && req.status==='Pending';
+        if(approveBtn) approveBtn.disabled=!canAct;
+        if(rejectBtn)  rejectBtn.disabled=!canAct;
+        if(remarksEl)  remarksEl.value=req.approverRemarks||'';
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+      }
+      function action(kind){
+        const remarks=document.getElementById('adminRemarks')?.value?.trim(); if(!remarks) return alert('Please add approver remarks.');
+        const id=document.getElementById('adminLeaveDetails')?.textContent?.match(/Request ID:\s*(RL-\d+)/)?.[1]; if(!id) return;
+        const idx=requests.findIndex(x=>x.id===id); if(idx===-1) return;
+        if(!ALLOWED.includes(currentAdmin.role)) return alert('Not authorized.');
+        if(requests[idx].status!=='Pending') return alert('Only Pending can be actioned.');
+        requests[idx].status = kind==='approve'?'Approved':'Rejected';
+        requests[idx].approver=currentAdmin.name;
+        requests[idx].approverRemarks=remarks;
+        requests[idx].updatedAt=new Date().toISOString().split('T')[0];
+        save(requests);
+        document.getElementById('adminLeaveModal')?.classList.add('hidden');
+        render();
+        alert(`Request ${requests[idx].id} ${requests[idx].status}.`);
+      }
+
+      $('adminApproveBtn')?.addEventListener('click', ()=>action('approve'));
+      $('adminRejectBtn')?.addEventListener('click', ()=>{ if(confirm('Reject this request?')) action('reject'); });
+      $('closeAdminLeaveModal')?.addEventListener('click', ()=> $('adminLeaveModal')?.classList.add('hidden'));
+      $('adminCloseBtn')?.addEventListener('click', ()=> $('adminLeaveModal')?.classList.add('hidden'));
+      [searchEl,statusFilter,fromFilter,toFilter].forEach(el=> el?.addEventListener('input', render));
+      refreshBtn?.addEventListener('click', render);
+      exportAllBtn?.addEventListener('click', ()=>{ if(!requests.length) return alert('No requests to export.'); const blob=new Blob([JSON.stringify(requests,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='leave_requests_all.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+      demoUserSelect?.addEventListener('change', function(){ const u=demoUsers.find(x=>x.id===Number(this.value)); if(u) currentAdmin=u; render(); });
+
+      populateUsers(); render();
+    })();
+
+    /* ---- CLIENT MANAGEMENT (demo) ---- */
+    (function(){
+      const root=document.getElementById('client-mgmt'); if(!root) return; const $=sel=>root.querySelector(sel); const $all=sel=>Array.from(root.querySelectorAll(sel));
+      const clients=[{ id:1, contact:'Maria Santos', company:'MJL Security Corp', email:'maria@example.com', phone:'09171234567', jobTitle:'Mall Guard', location:'Towerville, Graceville, SJDM', numGuards:5, shift:'Day', license:'PNP', experience:2, salary:15000, duration:'6 months', guards:[101,103], headGuard:103 }];
+      const personnel=[{id:101,name:'Ramon Dela Cruz',role:'Security Guard'},{id:102,name:'Jose Garcia',role:'Security Guard'},{id:103,name:'Lito Ramos',role:'Head Guard'},{id:104,name:'Anna Reyes',role:'Security Guard'}];
+      function escapeHtml(s){ if(!s && s!==0) return ''; return String(s).replace(/[&<>"'`=\/]/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch])); }
+
+      // load persisted clients
+      (function loadFromStore(){ const key='seekyu_clients'; try{ const raw=localStorage.getItem(key); if(raw){ const parsed=JSON.parse(raw); if(Array.isArray(parsed)&&parsed.length){ clients.length=0; parsed.forEach(c=>clients.push(c)); } } }catch(e){} })();
+      function persist(){ try{ localStorage.setItem('seekyu_clients', JSON.stringify(clients)); }catch(e){} }
+
+      function renderClients(filter=''){
+        const tbody=$('#client_clientsTable'); if(!tbody) return; tbody.innerHTML=''; const q=String(filter||'').trim().toLowerCase(); if(!clients.length){ tbody.innerHTML='<tr><td class="py-4 px-3 text-slate-500" colspan="7">No clients available.</td></tr>'; return; }
+        clients.forEach((c,idx)=>{ const hay=[c.contact,c.company,c.email,c.phone,c.jobTitle,c.location].join(' ').toLowerCase(); if(q && !hay.includes(q)) return; const tr=document.createElement('tr'); tr.className='hover:bg-slate-50'; tr.innerHTML=`<td>${idx+1}</td><td class='font-medium'>${escapeHtml(c.contact)}</td><td>${escapeHtml(c.company)}</td><td>${escapeHtml(c.phone||c.email||'')}</td><td>${escapeHtml(c.location||'')}</td><td>${Number(c.numGuards||0)}</td><td><div class='flex gap-2 items-center'><a href="client-profile.html?id=${encodeURIComponent(c.id)}" class="px-3 py-1 rounded bg-slate-100 text-slate-700 text-sm inline-block">View</a><button data-id="${c.id}" class="client_btnAssign px-3 py-1 rounded bg-indigo-600 text-white text-sm">Assign</button></div></td>`; tbody.appendChild(tr); });
+        $all('.client_btnAssign').forEach(b=> b.onclick=()=> openAssign(Number(b.dataset.id)) );
+        persist();
+      }
+
+      function getClient(id){ return clients.find(c=>c.id===id); } function getPerson(id){ return personnel.find(p=>p.id===id); }
+      let currentAssignClient=null;
+      function openAssign(id){ currentAssignClient=getClient(id); renderAssignLists(); showModal('#client_assignModal'); }
+      function renderAssignLists(){
+        const deployedEl=$('#client_deployedList'), availableEl=$('#client_availableList');
+        if(!deployedEl||!availableEl) return;
+        deployedEl.innerHTML=''; availableEl.innerHTML='';
+        const deployed=(currentAssignClient.guards||[]).map(getPerson).filter(Boolean);
+        if(!deployed.length){ deployedEl.innerHTML='<div class="text-xs text-slate-500">No deployed personnel</div>'; }
+        deployed.forEach(p=>{
+          const div=document.createElement('div'); div.className='flex items-center justify-between border rounded px-3 py-2 bg-white';
+          div.innerHTML=`<div><div class='font-medium'>${escapeHtml(p.name)}</div><div class='text-xs text-slate-500'>${escapeHtml(p.role)}</div></div><div><button data-id='${p.id}' class='client_removeDeployed text-rose-600 hover:text-rose-800'><i class='fa fa-trash'></i></button></div>`;
+          deployedEl.appendChild(div);
+        });
+        const deployedIds=new Set(currentAssignClient.guards||[]);
+        personnel.filter(p=>!deployedIds.has(p.id)).forEach(p=>{
+          const div=document.createElement('div'); div.className='flex items-center gap-2 border rounded px-3 py-2';
+          div.innerHTML=`<input type='checkbox' data-id='${p.id}' class='client_availChk' /><div><div class='font-medium'>${escapeHtml(p.name)}</div><div class='text-xs text-slate-500'>${escapeHtml(p.role)}</div></div>`;
+          availableEl.appendChild(div);
+        });
+        Array.from(deployedEl.querySelectorAll('.client_removeDeployed')).forEach(btn=> btn.onclick=()=> removePersonnel(currentAssignClient.id, Number(btn.dataset.id)) );
+      }
+      function assignSelected(){
+        const chks=Array.from(root.querySelectorAll('.client_availChk'));
+        const toAssign=chks.filter(c=>c.checked).map(c=>Number(c.dataset.id));
+        if(!toAssign.length){ alert('Select at least one guard'); return; }
+        currentAssignClient.guards=Array.from(new Set([...(currentAssignClient.guards||[]), ...toAssign]));
+        renderAssignLists(); renderClients($('#client_search')?.value||'');
+      }
+      function removePersonnel(clientId, personId){
+        const c=getClient(clientId); if(!c) return;
+        c.guards=(c.guards||[]).filter(g=>g!==personId);
+        if(c.headGuard===personId) c.headGuard=null;
+        renderAssignLists(); renderClients($('#client_search')?.value||'');
+      }
+      function showModal(sel){ const el=document.querySelector(sel); if(!el) return; el.classList.remove('hidden'); el.classList.add('flex'); }
+      function hideModal(sel){ const el=document.querySelector(sel); if(!el) return; el.classList.add('hidden'); el.classList.remove('flex'); }
+
+      $('#client_assignSelected')?.addEventListener('click', assignSelected);
+      $('#client_search')?.addEventListener('input', e=> renderClients(e.target.value));
+      [['#client_closeAssign','#client_assignModal'],['#client_closeAssign2','#client_assignModal']].forEach(([btnSel,modalSel])=>{ const btn=document.querySelector(btnSel); btn?.addEventListener('click', ()=> hideModal(modalSel)); });
+      document.querySelector('#client_assignModal')?.addEventListener('click', e=>{ const m=e.currentTarget; if(e.target===m) hideModal('#client_assignModal'); });
+
+      renderClients();
+      window.ClientsModule={ render: renderClients, openAssign };
+    })();
+
+    // ---------- Greeting helper ----------
+    function getLastName(fullName) {
+      if (!fullName) return '';
+      const parts = fullName.trim().split(/\s+/);
+      if (!parts.length) return '';
+      const suffixes = /^(jr\.?|sr\.?|ii|iii|iv|v)$/i;
+      let last = parts[parts.length - 1];
+      if (parts.length > 1 && suffixes.test(last)) last = parts[parts.length - 2];
+      return last.replace(/[^A-Za-zÀ-ÿ'-]/g, '');
+    }
+    function renderGreeting() {
+      const nameEl = document.getElementById('profileName');
+      const greetEl = document.getElementById('welcomeGreeting');
+      if (!nameEl || !greetEl) return;
+      const last = getLastName(nameEl.textContent || '');
+      greetEl.textContent = last ? `Welcome, ${last}!` : 'Welcome!';
+    }
+    document.addEventListener('DOMContentLoaded', renderGreeting);
+
+    // ---------- Profile modal wiring (merged; sync avatars + greeting) ----------
+    (function profile(){
+      const openBtns=[document.getElementById('editProfileBtn'), document.getElementById('editProfileSmall')].filter(Boolean);
+      const modal=document.getElementById('editProfileModal');
+      const closeBtn=document.getElementById('closeModal');
+      const cancelBtn=document.getElementById('cancelProfile');
+      const form=document.getElementById('profileForm');
+
+      const profilePicTop=document.getElementById('profilePic');      // top bar avatar
+      const profilePicSide=document.getElementById('sidebarAvatar');  // sidebar avatar
+      const profileName=document.getElementById('profileName');
+
+      const modalAvatar=document.getElementById('modalAvatar');
+      const changeAvatar=document.getElementById('changeAvatarBtn');
+      const modalFile=document.getElementById('modalFile');
+
+      const inputFullName=document.getElementById('inputFullName');
+      const inputEmail=document.getElementById('inputEmail');
+      const inputPhone=document.getElementById('inputPhone');
+
+      function open(){ modal.classList.remove('hidden'); modal.classList.add('flex'); }
+      function close(){ modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+      openBtns.forEach(b=> b?.addEventListener('click', open));
+      closeBtn?.addEventListener('click', close);
+      cancelBtn?.addEventListener('click', close);
+      modal?.addEventListener('click', e=>{ if(e.target===modal) close(); });
+
+      // Prefill
+      inputFullName.value = profileName?.textContent?.trim() || '';
+      inputEmail.value = 'superadmin@example.com';
+      inputPhone.value = '';
+
+      // Avatar change preview
+      changeAvatar?.addEventListener('click', ()=> modalFile?.click());
+      modalFile?.addEventListener('change', e=>{
+        const f=e.target.files?.[0]; if(!f) return;
+        modalAvatar.src = URL.createObjectURL(f);
+      });
+
+      // Save -> reflect across UI and update greeting
+      form?.addEventListener('submit', e=>{
+        e.preventDefault();
+        const newName = inputFullName.value.trim() || '—';
+        if (profileName) profileName.textContent = newName;
+
+        // Sync avatars if a new one is set in modal
+        if (modalAvatar?.src) {
+          if (profilePicTop)  profilePicTop.src  = modalAvatar.src;
+          if (profilePicSide) profilePicSide.src = modalAvatar.src;
+        }
+
+        // Update greeting
+        renderGreeting();
+        close();
+      });
+    })();
+
+    // ---------- Theme toggle (solid icons) ----------
+    (function themeToggle(){
+      const STORAGE_KEY = 'seekyu_theme';
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const startDark = saved ? (saved === 'dark') : systemPrefersDark;
+      if (startDark) root.classList.add('dark');
+
+      function syncIcon(){
+        if (!icon) return;
+        const isDark = root.classList.contains('dark');
+        icon.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      }
+      syncIcon();
+
+      btn?.addEventListener('click', () => {
+        const isDark = root.classList.toggle('dark');
+        localStorage.setItem(STORAGE_KEY, isDark ? 'dark' : 'light');
+        syncIcon();
+      });
+
+      try {
+        const mql = window.matchMedia('(prefers-color-scheme: dark)');
+        mql.addEventListener?.('change', e => {
+          const hasExplicitChoice = localStorage.getItem(STORAGE_KEY) !== null;
+          if (!hasExplicitChoice) {
+            if (e.matches) root.classList.add('dark'); else root.classList.remove('dark');
+            syncIcon();
+          }
+        });
+      } catch(_) {}
+    })();
+  </script>
+</body>
+</html>
