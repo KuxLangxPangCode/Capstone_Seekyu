@@ -3,302 +3,486 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeekYu · Dashboard (Refined)</title>
+  <title>SeekYu — Clean Layout Upgrade</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <style>
-    /* ============= THEME TOKENS (can tweak in one place) ============= */
-    :root {
-      --bg: 247 247 248;      /* slate-50-ish */
-      --card: 255 255 255;    /* white */
-      --muted: 100 116 139;   /* slate-500 */
-      --ink: 15 23 42;        /* slate-900 */
-      --ring: 59 130 246;     /* indigo-500-ish */
-      --brand: 67 56 202;     /* indigo-700 */
-      --brand-weak: 99 102 241; /* indigo-500 */
-      --good: 5 150 105;      /* emerald-600 */
-      --bad: 220 38 38;       /* red-600 */
-      --warn: 217 119 6;      /* amber-600 */
-    }
+    /* ===============================
+       CLEAN LAYOUT UPGRADE LAYER
+       (non‑destructive: can be dropped into your current page)
+       =============================== */
 
-    /* ============= PRIMITIVES ============= */
-    .app { min-height: 100dvh; background-color: rgb(var(--bg)); color: rgb(var(--ink)); }
-    .sidebar { width: 280px; background: linear-gradient(180deg, rgb(15 23 42) 0%, rgb(15 23 42) 70%, rgb(30 41 59) 100%); }
-    .card { background: rgb(var(--card)); border-radius: 16px; box-shadow: 0 1px 2px rgb(15 23 42 / .05), 0 8px 24px -12px rgb(15 23 42 / .12); border: 1px solid rgb(226 232 240); }
-    .card-header { padding: 16px 20px; border-bottom: 1px solid rgb(241 245 249); display:flex; align-items:center; justify-content:space-between; }
-    .card-body { padding: 16px 20px; }
-    .pill { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
-    .pill-blue { background: rgb(219 234 254); color: rgb(29 78 216); }
-    .pill-red { background: rgb(254 226 226); color: rgb(185 28 28); }
-    .pill-amber { background: rgb(254 243 199); color: rgb(180 83 9); }
+    :root { color-scheme: light; }
+    html.dark { color-scheme: dark; }
 
-    /* Sidebar nav */
-    .nav-btn { display:flex; align-items:center; gap:.75rem; width:100%; padding:.625rem .875rem; border-radius: .75rem; color: rgb(226 232 240); }
-    .nav-btn:hover { background: rgb(51 65 85 / .5); }
-    .nav-btn.active { background: rgb(30 64 175); color: white; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .06); }
-    .nav-label { font-weight: 500; }
+    /* Page shell */
+    .content-shell { max-width: 1400px; margin-inline: auto; }
 
-    /* Section visibility */
-    .content-section { display: none; }
-    .content-section.active { display: block; }
+    /* Cards – unify style across the app */
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .card-inset { padding: 1.25rem; }
+    .card-title { font-size: 1.125rem; font-weight: 700; color: #0f172a; }
+    .card-subtle { color: #64748b; }
 
-    /* Small helpers */
-    .muted { color: rgb(var(--muted)); }
-    .kpi-bar { height: 8px; border-radius: 999px; background: rgb(226 232 240); overflow: hidden; }
-    .kpi-bar > i { display:block; height:100%; background: rgb(var(--brand-weak)); }
+    /* Section header (title + actions) */
+    .section-header { display: flex; align-items: center; gap: .75rem; justify-content: space-between; padding-bottom: .75rem; margin-bottom: 1rem; border-bottom: 1px solid #eef2f7; }
+    .section-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; letter-spacing: -.01em; }
 
-    /* Calendar grid */
-    .calendar-grid { display:grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 4px; }
-    .day-cell { height: 34px; display:flex; align-items:center; justify-content:center; border-radius: 10px; }
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; gap:.5rem; border-radius: 10px; padding: .5rem .85rem; font-weight: 600; border: 1px solid transparent; }
+    .btn-primary { background:#4f46e5; color:#fff; }
+    .btn-ghost { background:#fff; color:#0f172a; border-color:#e5e7eb; }
+    .btn-muted { background:#f1f5f9; color:#0f172a; }
+    .btn-icon { width: 36px; height: 36px; justify-content: center; padding: 0; }
 
-    /* Modal dimmer */
-    .modal-backdrop { background: rgb(2 6 23 / .55); }
+    /* Badges/Pills */
+    .badge { display:inline-flex; align-items:center; gap:.4rem; padding:.25rem .5rem; border-radius:999px; font-size:.7rem; font-weight:700; border:1px solid #e5e7eb; color:#0f172a; background:#fff; }
+  
+    /* Tables */
+    .table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .925rem; }
+    .table thead th { position: sticky; top: 0; background:#fff; z-index: 5; text-align:left; font-weight:700; color:#475569; padding:.65rem .75rem; border-bottom:1px solid #e5e7eb; }
+    .table tbody td { padding:.65rem .75rem; border-bottom:1px solid #edf2f7; }
+    .table tbody tr:hover { background:#f8fafc; }
+    .table.zebra tbody tr:nth-child(even) { background:#fcfdff; }
 
-    /* Carousel */
-    .carousel-track { will-change: transform; }
-    /* --- Dark mode shim (non-breaking) --- */
-    .dark body { background:#0b1220; color:#e5e7eb; }
-    .dark .sidebar { background:#0b132a; color:#e5e7eb; }
-    .dark .sidebar-item { color:#cbd5e1; }
-    .dark .sidebar-item:hover { background:#111827; }
-    .dark .sidebar-item.active { background:#1e293b; color:#fff; }
+    /* Scroll container with fading shadows */
+    .scroll-area { position: relative; overflow:auto; }
+    .scroll-area::before, .scroll-area::after { content:""; position:absolute; left:0; right:0; height:18px; pointer-events:none; z-index:10; }
+    .scroll-area::before { top:0; background:linear-gradient(#fff, rgba(255,255,255,0)); }
+    .scroll-area::after { bottom:0; background:linear-gradient(rgba(255,255,255,0), #fff); }
 
-    /* cards & panels */
-    .dark .bg-white { background:#0f172a !important; }
-    .dark .shadow-sm, .dark .shadow, .dark .shadow-lg { box-shadow: 0 1px 2px 0 rgba(0,0,0,.4), 0 1px 1px -1px rgba(0,0,0,.5); }
-    .dark .border, .dark .border-gray-100, .dark .border-gray-200, .dark .border-gray-300, .dark .border-slate-200 { border-color:#27344a !important; }
+    /* Sidebar collapse */
+    .sidebar { transition: width .25s ease; }
+    .sidebar.collapsed { width: 76px; }
+    .sidebar.collapsed .label { display:none; }
+    /* hide labels & badges when collapsed */
+    .sidebar.collapsed .label { display: none !important; }
+    .sidebar.collapsed .badge { display: none !important; }
 
-    /* text utilities */
-    .dark .text-gray-800 { color:#e5e7eb !important; }
-    .dark .text-gray-700 { color:#e2e8f0 !important; }
-    .dark .text-gray-600 { color:#cbd5e1 !important; }
-    .dark .text-slate-700 { color:#e2e8f0 !important; }
 
-    /* inputs */
-    .dark input, .dark select, .dark textarea { background:#0b1220 !important; color:#e5e7eb !important; border-color:#27344a !important; }
-    .dark ::placeholder { color:#94a3b8 !important; }
+    /* Header bar */
+    .appbar { position: sticky; top: 0; z-index: 40; backdrop-filter: saturate(180%) blur(8px); background: rgba(255,255,255,.75); border-bottom: 1px solid #e5e7eb; }
 
-    /* tables */
-    .dark thead.bg-gray-50, .dark thead.bg-slate-50 { background:#111827 !important; }
-    .dark tbody.bg-white { background:#0f172a !important; }
+    /* Dark mode shim (works with your existing classes) */
+    html.dark body { background-color:#0b1220; }
+    html.dark .appbar { background: rgba(2,6,23,.6); border-color:#1e293b; }
+    html.dark .card { background:#0f172a; border-color:#1f2a3a; box-shadow: 0 1px 2px rgba(0,0,0,.45); }
+    html.dark .card-title, html.dark .section-title { color:#e5e7eb; }
+    html.dark .card-subtle { color:#94a3b8; }
+    html.dark .badge { background:#0f172a; color:#e5e7eb; border-color:#334155; }
+    html.dark .btn-ghost { background:#0f172a; color:#e5e7eb; border-color:#334155; }
+    html.dark .btn-muted { background:#111827; color:#e5e7eb; }
+    html.dark .table thead th { background:#0f172a; border-color:#334155; color:#cbd5e1; }
+    html.dark .table tbody td { border-color:#1f2a3a; color:#e5e7eb; }
+    html.dark .table tbody tr:hover { background:#0b1220; }
+    html.dark .scroll-area::before { background:linear-gradient(#0f172a, rgba(15,23,42,0)); }
+    html.dark .scroll-area::after { background:linear-gradient(rgba(15,23,42,0), #0f172a); }
 
-    /* misc */
-    .dark .bg-gray-100 { background:#0b1220 !important; }
-    .dark .bg-slate-50 { background:#0b1220 !important; }
-    .dark .bg-slate-100 { background:#0f172a !important; }
-    .dark .text-slate-500 { color:#94a3b8 !important; }
+    /* Utility tweaks */
+    .heading-hero { font-weight: 900; letter-spacing:-.02em; }
+    .stat { display:flex; flex-direction:column; gap:.25rem; padding:.85rem 1rem; border-radius:12px; border:1px solid #e5e7eb; }
+    html.dark .stat { border-color:#334155; }
   </style>
 </head>
-<body class="app">
-  <div class="flex">
-    <!-- =============== SIDEBAR =============== -->
-    <aside id="sidebar" class="sidebar text-white hidden lg:flex flex-col">
-      <div class="px-5 py-5 border-b border-slate-700/60">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <i class="fa-solid fa-shield-halved text-indigo-400 text-2xl"></i>
-            <span class="text-xl font-semibold tracking-tight">SeekYu</span>
-          </div>
-          <button id="sidebar-close" class="lg:hidden text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+<body class="min-h-screen flex bg-gray-50">
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar bg-gray-900 text-white w-64 min-h-screen flex flex-col">
+    <div class="p-4 flex items-center justify-between border-b border-gray-800">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-shield-alt text-indigo-400 text-xl"></i>
+        <span class="label font-bold">SeekYu</span>
+      </div>
+      <button id="collapseSidebar" class="btn btn-icon btn-ghost" title="Collapse sidebar">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto py-4 space-y-1">
+      <div class="px-3 text-gray-400 text-[11px] uppercase tracking-wider label">Main</div>
+      <button data-target="dashboard" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-house text-indigo-400 w-5 text-center"></i><span class="label">Dashboard</span>
+      </button>
+      <button data-target="guardmanagement" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-user-shield text-green-400 w-5 text-center"></i><span class="label">Guard Management</span> 
+      </button>
+      <button data-target="messaging" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-comment text-sky-400 w-5 text-center"></i><span class="label">Send Message</span>
+        <span class="ml-auto badge">3</span>
+      </button>
+      <button data-target="leave" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-calendar-days text-pink-400 w-5 text-center"></i><span class="label">Request Leave</span>
+        <span class="ml-auto badge">2</span>
+      </button>
+      <button data-target="exam" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-clipboard-list text-pink-400 w-5 text-center"></i><span class="label">Take Exam</span>
+      </button>
+
+      <div class="px-3 mt-5 text-gray-400 text-[11px] uppercase tracking-wider label">Reports</div>
+      <button data-target="incidents" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-circle-exclamation text-orange-400 w-5 text-center"></i><span class="label">Incident Reports</span>
+        <span class="ml-auto badge">1</span>
+      </button>
+      <button data-target="attendancemonitoring" class="w-full text-left flex items-center gap-3 px-4 py-2 text-gray-200 hover:bg-gray-800">
+        <i class="fa-solid fa-user-check text-lime-400 w-5 text-center"></i><span class="label">Attendance Monitoring</span> 
+      </button>
+        <div class="p-3 border-t border-gray-800">
+      <button class="w-full btn btn-primary justify-center" onclick="location.href='homepage.html'"><i class="fa-solid fa-right-from-bracket"></i><span class="label">Logout</span></button>
         </div>
-        <div class="mt-4 flex items-center gap-3">
-          <div class="relative">
-            <img id="profilePic" src="https://i.pravatar.cc/100?img=3" class="w-14 h-14 rounded-full object-cover ring-2 ring-slate-700" alt="profile"/>
-            <button id="editProfileBtn" class="absolute -bottom-1 -right-1 bg-slate-700 hover:bg-slate-600 p-1 rounded-full text-xs" title="Edit profile"><i class="fa-solid fa-pen"></i></button>
+    </nav> 
+  </aside>
+
+  <!-- MAIN -->
+  <div class="flex-1 flex flex-col">
+    <!-- APP BAR -->
+    <header class="appbar">
+      <div class="content-shell px-4 py-3 flex items-center gap-3">
+        <h1 class="heading-hero text-xl md:text-2xl text-slate-900 dark:text-slate-100">Dashboard</h1>
+        <div class="ml-auto flex items-center gap-2">
+          <div class="hidden md:flex items-center border rounded-xl px-2 py-1 bg-white dark:bg-slate-900 dark:border-slate-700">
+            <i class="fa-solid fa-magnifying-glass text-slate-400 mr-2"></i>
+            <input placeholder="Search…" class="outline-none bg-transparent text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 w-56"/>
+          </div>
+          <button id="themeToggle" class="btn btn-icon btn-ghost" title="Toggle dark mode"><i id="themeIcon" class="fa-solid fa-moon"></i></button>
+          <button class="btn btn-ghost"><i class="fa-regular fa-bell"></i><span class="hidden sm:inline">Notifications</span></button>
+          <div class="w-9 h-9 rounded-full overflow-hidden ring-2 ring-white/70">
+            <img src="https://i.pravatar.cc/100?img=3" class="w-full h-full object-cover" alt="avatar"/>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content-shell w-full px-4 py-6 space-y-6">
+      <!-- Top stats -->
+       <div data-section="dashboard" class="section">
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="stat"><div class="text-xs text-slate-500">On-duty Guards</div><div class="text-2xl font-extrabold">18</div></div>
+        <div class="stat"><div class="text-xs text-slate-500">Open Incidents</div><div class="text-2xl font-extrabold">3</div></div>
+        <div class="stat"><div class="text-xs text-slate-500">Avg. KPI</div><div class="text-2xl font-extrabold">85%</div></div>
+        <div class="stat"><div class="text-xs text-slate-500">Unread Messages</div><div class="text-2xl font-extrabold">4</div></div>
+      </section>
+
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Bulletin + Recent -->
+        <div class="lg:col-span-2 card">
+          <div class="card-inset">
+            <div class="section-header">
+              <div class="section-title">Bulletin Board</div>
+              <div class="flex gap-2"><button class="btn btn-muted"><i class="fa-solid fa-rotate"></i>Refresh</button></div>
+            </div>
+
+            <div class="relative rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+              <div id="bulletin" class="flex snap-x snap-mandatory overflow-x-auto">
+                <!-- slides injected by JS -->
+              </div>
+              <div class="absolute inset-x-0 bottom-2 flex items-center justify-center gap-2" id="bulletinDots"></div>
+            </div>
+
+            <div class="mt-6">
+              <div class="section-header"><div class="section-title">Recent Activity</div></div>
+              <ul id="recent" class="space-y-3">
+                <li class="flex gap-3 items-start">
+                  <span class="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 grid place-items-center"><i class="fa-solid fa-user-plus"></i></span>
+                  <div>
+                    <div class="font-semibold text-slate-800 dark:text-slate-100">John Doe</div>
+                    <div class="text-sm card-subtle">registered as a new security guard · 2h ago</div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: Notifications, Calendar, KPI -->
+        <div class="space-y-6">
+          <div class="card card-inset">
+            <div class="section-header"><div class="section-title">Notifications</div></div>
+            <ul id="notifList" class="space-y-2 max-h-48 scroll-area pr-2">
+              <li class="p-3 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <div class="text-sm font-semibold">Holiday Notice</div>
+                    <div class="text-xs card-subtle">Office closed on Sept 25 for local holiday.</div>
+                  </div>
+                  <div class="text-xs text-slate-400">2d</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="card card-inset">
+            <div class="section-header"><div class="section-title">Calendar</div></div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="font-semibold" id="calendarMonth"></div>
+              <div class="flex gap-2">
+                <button id="prevMonth" class="btn btn-icon btn-ghost"><i class="fa-solid fa-chevron-left"></i></button>
+                <button id="nextMonth" class="btn btn-icon btn-ghost"><i class="fa-solid fa-chevron-right"></i></button>
+              </div>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-[11px] text-slate-500 mb-1">
+              <div class="text-center">Sun</div><div class="text-center">Mon</div><div class="text-center">Tue</div><div class="text-center">Wed</div><div class="text-center">Thu</div><div class="text-center">Fri</div><div class="text-center">Sat</div>
+            </div>
+            <div id="calendarDays" class="grid grid-cols-7 gap-1 text-sm"></div>
+          </div>
+
+          <div class="card card-inset">
+            <div class="section-header"><div class="section-title">KPI Snapshot</div></div>
+            <div id="kpiList" class="space-y-3"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Shift + Attendance (example refactor) -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="card card-inset">
+          <div class="section-header"><div class="section-title">Shift Schedule (Today)</div></div>
+          <div class="scroll-area rounded-xl border border-slate-200 dark:border-slate-700">
+            <table class="table zebra">
+              <thead><tr><th>Guard</th><th>Area</th><th>Start</th><th>End</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Him</td><td>Warehouse A</td><td>07:00</td><td>15:00</td><td class="text-emerald-600 font-semibold">On Duty</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card card-inset">
+          <div class="section-header"><div class="section-title">Your Attendance</div>
+            <div class="flex gap-2">
+              <button id="btnCheckIn" class="btn btn-primary"><i class="fa-solid fa-arrow-right-to-bracket"></i>Check In</button>
+              <button id="btnCheckOut" class="btn btn-ghost"><i class="fa-solid fa-arrow-right-from-bracket"></i>Check Out</button>
+            </div>
+          </div>
+          <div id="attendanceList" class="space-y-3">
+            <p class="text-xs card-subtle">No attendance yet.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+      <!-- END Dashboard section -->
+     <!-- Messaging section -->
+<div data-section="messaging" class="section hidden">
+  <div class="card card-inset">
+    <div class="section-header">
+      <div class="section-title">Send Message</div>
+    </div>
+
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold">Messaging Management</h2>
+        <div class="flex gap-2">
+          <button id="inboxBtn" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Inbox</button>
+          <button id="composeBtn" class="px-3 py-2 rounded bg-slate-200 text-slate-800 text-sm">Compose</button>
+        </div>
+      </div>
+
+      <div id="inbox-section" class="space-y-3">
+        <div class="flex items-center gap-3">
+          <input type="text" id="messageSearch" placeholder="Search messages..." class="flex-1 px-3 py-2 rounded border border-slate-200 bg-slate-50" />
+          <button id="refreshBtn" class="px-3 py-2 rounded bg-white border border-slate-200">Refresh</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="clean min-w-full text-sm">
+            <thead>
+              <tr><th>Sender</th><th>Subject</th><th>Date</th><th>Action</th></tr>
+            </thead>
+            <tbody id="messageTable" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="compose-section" class="hidden mt-4">
+        <form id="composeForm" class="space-y-3">
+          <div>
+            <label class="block text-sm text-slate-600">To</label>
+            <input id="recipient" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" />
           </div>
           <div>
-            <div id="profileName" class="font-semibold text-sm">User name</div>
-            <div id="profileRole" class="text-xs text-slate-300 mt-1">Guard Head</div>
-            <button id="editProfileSmall" class="text-xs text-slate-300 hover:text-white mt-1">Edit profile</button>
+            <label class="block text-sm text-slate-600">Subject</label>
+            <input id="subject" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50" />
           </div>
+          <div>
+            <label class="block text-sm text-slate-600">Message</label>
+            <textarea id="message" rows="5" required class="w-full px-3 py-2 rounded border border-slate-200 bg-slate-50"></textarea>
+          </div>
+          <div class="flex gap-2">
+            <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Send</button>
+            <button type="button" id="cancelCompose" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leave request section -->
+<div data-section="leave" class="section hidden">
+  <div class="card card-inset">
+    <div class="section-header">
+      <div class="section-title">Request Leave</div>
+    </div>
+
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Request Leave</h1>
+        <div class="flex gap-2">
+          <button id="leaveTabNew" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">New Request</button>
+          <button id="leaveTabMy" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">My Requests</button>
         </div>
       </div>
 
-      <nav class="flex-1 overflow-y-auto px-4 py-4">
-        <div class="text-slate-400 uppercase tracking-wider text-[11px] px-2 mb-2">Main</div>
-        <div class="space-y-1">
-          <button onclick="showSection('dashboard', this)" class="nav-btn active"><i class="fa-solid fa-house text-indigo-300"></i><span class="nav-label">Dashboard</span></button>
-          <button onclick="showSection('guard-mgmt', this)" class="nav-btn"><i class="fa-solid fa-id-badge text-emerald-300"></i><span class="nav-label">Guard Management</span><span class="ml-auto pill pill-blue">2</span></button>
-          <button onclick="showSection('messaging-mgmt', this); showInbox();" class="nav-btn"><i class="fa-solid fa-comment text-indigo-300"></i><span class="nav-label">Send Message</span><span class="ml-auto pill pill-red">3</span></button>
-          <button onclick="showSection('request-leave', this)" class="nav-btn"><i class="fa-solid fa-calendar-days text-indigo-300"></i><span class="nav-label">Request Leave</span><span class="ml-auto pill pill-blue">2</span></button>
-          <button onclick="showSection('take-exam', this)" class="nav-btn"><i class="fa-solid fa-clipboard-check text-pink-300"></i><span class="nav-label">Take Exam</span></button>
-        </div>
-
-        <div class="text-slate-400 uppercase tracking-wider text-[11px] px-2 mt-6 mb-2">Reports</div>
-        <div class="space-y-1">
-          <button onclick="showSection('incident-reports', this)" class="nav-btn"><i class="fa-solid fa-circle-exclamation text-orange-300"></i><span class="nav-label">Incident Reports</span><span class="ml-auto pill pill-red">1</span></button>
-          <button onclick="showSection('attendance-monitor', this)" class="nav-btn"><i class="fa-solid fa-clock text-emerald-300"></i><span class="nav-label">Attendance Monitoring</span></button>
-        </div>
-      </nav>
-
-      <div class="p-4 border-t border-slate-700/60">
-        <button onclick="location.href='Index.html'" class="w-full inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 px-4 py-2.5 rounded-xl font-medium">
-          <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
-        </button>
-      </div>
-    </aside>
-
-    <!-- =============== MAIN =============== -->
-    <div class="flex-1 flex flex-col min-w-0">
-      <!-- Mobile topbar -->
-      <div class="bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/70 border-b border-slate-200 px-4 py-3 lg:hidden sticky top-0 z-30">
-        <div class="flex items-center justify-between">
-          <button id="sidebar-open" class="text-slate-700" title="Open menu"><i class="fa-solid fa-bars text-xl"></i></button>
-          <h1 class="text-lg font-semibold">Dashboard</h1>
-          <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-user text-slate-600"></i></div>
-        </div>
-      </div>
-
-      <!-- Content -->
-      <main class="px-4 sm:px-6 lg:px-8 py-6 w-full max-w-7xl mx-auto space-y-6">
-        <!-- DASHBOARD -->
-        <section id="dashboard" class="content-section active">
-          <header class="mb-2">
-            <h2 class="text-2xl font-bold tracking-tight">Welcome, Security Guard Head!</h2>
-            <p class="muted">Here’s a quick overview of your dashboard.</p>
-          </header>
-
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- LEFT: Bulletin + Shift + Attendance + Activity -->
-            <div class="lg:col-span-2 space-y-6 min-w-0">
-              <!-- Bulletin Board -->
-              <div class="card">
-                <div class="card-header">
-                  <h3 class="font-semibold">Bulletin Board</h3>
-                  <div class="flex items-center gap-2">
-                    <button id="bulletPrev" class="px-2.5 py-1.5 rounded-lg border text-sm bg-white hover:bg-slate-50" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
-                    <button id="bulletNext" class="px-2.5 py-1.5 rounded-lg border text-sm bg-white hover:bg-slate-50" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <div class="relative" id="bulletinWrap">
-                    <div class="overflow-hidden rounded-xl">
-                      <div id="bulletinTrack" class="carousel-track flex gap-4 transition-transform duration-500"></div>
-                    </div>
-                    <div id="bulletIndicators" class="absolute left-1/2 -translate-x-1/2 bottom-2 flex gap-1.5"></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Shift Schedule (Today) -->
-              <div class="card">
-                <div class="card-header"><h3 class="font-semibold">Shift Schedule (Today)</h3></div>
-                <div class="card-body overflow-x-auto">
-                  <table class="min-w-full text-sm">
-                    <thead class="text-slate-600 bg-slate-50">
-                      <tr>
-                        <th class="px-4 py-2 text-left font-medium">Guard</th>
-                        <th class="px-4 py-2 text-left font-medium">Area</th>
-                        <th class="px-4 py-2 text-left font-medium">Start</th>
-                        <th class="px-4 py-2 text-left font-medium">End</th>
-                        <th class="px-4 py-2 text-left font-medium">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y">
-                      <tr class="hover:bg-slate-50">
-                        <td class="px-4 py-2">Miguel Santos</td>
-                        <td class="px-4 py-2">Warehouse A</td>
-                        <td class="px-4 py-2">07:00</td>
-                        <td class="px-4 py-2">15:00</td>
-                        <td class="px-4 py-2"><span class="pill" style="background:rgb(209 250 229); color:rgb(5 150 105);">On Duty</span></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Attendance (personal quick log) -->
-              <div class="card">
-                <div class="card-header"><h3 class="font-semibold">Your Attendance Records</h3></div>
-                <div class="card-body">
-                  <div id="attendanceList" class="space-y-3 mb-4"><p class="text-xs text-slate-500">No attendance yet.</p></div>
-                  <div class="flex gap-3">
-                    <button id="btnCheckIn" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium">Check In</button>
-                    <button id="btnCheckOut" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium">Check Out</button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Recent Activity -->
-              <div class="card">
-                <div class="card-header"><h3 class="font-semibold">Recent Activity</h3></div>
-                <div class="card-body">
-                  <div id="recentActivity" class="space-y-3">
-                    <div class="flex items-start gap-3">
-                      <div class="bg-indigo-100 text-indigo-700 p-2 rounded-full"><i class="fa-solid fa-user-plus"></i></div>
-                      <div>
-                        <p><span class="font-medium">John Doe</span> registered as a new security guard</p>
-                        <p class="text-xs muted">2 hours ago</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <!-- New Request Form -->
+      <div id="leave-new-section">
+        <form id="leaveForm" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm text-slate-600">Full Name</label>
+              <input id="leave_name" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
             </div>
-
-            <!-- RIGHT: Notifications + Mini Calendar + KPI -->
-            <div class="space-y-6 min-w-0">
-              <div class="card">
-                <div class="card-header"><h3 class="font-semibold">Notifications</h3></div>
-                <div class="card-body">
-                  <ul id="notifList" class="space-y-2 max-h-44 overflow-y-auto">
-                    <li class="p-3 rounded-xl bg-slate-50 border">
-                      <div class="flex items-start justify-between gap-2">
-                        <div>
-                          <div class="text-sm font-medium">Holiday Notice</div>
-                          <div class="text-xs muted">Office closed on Sept 25 for local holiday.</div>
-                        </div>
-                        <div class="text-[11px] muted">2d</div>
-                      </div>
-                    </li>
-                  </ul>
-                  <div class="mt-4">
-                    <div class="flex items-center justify-between mb-2">
-                      <div id="calendarMonth" class="text-sm font-semibold">Month Year</div>
-                      <div class="flex items-center gap-1.5">
-                        <button id="prevMonth" class="px-2 py-1 rounded-lg hover:bg-slate-100" aria-label="Previous month"><i class="fa-solid fa-chevron-left"></i></button>
-                        <button id="nextMonth" class="px-2 py-1 rounded-lg hover:bg-slate-100" aria-label="Next month"><i class="fa-solid fa-chevron-right"></i></button>
-                      </div>
-                    </div>
-                    <div class="calendar-grid text-[11px] muted mb-1">
-                      <div class="text-center font-medium">Sun</div><div class="text-center font-medium">Mon</div><div class="text-center font-medium">Tue</div><div class="text-center font-medium">Wed</div><div class="text-center font-medium">Thu</div><div class="text-center font-medium">Fri</div><div class="text-center font-medium">Sat</div>
-                    </div>
-                    <div id="calendarDays" class="calendar-grid text-sm"></div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-header"><h3 class="font-semibold">Your KPI Scores</h3></div>
-                <div id="kpiList" class="card-body space-y-4">
-                  <!-- populated by script -->
-                </div>
-              </div>
+            <div>
+              <label class="block text-sm text-slate-600">Employee / Account ID</label>
+              <input id="leave_accountId" class="w-full px-3 py-2 rounded border bg-slate-50 font-mono" readonly />
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600">Role</label>
+              <input id="leave_role" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600">E-mail</label>
+              <input id="leave_email" type="email" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
             </div>
           </div>
-        </section>
 
-        <!-- ===== The rest of your sections stay the same DOM IDs so existing JS keeps working ===== -->
-        <!-- Attendance Monitoring (merged) -->
-<div id="attendance-monitor" class="content-section">
-  <div class="bg-white rounded-lg shadow-sm p-6">
-    <div class="flex items-center justify-between mb-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-sm text-slate-600">Start Date</label>
+              <input id="leave_start" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600">End Date</label>
+              <input id="leave_end" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+            </div>
+            <div>
+              <label class="block text-sm text-slate-600">Type</label>
+              <select id="leave_type" class="w-full px-3 py-2 rounded border bg-slate-50" required>
+                <option value="">Select type</option>
+                <option>Vacation</option>
+                <option>Sick</option>
+                <option>Emergency</option>
+                <option>Bereavement</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600">Reason</label>
+            <textarea id="leave_reason" rows="4" class="w-full px-3 py-2 rounded border bg-slate-50" required></textarea>
+          </div>
+
+          <div class="flex gap-2">
+            <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Submit Request</button>
+            <button type="reset" id="leaveReset" class="px-4 py-2 rounded bg-slate-200">Reset</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- My Requests (table) -->
+      <div id="leave-my-section" class="hidden mt-6">
+        <div class="flex items-center gap-3 mb-4">
+          <input id="leaveSearch" placeholder="Search by ID, type or reason..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
+          <select id="leaveFilterStatus" class="px-3 py-2 rounded border bg-slate-50">
+            <option value="">All Status</option>
+            <option>Pending</option>
+            <option>Approved</option>
+            <option>Rejected</option>
+          </select>
+          <input id="leaveFilterFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+          <input id="leaveFilterTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+          <button id="leaveRefresh" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+        </div>
+
+        <div class="overflow-x-auto bg-white rounded border">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 text-left text-slate-600">
+              <tr>
+                <th class="py-3 px-3">Request ID</th>
+                <th class="py-3 px-3">Range</th>
+                <th class="py-3 px-3">Type</th>
+                <th class="py-3 px-3">Status</th>
+                <th class="py-3 px-3">Submitted</th>
+                <th class="py-3 px-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="leaveTable" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="leaveEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
+  <div class="bg-white rounded-lg max-w-lg w-full p-5">
+    <div class="flex items-start justify-between mb-3">
+      <h2 class="text-lg font-semibold">Edit Leave Request</h2>
+      <button id="closeLeaveEdit" class="text-slate-500">✕</button>
+    </div>
+
+    <form id="leaveEditForm" class="space-y-3">
+      <input type="hidden" id="editRequestId" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm text-slate-600">Start Date</label>
+          <input id="edit_start" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required title="StartDateINp"/>
+        </div>
+        <div>
+          <label class="block text-sm text-slate-600">End Date</label>
+          <input id="edit_end" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required title="EndDateInp"/>
+        </div>
+      </div>
       <div>
-        <h2 class="text-lg font-semibold">Attendance Monitoring</h2>
-        <p class="text-sm text-gray-500">The time-in and time-out of security guards in their deployed area are displayed here.</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <input id="amSearch" type="search" placeholder="Search guard or area..." class="px-3 py-2 rounded border bg-slate-50" />
-        <input id="amFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
-        <input id="amTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
-        <select id="amAreaFilter" class="px-3 py-2 rounded border bg-slate-50">
-          <option value="">All areas</option>
+        <label class="block text-sm text-slate-600">Type</label>
+        <select id="edit_type" class="w-full px-3 py-2 rounded border bg-slate-50" required title="EditTypeInp">
+          <option>Vacation</option><option>Sick</option><option>Emergency</option><option>Bereavement</option><option>Other</option>
         </select>
-        <button id="amRefresh" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
-        <button id="amExport" class="px-3 py-2 rounded bg-emerald-600 text-white">Export CSV</button>
+      </div>
+      <div>
+        <label class="block text-sm text-slate-600" title="reasonInput">Reason</label>
+        <textarea id="edit_reason" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50" required title="EditReason"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button type="submit" class="px-3 py-2 rounded bg-indigo-600 text-white">Save</button>
+        <button type="button" id="cancelLeaveEdit" class="px-3 py-2 rounded bg-slate-200">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Attendance Monitoring section -->
+<div data-section="attendancemonitoring" class="section hidden">
+  <div class="card card-inset">
+    <div class="section-header">
+      <div>
+        <div class="section-title">Attendance Monitoring</div>
+        <p class="card-subtle">The time-in and time-out of security guards in their deployed area are displayed here.</p>
       </div>
     </div>
 
+    <!-- Filters -->
+    <div class="flex flex-wrap items-center gap-3 mb-4">
+      <input id="amSearch" type="search" placeholder="Search guard or area..." class="px-3 py-2 rounded border bg-slate-50" />
+      <input id="amFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+      <input id="amTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
+      <select id="amAreaFilter" class="px-3 py-2 rounded border bg-slate-50">
+        <option value="">All areas</option>
+      </select>
+      <button id="amRefresh" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+      <button id="amExport" class="px-3 py-2 rounded bg-emerald-600 text-white">Export CSV</button>
+    </div>
+
+    <!-- Table -->
     <div class="overflow-auto">
       <table class="min-w-full text-sm">
         <thead class="bg-gray-50 text-gray-600">
@@ -317,411 +501,264 @@
     </div>
   </div>
 </div>
-        <!-- Guard Management (merged) -->
-<div id="guard-mgmt" class="content-section">
-  <div class="max-w-full">
-    <main class="max-w-6xl mx-auto p-0">
-      <header class="flex items-center justify-between mb-6">
-        <div>
-          <h1 class="text-2xl font-semibold">Guard Management</h1>
-          <p class="text-sm text-gray-500">Manage guards, evaluate KPIs and review attendance (Head Guard).</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <input id="gmSearch" type="search" placeholder="Search guards by name, area or ID..." class="px-3 py-2 rounded border bg-white shadow-sm w-72" />
-          <button id="gmAddBtn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"><i class="fas fa-plus"></i> Add Guard</button>
-          <button id="gmExportBtn" class="bg-slate-50 text-slate-800 px-3 py-2 rounded border hover:bg-slate-100">Export CSV</button>
-        </div>
-      </header>
 
-      <section class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="p-4 border-b flex items-center justify-between">
-          <div class="text-sm text-gray-600">Guards — <span id="gmCount">0</span></div>
-          <div class="text-xs text-gray-400">Tip: Click "Evaluate" to rate KPI or "Attendance" to view logs.</div>
-        </div>
-
-        <div class="overflow-auto">
-          <table class="min-w-full text-sm table-auto">
-            <thead class="bg-gray-50 text-gray-600">
-              <tr>
-                <th class="px-4 py-3 text-left">Name</th>
-                <th class="px-4 py-3 text-left">Area</th>
-                <th class="px-4 py-3 text-left">Avg KPI</th>
-                <th class="px-4 py-3 text-left">Last Evaluated</th>
-                <th class="px-4 py-3 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="gmTbody" class="divide-y bg-white"></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
+<!-- Exam section -->
+<div data-section="exam" class="section hidden">
+  <div class="card card-inset">
+    <div class="section-header"><div class="section-title">Take Exam</div></div>
+    <p class="card-subtle">Exam interface goes here.</p>
   </div>
-
-  <!-- Add / Edit Guard Modal -->
-  <div id="gmModalGuard" class="fixed inset-0 hidden items-center justify-center z-40">
-    <div class="absolute inset-0 modal-backdrop" data-close></div>
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-lg z-50">
-      <form id="gmFormGuard" class="p-6">
-        <h2 class="text-lg font-semibold mb-3" id="gmModalGuardTitle">Add Guard</h2>
-        <input type="hidden" id="gmGuardId" />
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-          <div>
-            <label class="text-xs text-gray-600">Full name <span class="text-red-500">*</span></label>
-            <input id="gmGuardName" required class="w-full px-3 py-2 rounded border bg-slate-50" />
-          </div>
-          <div>
-            <label class="text-xs text-gray-600">Area / Post</label>
-            <input id="gmGuardArea" class="w-full px-3 py-2 rounded border bg-slate-50" />
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-          <div>
-            <label class="text-xs text-gray-600">Employee ID</label>
-            <input id="gmGuardEmpId" placeholder="auto-generated" class="w-full px-3 py-2 rounded border bg-slate-50" />
-          </div>
-          <div>
-            <label class="text-xs text-gray-600">Contact (optional)</label>
-            <input id="gmGuardContact" class="w-full px-3 py-2 rounded border bg-slate-50" />
-          </div>
-        </div>
-        <div class="flex justify-end gap-2">
-          <button type="button" data-close class="px-4 py-2 rounded border bg-white">Cancel</button>
-          <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Save Guard</button>
-        </div>
-      </form>
+</div>
+<!-- Guard Management section -->
+<div data-section="guardmanagement" class="section hidden">
+  <div class="card card-inset">
+    <div class="section-header">
+      <div class="section-title">Security Guard Management</div>
     </div>
-  </div>
 
-  <!-- KPI Modal -->
-  <div id="gmModalKpi" class="fixed inset-0 hidden items-center justify-center z-40">
-    <div class="absolute inset-0 modal-backdrop" data-close></div>
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl z-50">
-      <form id="gmFormKpi" class="p-6">
-        <h2 class="text-lg font-semibold mb-3">Evaluate KPI — <span id="gmKpiGuardName"></span></h2>
-        <input type="hidden" id="gmKpiGuardId" />
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-          <div>
-            <label class="text-xs text-gray-600">Professional conduct</label>
-            <select id="gmKpiProfessional" class="w-full px-3 py-2 rounded border bg-slate-50">
-              <option value="1">1 — Poor</option>
-              <option value="2">2 — Fair</option>
-              <option value="3" selected>3 — Good</option>
-              <option value="4">4 — Very Good</option>
-              <option value="5">5 — Excellent</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs text-gray-600">Operational effectiveness</label>
-            <select id="gmKpiOperational" class="w-full px-3 py-2 rounded border bg-slate-50">
-              <option value="1">1 — Poor</option>
-              <option value="2">2 — Fair</option>
-              <option value="3" selected>3 — Good</option>
-              <option value="4">4 — Very Good</option>
-              <option value="5">5 — Excellent</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-xs text-gray-600">Situational awareness & response</label>
-            <select id="gmKpiSituational" class="w-full px-3 py-2 rounded border bg-slate-50">
-              <option value="1">1 — Poor</option>
-              <option value="2">2 — Fair</option>
-              <option value="3" selected>3 — Good</option>
-              <option value="4">4 — Very Good</option>
-              <option value="5">5 — Excellent</option>
-            </select>
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="text-xs text-gray-600">Notes (optional)</label>
-          <textarea id="gmKpiNotes" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
-        </div>
-        <div class="flex justify-end gap-2">
-          <button type="button" data-close class="px-4 py-2 rounded border bg-white">Cancel</button>
-          <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Save Evaluation</button>
-        </div>
-      </form>
-    </div>
-  </div>
+    <div class="p-6">
+      <div class="max-w-full">
+        <main class="max-w-6xl mx-auto p-0">
+          <header class="flex items-center justify-between mb-6">
+            <div>
+              <h1 class="text-2xl font-semibold">Guard Management</h1>
+              <p class="text-sm text-gray-500">Manage guards, evaluate KPIs and review attendance (Head Guard).</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <input id="gmSearch" type="search" placeholder="Search guards by name, area or ID..." class="px-3 py-2 rounded border bg-white shadow-sm w-72" />
+              <button id="gmAddBtn" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"><i class="fas fa-plus"></i> Add Guard</button>
+              <button id="gmExportBtn" class="bg-slate-50 text-slate-800 px-3 py-2 rounded border hover:bg-slate-100">Export CSV</button>
+            </div>
+          </header>
 
-  <!-- Attendance Modal -->
-  <div id="gmModalAttendance" class="fixed inset-0 hidden items-center justify-center z-40">
-    <div class="absolute inset-0 modal-backdrop" data-close></div>
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl z-50 overflow-auto">
-      <div class="p-6">
-        <div class="flex items-start justify-between mb-3">
-          <h2 class="text-lg font-semibold">Attendance — <span id="gmAttGuardName"></span></h2>
-          <button data-close class="text-gray-500">✕ Close</button>
-        </div>
-        <div class="mb-4 flex gap-2 items-center">
-          <button id="gmBtnTimeIn" class="px-3 py-2 rounded bg-green-600 text-white">Record Time-In</button>
-          <button id="gmBtnTimeOut" class="px-3 py-2 rounded bg-red-600 text-white">Record Time-Out</button>
-          <button id="gmBtnExportAtt" class="px-3 py-2 rounded bg-slate-100">Export Guard CSV</button>
-        </div>
-        <div class="overflow-auto">
-          <table class="min-w-full text-sm">
-            <thead class="bg-gray-50 text-gray-600">
-              <tr>
-                <th class="px-3 py-2 text-left">Date</th>
-                <th class="px-3 py-2 text-left">Time In</th>
-                <th class="px-3 py-2 text-left">Time Out</th>
-                <th class="px-3 py-2 text-left">Notes</th>
-              </tr>
-            </thead>
-            <tbody id="gmAttendanceTbody" class="bg-white divide-y"></tbody>
-          </table>
-        </div>
+          <section class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-4 border-b flex items-center justify-between">
+              <div class="text-sm text-gray-600">Guards — <span id="gmCount">0</span></div>
+              <div class="text-xs text-gray-400">Tip: Click "Evaluate" to rate KPI or "Attendance" to view logs.</div>
+            </div>
+
+            <div class="overflow-auto">
+              <table class="min-w-full text-sm table-auto">
+                <thead class="bg-gray-50 text-gray-600">
+                  <tr>
+                    <th class="px-4 py-3 text-left">Name</th>
+                    <th class="px-4 py-3 text-left">Area</th>
+                    <th class="px-4 py-3 text-left">Avg KPI</th>
+                    <th class="px-4 py-3 text-left">Last Evaluated</th>
+                    <th class="px-4 py-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="gmTbody" class="divide-y bg-white"></tbody>
+              </table>
+            </div>
+          </section>
+        </main>
       </div>
     </div>
   </div>
 </div>
-        <!-- Messaging Management (merged) -->
-<div id="messaging-mgmt" class="content-section">
-  <div class="bg-white rounded-lg shadow-sm p-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Messaging Management</h1>
-    <div class="mt-4">
-      <div class="flex gap-2 mb-4">
-        <button id="inboxBtn" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Inbox</button>
-        <button id="composeBtn" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">Compose</button>
-      </div>
-      <div id="inbox-section" class="bg-white rounded-lg shadow-sm p-4">
-        <div class="flex items-center gap-3 mb-4">
-          <input type="text" id="messageSearch" placeholder="Search messages..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
-          <button id="refreshBtn" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-sm">
-            <thead class="text-left text-slate-500">
-              <tr>
-                <th class="py-2">Sender</th>
-                <th class="py-2">Subject</th>
-                <th class="py-2">Date</th>
-                <th class="py-2">Action</th>
-              </tr>
-            </thead>
-            <tbody id="messageTable" class="divide-y"></tbody>
-          </table>
-        </div>
-      </div>
-      <div id="compose-section" class="hidden bg-white rounded-lg shadow-sm p-4 mt-4">
-        <form id="composeForm" class="space-y-3">
-          <div>
-            <label class="block text-sm text-slate-600">To:</label>
-            <input type="text" id="recipient" required class="w-full px-3 py-2 rounded border bg-slate-50" />
-          </div>
-          <div>
-            <label class="block text-sm text-slate-600">Subject:</label>
-            <input type="text" id="subject" required class="w-full px-3 py-2 rounded border bg-slate-50" />
-          </div>
-          <div>
-            <label class="block text-sm text-slate-600">Message:</label>
-            <textarea id="message" rows="5" required class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
-          </div>
-          <div class="flex gap-2">
-            <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Send Message</button>
-            <button type="button" id="cancelCompose" class="px-4 py-2 rounded bg-slate-200">Cancel</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-        <!-- Request Leave (merged) -->
-<div id="request-leave" class="content-section">
-  <div class="bg-white rounded-lg shadow-sm p-6">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Request Leave</h1>
-      <div class="flex gap-2">
-        <button id="leaveTabNew" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">New Request</button>
-        <button id="leaveTabMy" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">My Requests</button>
-      </div>
-    </div>
-    <div id="leave-new-section">
-      <form id="leaveForm" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm text-slate-600">Full Name</label>
-            <input id="leave_name" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
-          </div>
-          <div>
-            <label class="block text-sm text-slate-600">Employee / Account ID</label>
-            <input id="leave_accountId" class="w-full px-3 py-2 rounded border bg-slate-50 font-mono" readonly />
-          </div>
-          <div>
-            <label class="block text-sm text-slate-600">Role</label>
-            <input id="leave_role" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
-          </div>
-          <div>
-            <label class="block text-sm text-slate-600">E-mail</label>
-            <input id="leave_email" type="email" class="w-full px-3 py-2 rounded border bg-slate-50" readonly />
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label class="block text-sm text-slate-600">Start Date</label>
-            <input id="leave_start" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
-          </div>
-          <div>
-            <label class="block text-sm text-slate-600">End Date</label>
-            <input id="leave_end" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
-          </div>
-          <div>
-            <label class="block text-sm text-slate-600">Type</label>
-            <select id="leave_type" class="w-full px-3 py-2 rounded border bg-slate-50" required>
-              <option value="">Select type</option>
-              <option>Vacation</option>
-              <option>Sick</option>
-              <option>Emergency</option>
-              <option>Bereavement</option>
-              <option>Other</option>
-            </select>
-          </div>
+
+<!-- Add / Edit Guard Modal -->
+<div id="gmModalGuard" class="fixed inset-0 hidden items-center justify-center z-40">
+  <div class="absolute inset-0 modal-backdrop" data-close></div>
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-lg z-50">
+    <form id="gmFormGuard" class="p-6">
+      <h2 class="text-lg font-semibold mb-3" id="gmModalGuardTitle">Add Guard</h2>
+      <input type="hidden" id="gmGuardId" />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="text-xs text-gray-600">Full name <span class="text-red-500">*</span></label>
+          <input id="gmGuardName" required class="w-full px-3 py-2 rounded border bg-slate-50" />
         </div>
         <div>
-          <label class="block text-sm text-slate-600">Reason</label>
-          <textarea id="leave_reason" rows="4" class="w-full px-3 py-2 rounded border bg-slate-50" required></textarea>
+          <label class="text-xs text-gray-600">Area / Post</label>
+          <input id="gmGuardArea" class="w-full px-3 py-2 rounded border bg-slate-50" />
         </div>
-        <div class="flex gap-2">
-          <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Submit Request</button>
-          <button type="reset" id="leaveReset" class="px-4 py-2 rounded bg-slate-200">Reset</button>
-        </div>
-      </form>
-    </div>
-    <div id="leave-my-section" class="hidden mt-6">
-      <div class="flex items-center gap-3 mb-4">
-        <input id="leaveSearch" placeholder="Search by ID, type or reason..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
-        <select id="leaveFilterStatus" class="px-3 py-2 rounded border bg-slate-50">
-          <option value="">All Status</option>
-          <option>Pending</option>
-          <option>Approved</option>
-          <option>Rejected</option>
-        </select>
-        <input id="leaveFilterFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
-        <input id="leaveFilterTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
-        <button id="leaveRefresh" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
       </div>
-      <div class="overflow-x-auto bg-white rounded border">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="text-xs text-gray-600">Employee ID</label>
+          <input id="gmGuardEmpId" placeholder="auto-generated" class="w-full px-3 py-2 rounded border bg-slate-50" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">Contact (optional)</label>
+          <input id="gmGuardContact" class="w-full px-3 py-2 rounded border bg-slate-50" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button type="button" data-close class="px-4 py-2 rounded border bg-white">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Save Guard</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- KPI Modal -->
+<div id="gmModalKpi" class="fixed inset-0 hidden items-center justify-center z-40">
+  <div class="absolute inset-0 modal-backdrop" data-close></div>
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl z-50">
+    <form id="gmFormKpi" class="p-6">
+      <h2 class="text-lg font-semibold mb-3">Evaluate KPI — <span id="gmKpiGuardName"></span></h2>
+      <input type="hidden" id="gmKpiGuardId" />
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+        <div>
+          <label class="text-xs text-gray-600">Professional conduct</label>
+          <select id="gmKpiProfessional" class="w-full px-3 py-2 rounded border bg-slate-50">
+            <option value="1">1 — Poor</option>
+            <option value="2">2 — Fair</option>
+            <option value="3" selected>3 — Good</option>
+            <option value="4">4 — Very Good</option>
+            <option value="5">5 — Excellent</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">Operational effectiveness</label>
+          <select id="gmKpiOperational" class="w-full px-3 py-2 rounded border bg-slate-50">
+            <option value="1">1 — Poor</option>
+            <option value="2">2 — Fair</option>
+            <option value="3" selected>3 — Good</option>
+            <option value="4">4 — Very Good</option>
+            <option value="5">5 — Excellent</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-gray-600">Situational awareness & response</label>
+          <select id="gmKpiSituational" class="w-full px-3 py-2 rounded border bg-slate-50">
+            <option value="1">1 — Poor</option>
+            <option value="2">2 — Fair</option>
+            <option value="3" selected>3 — Good</option>
+            <option value="4">4 — Very Good</option>
+            <option value="5">5 — Excellent</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="text-xs text-gray-600">Notes (optional)</label>
+        <textarea id="gmKpiNotes" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button type="button" data-close class="px-4 py-2 rounded border bg-white">Cancel</button>
+        <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Save Evaluation</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Attendance Modal -->
+<div id="gmModalAttendance" class="fixed inset-0 hidden items-center justify-center z-40">
+  <div class="absolute inset-0 modal-backdrop" data-close></div>
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl z-50 overflow-auto">
+    <div class="p-6">
+      <div class="flex items-start justify-between mb-3">
+        <h2 class="text-lg font-semibold">Attendance — <span id="gmAttGuardName"></span></h2>
+        <button data-close class="text-gray-500">✕ Close</button>
+      </div>
+
+      <div class="mb-4 flex gap-2 items-center">
+        <button id="gmBtnTimeIn" class="px-3 py-2 rounded bg-green-600 text-white">Record Time-In</button>
+        <button id="gmBtnTimeOut" class="px-3 py-2 rounded bg-red-600 text-white">Record Time-Out</button>
+        <button id="gmBtnExportAtt" class="px-3 py-2 rounded bg-slate-100">Export Guard CSV</button>
+      </div>
+
+      <div class="overflow-auto">
         <table class="min-w-full text-sm">
-          <thead class="bg-slate-50 text-left text-slate-600">
+          <thead class="bg-gray-50 text-gray-600">
             <tr>
-              <th class="py-3 px-3">Request ID</th>
-              <th class="py-3 px-3">Range</th>
-              <th class="py-3 px-3">Type</th>
-              <th class="py-3 px-3">Status</th>
-              <th class="py-3 px-3">Submitted</th>
-              <th class="py-3 px-3">Actions</th>
+              <th class="px-3 py-2 text-left">Date</th>
+              <th class="px-3 py-2 text-left">Time In</th>
+              <th class="px-3 py-2 text-left">Time Out</th>
+              <th class="px-3 py-2 text-left">Notes</th>
             </tr>
           </thead>
-          <tbody id="leaveTable" class="divide-y"></tbody>
+          <tbody id="gmAttendanceTbody" class="bg-white divide-y"></tbody>
         </table>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Leave Edit Modal (merged) -->
-<div id="leaveEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-  <div class="bg-white rounded-lg max-w-lg w-full p-5">
-    <div class="flex items-start justify-between mb-3">
-      <h2 class="text-lg font-semibold">Edit Leave Request</h2>
-      <button id="closeLeaveEdit" class="text-slate-500">✕</button>
-    </div>
-    <form id="leaveEditForm" class="space-y-3">
-      <input type="hidden" id="editRequestId" />
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
-          <label class="block text-sm text-slate-600">Start Date</label>
-          <input id="edit_start" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
-        </div>
-        <div>
-          <label class="block text-sm text-slate-600">End Date</label>
-          <input id="edit_end" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
-        </div>
-      </div>
-      <div>
-        <label class="block text-sm text-slate-600">Type</label>
-        <select id="edit_type" class="w-full px-3 py-2 rounded border bg-slate-50" required>
-          <option>Vacation</option><option>Sick</option><option>Emergency</option><option>Bereavement</option><option>Other</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm text-slate-600">Reason</label>
-        <textarea id="edit_reason" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50" required></textarea>
-      </div>
-      <div class="flex justify-end gap-2">
-        <button type="submit" class="px-3 py-2 rounded bg-indigo-600 text-white">Save</button>
-        <button type="button" id="cancelLeaveEdit" class="px-3 py-2 rounded bg-slate-200">Cancel</button>
-      </div>
-    </form>
-  </div>
-</div>
-        <!-- Incident Reports (merged) -->
-<div id="incident-reports" class="content-section">
-  <div class="bg-white rounded-lg shadow-sm p-6">
+<!-- Incidents (theme-ready: light / dark) -->
+<div data-section="incidents" class="section hidden">
+  <div class="card card-inset">
+    <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">Incident Reports</h1>
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-slate-100">Incident Reports</h1>
       <div class="flex gap-2">
-        <button id="irTabSubmit" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Submit Report</button>
-        <button id="irTabView" class="px-3 py-2 rounded bg-slate-200 text-gray-800 text-sm">View Reports</button>
+        <!-- active/inactive styling handled in JS -->
+        <button id="irTabSubmit" class="px-3 py-2 rounded text-sm bg-indigo-600 text-white">Submit Report</button>
+        <button id="irTabView" class="px-3 py-2 rounded text-sm bg-slate-200 text-gray-800 dark:bg-slate-700 dark:text-slate-200">View Reports</button>
       </div>
     </div>
-    <!-- Submit Report -->
+
+    <!-- Submit form -->
     <div id="ir-submit-section">
       <form id="incidentForm" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm text-slate-600">Full Name</label>
-            <input id="ir_fullName" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Full Name</label>
+            <input id="ir_fullName" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
           </div>
           <div>
-            <label class="block text-sm text-slate-600">Employee ID / License No.</label>
-            <input id="ir_employeeId" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Employee ID / License No.</label>
+            <input id="ir_employeeId" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
           </div>
+
           <div>
-            <label class="block text-sm text-slate-600">Role</label>
-            <select id="ir_role" class="w-full px-3 py-2 rounded border bg-slate-50" required>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Role</label>
+            <select id="ir_role" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required>
               <option value="">Select role</option>
               <option>Security Guard</option>
               <option>Head Guard</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm text-slate-600">Shift Date</label>
-            <input id="ir_shiftDate" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Shift Date</label>
+            <input id="ir_shiftDate" type="date" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Shift Start Time</label>
+            <input id="ir_shiftStart" type="time" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"/>
           </div>
           <div>
-            <label class="block text-sm text-slate-600">Shift Start Time</label>
-            <input id="ir_shiftStart" type="time" class="w-full px-3 py-2 rounded border bg-slate-50" />
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Shift End Time</label>
+            <input id="ir_shiftEnd" type="time" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"/>
+          </div>
+
+          <div>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Contact Phone</label>
+            <input id="ir_contact" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"/>
           </div>
           <div>
-            <label class="block text-sm text-slate-600">Shift End Time</label>
-            <input id="ir_shiftEnd" type="time" class="w-full px-3 py-2 rounded border bg-slate-50" />
-          </div>
-          <div>
-            <label class="block text-sm text-slate-600">Contact Phone</label>
-            <input id="ir_contact" class="w-full px-3 py-2 rounded border bg-slate-50" />
-          </div>
-          <div>
-            <label class="block text-sm text-slate-600">E-Mail Address</label>
-            <input id="ir_email" type="email" class="w-full px-3 py-2 rounded border bg-slate-50" />
+            <label class="block text-sm text-slate-600 dark:text-slate-300">E-Mail Address</label>
+            <input id="ir_email" type="email" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"/>
           </div>
         </div>
-        <hr class="my-2" />
+
+        <hr class="my-2 border-slate-200 dark:border-slate-700" />
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm text-slate-600">Date of Incident</label>
-            <input id="ir_date" type="date" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Date of Incident</label>
+            <input id="ir_date" type="date" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
           </div>
           <div>
-            <label class="block text-sm text-slate-600">Time of Incident</label>
-            <input id="ir_time" type="time" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Time of Incident</label>
+            <input id="ir_time" type="time" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
           </div>
           <div class="md:col-span-2">
-            <label class="block text-sm text-slate-600">Location of Incident</label>
-            <input id="ir_location" class="w-full px-3 py-2 rounded border bg-slate-50" required />
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Location of Incident</label>
+            <input id="ir_location" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required />
           </div>
+
           <div class="md:col-span-2">
-            <label class="block text-sm text-slate-600">Incident Type</label>
-            <select id="ir_type" class="w-full px-3 py-2 rounded border bg-slate-50" required>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Incident Type</label>
+            <select id="ir_type" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" required>
               <option value="">Select type</option>
               <option>Trespassing</option>
               <option>Theft / Burglary</option>
@@ -734,33 +771,39 @@
               <option>Other</option>
             </select>
           </div>
+
           <div class="md:col-span-2">
-            <label class="block text-sm text-slate-600">Description of Incident</label>
-            <textarea id="ir_description" rows="5" class="w-full px-3 py-2 rounded border bg-slate-50" placeholder="Describe what happened, sequence of events..." required></textarea>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Description of Incident</label>
+            <textarea id="ir_description" rows="5" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500" placeholder="Describe what happened, sequence of events..." required></textarea>
           </div>
         </div>
-        <hr />
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
+        <!-- Parties involved -->
         <div>
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-sm font-semibold">Parties Involved</h3>
-            <button type="button" id="irAddPerson" class="px-2 py-1 text-xs bg-slate-200 rounded">Add Person</button>
+            <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-100">Parties Involved</h3>
+            <button type="button" id="irAddPerson" class="px-2 py-1 text-xs bg-slate-200 rounded dark:bg-slate-700 dark:text-slate-200">Add Person</button>
           </div>
           <div id="ir_parties" class="space-y-3"></div>
         </div>
-        <hr />
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
         <div>
-          <h3 class="text-sm font-semibold mb-2">Injuries and Medical Services</h3>
+          <h3 class="text-sm font-semibold mb-2 text-slate-800 dark:text-slate-100">Injuries and Medical Services</h3>
           <div class="flex items-center gap-4 mb-2">
-            <label class="text-sm"><input type="radio" name="ir_injuries" value="Yes" /> Yes</label>
-            <label class="text-sm"><input type="radio" name="ir_injuries" value="No" checked/> No</label>
+            <label class="text-sm text-slate-800 dark:text-slate-200"><input type="radio" name="ir_injuries" value="Yes" /> Yes</label>
+            <label class="text-sm text-slate-800 dark:text-slate-200"><input type="radio" name="ir_injuries" value="No" checked /> No</label>
           </div>
           <div>
-            <label class="block text-sm text-slate-600">If yes, describe injuries</label>
-            <textarea id="ir_injuries_desc" rows="2" class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">If yes, describe injuries</label>
+            <textarea id="ir_injuries_desc" rows="2" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"></textarea>
           </div>
           <div class="mt-2">
-            <label class="block text-sm text-slate-600">Was medical treatment provided?</label>
-            <select id="ir_medical_provided" class="w-full px-3 py-2 rounded border bg-slate-50">
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Was medical treatment provided?</label>
+            <select id="ir_medical_provided" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200">
               <option value="">Select</option>
               <option>Yes</option>
               <option>No</option>
@@ -768,64 +811,73 @@
             </select>
           </div>
         </div>
-        <hr />
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
         <div>
-          <h3 class="text-sm font-semibold mb-2">Actions Taken</h3>
+          <h3 class="text-sm font-semibold mb-2 text-slate-800 dark:text-slate-100">Actions Taken</h3>
           <div class="flex gap-4 mb-2">
-            <label class="text-sm"><input id="ir_police_notified" type="checkbox" /> Police Notified</label>
-            <label class="text-sm"><input id="ir_medical_contacted" type="checkbox" /> Medical Services Contacted</label>
-            <label class="text-sm"><input id="ir_scene_secured" type="checkbox" /> Scene Secured</label>
+            <label class="text-sm text-slate-800 dark:text-slate-200"><input id="ir_police_notified" type="checkbox" /> Police Notified</label>
+            <label class="text-sm text-slate-800 dark:text-slate-200"><input id="ir_medical_contacted" type="checkbox" /> Medical Services Contacted</label>
+            <label class="text-sm text-slate-800 dark:text-slate-200"><input id="ir_scene_secured" type="checkbox" /> Scene Secured</label>
           </div>
           <div>
-            <label class="block text-sm text-slate-600">Other actions taken</label>
-            <textarea id="ir_actions" rows="2" class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Other actions taken</label>
+            <textarea id="ir_actions" rows="2" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"></textarea>
           </div>
         </div>
-        <hr />
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
         <div>
-          <h3 class="text-sm font-semibold mb-2">Evidence Collected</h3>
-          <div class="flex gap-3 flex-wrap mb-2">
+          <h3 class="text-sm font-semibold mb-2 text-slate-800 dark:text-slate-100">Evidence Collected</h3>
+          <div class="flex gap-3 flex-wrap mb-2 text-slate-800 dark:text-slate-200">
             <label class="text-sm"><input id="ir_e_photos" type="checkbox" /> Photos</label>
             <label class="text-sm"><input id="ir_e_videos" type="checkbox" /> Video Footage</label>
             <label class="text-sm"><input id="ir_e_witness" type="checkbox" /> Witness Statements</label>
             <label class="text-sm"><input id="ir_e_physical" type="checkbox" /> Physical Items</label>
           </div>
           <div>
-            <label class="block text-sm text-slate-600">Other Evidence</label>
-            <input id="ir_e_other" class="w-full px-3 py-2 rounded border bg-slate-50" />
+            <label class="block text-sm text-slate-600 dark:text-slate-300">Other Evidence</label>
+            <input id="ir_e_other" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" />
           </div>
         </div>
-        <hr />
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
         <div>
-          <label class="block text-sm text-slate-600">Additional Remarks</label>
-          <textarea id="ir_remarks" rows="3" class="w-full px-3 py-2 rounded border bg-slate-50"></textarea>
+          <label class="block text-sm text-slate-600 dark:text-slate-300">Additional Remarks</label>
+          <textarea id="ir_remarks" rows="3" class="w-full px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200"></textarea>
         </div>
+
         <div class="flex gap-2">
           <button type="submit" class="px-4 py-2 rounded bg-emerald-600 text-white">Submit Report</button>
-          <button type="reset" class="px-4 py-2 rounded bg-slate-200">Reset</button>
+          <button type="reset" class="px-4 py-2 rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200">Reset</button>
         </div>
       </form>
     </div>
+
     <!-- View Reports -->
     <div id="ir-view-section" class="hidden mt-6">
       <div class="flex items-center gap-3 mb-4">
-        <input id="reportsSearch" placeholder="Search by reporter, ID, location, subject..." class="flex-1 px-3 py-2 rounded border bg-slate-50" />
-        <select id="filterRole" class="px-3 py-2 rounded border bg-slate-50">
+        <input id="reportsSearch" placeholder="Search by reporter, ID, location, subject..." class="flex-1 px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" />
+        <select id="filterRole" class="px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200">
           <option value="">All Roles</option>
           <option>Security Guard</option>
           <option>Head Guard</option>
         </select>
-        <select id="filterType" class="px-3 py-2 rounded border bg-slate-50">
+        <select id="filterType" class="px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200">
           <option value="">All Types</option>
           <option>Trespassing</option><option>Theft / Burglary</option><option>Vandalism</option><option>Fire / Smoke</option><option>Assault</option><option>Safety Hazard</option><option>False Fire Alarm</option><option>Accident</option><option>Other</option>
         </select>
-        <input id="filterFrom" type="date" class="px-3 py-2 rounded border bg-slate-50" />
-        <input id="filterTo" type="date" class="px-3 py-2 rounded border bg-slate-50" />
-        <button id="refreshReports" class="px-3 py-2 rounded bg-slate-100 border">Refresh</button>
+        <input id="filterFrom" type="date" class="px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" />
+        <input id="filterTo" type="date" class="px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200" />
+        <button id="refreshReports" class="px-3 py-2 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Refresh</button>
       </div>
-      <div class="overflow-x-auto bg-white rounded border">
+
+      <div class="overflow-x-auto bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700">
         <table class="min-w-full text-sm">
-          <thead class="bg-slate-50 text-left text-slate-600">
+          <thead class="bg-slate-50 dark:bg-slate-800 text-left text-slate-600 dark:text-slate-300">
             <tr>
               <th class="py-3 px-3">Report ID</th>
               <th class="py-3 px-3">Date</th>
@@ -836,307 +888,622 @@
               <th class="py-3 px-3">Actions</th>
             </tr>
           </thead>
-          <tbody id="reportsTable" class="divide-y"></tbody>
+          <tbody id="reportsTable" class="divide-y bg-white dark:bg-transparent"></tbody>
         </table>
       </div>
     </div>
+    <!-- END: Incident Reports Content -->
   </div>
 </div>
 
-<!-- Report Details Modal (merged) -->
+<!-- Report Details Modal (theme-ready) -->
 <div id="reportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-  <div class="bg-white rounded-lg max-w-3xl w-full p-5 overflow-y-auto max-h-[90vh]">
+  <div class="bg-white dark:bg-slate-900 rounded-lg max-w-3xl w-full p-5 overflow-y-auto max-h-[90vh] text-slate-700 dark:text-slate-200">
     <div class="flex items-start justify-between mb-3">
       <h2 class="text-lg font-semibold">Incident Report Details</h2>
-      <button id="closeReportModal" class="text-slate-500">✕</button>
+      <button id="closeReportModal" class="text-slate-500 dark:text-slate-300">✕</button>
     </div>
-    <div id="reportDetails" class="space-y-2 text-sm text-slate-700"></div>
+    <div id="reportDetails" class="space-y-2 text-sm"></div>
     <div class="mt-4 flex justify-end gap-2">
       <button id="exportReportBtn" class="px-3 py-2 rounded bg-blue-600 text-white">Export (JSON)</button>
-      <button id="closeReportModal2" class="px-3 py-2 rounded bg-slate-200">Close</button>
+      <button id="closeReportModal2" class="px-3 py-2 rounded bg-slate-200 dark:bg-slate-700 dark:text-slate-200">Close</button>
     </div>
   </div>
 </div>
-        <section id="take-exam" class="content-section"></section>
-      </main>
-    </div>
-  </div>
 
-  <!-- ======= Modals area (use your existing modals; IDs preserved) ======= -->
-  <div id="editProfileModal" class="fixed inset-0 hidden items-center justify-center z-50">
-    <div class="modal-backdrop absolute inset-0"></div>
-    <div class="relative bg-white w-full max-w-2xl mx-4 rounded-2xl shadow-xl overflow-hidden">
-      <div class="p-4 border-b flex items-center justify-between">
-        <h3 class="text-lg font-semibold">Edit Profile</h3>
-        <button id="closeModal" class="text-slate-500 hover:text-slate-800" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="p-6">
-        <form id="profileForm" class="space-y-4">
-          <div class="flex items-center gap-4">
-            <div class="flex-shrink-0">
-              <img id="modalAvatar" src="https://i.pravatar.cc/100?img=3" class="w-20 h-20 rounded-full object-cover border" alt="avatar"/>
-              <div class="mt-2">
-                <input id="modalFile" type="file" accept="image/*" class="hidden"/>
-                <button type="button" id="changeAvatarBtn" class="text-xs px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200"><i class="fa-solid fa-image mr-1"></i> Change</button>
-              </div>
-            </div>
-            <div class="flex-1 grid grid-cols-2 gap-3">
-              <div class="col-span-2">
-                <label class="text-xs font-medium text-slate-600">Full name *</label>
-                <input id="inputFullName" required class="w-full mt-1 px-3 py-2 border rounded-lg bg-slate-50" />
-              </div>
-              <div>
-                <label class="text-xs font-medium text-slate-600">Email *</label>
-                <input id="inputEmail" type="email" required class="w-full mt-1 px-3 py-2 border rounded-lg bg-slate-50" />
-              </div>
-              <div>
-                <label class="text-xs font-medium text-slate-600">Phone</label>
-                <input id="inputPhone" class="w-full mt-1 px-3 py-2 border rounded-lg bg-slate-50" />
-              </div>
-            </div>
-          </div>
-          <div class="flex items-center justify-end gap-2 pt-4 border-t">
-            <button type="button" id="cancelProfile" class="px-4 py-2 rounded-lg border">Cancel</button>
-            <button type="submit" id="saveProfile" class="px-4 py-2 rounded-lg bg-indigo-600 text-white">Save Profile</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
 
-  <!-- ================== SCRIPTS ================== -->
+
+      <!-- The rest of your original sections (Messaging, Leave, Incidents, Exam, Modals) can stay as-is.
+           This file focuses on the visual shell & components you can copy into your page. -->
+    </main>
+  </div>
+  <!-- END MAIN -->
+
+  <!-- inside <main class="content-shell ..."> -->
+
+  <!-- THEME TOGGLE (works app-wide) -->
   <script>
-    // Minimal JS to keep your existing logic working, plus a few small UX bits.
+    (function () {
+      const STORAGE_KEY = 'seekyu-theme';
+      const root = document.documentElement;
+      const btn = document.getElementById('themeToggle');
+      const icon = document.getElementById('themeIcon');
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initial = saved || (systemDark ? 'dark' : 'light');
+      applyTheme(initial);
+      function setIcon(theme){ if(!icon) return; icon.className = 'fa-solid ' + (theme==='dark' ? 'fa-sun' : 'fa-moon'); }
+      function applyTheme(theme){ const isDark = theme==='dark'; root.classList.toggle('dark', isDark); localStorage.setItem(STORAGE_KEY, isDark?'dark':'light'); setIcon(theme); }
+      btn?.addEventListener('click', ()=> applyTheme(root.classList.contains('dark')?'light':'dark'));
+    })();
+  </script>
 
-    /* ---------------- Section switching ---------------- */
-    window.showSection = function(sectionId, clickedBtn = null) {
-      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-      const target = document.getElementById(sectionId); if (target) target.classList.add('active');
-      // sidebar active state
-      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-      if (clickedBtn) clickedBtn.classList.add('active');
-      // close sidebar on mobile
-      if (window.innerWidth < 1024) document.getElementById('sidebar')?.classList.add('hidden');
-    }
+  <!-- Sidebar collapse & simple demo data renderers -->
+  <script>
+    // Sidebar collapse
+    document.getElementById('collapseSidebar')?.addEventListener('click', () => {
+      const sb = document.getElementById('sidebar');
+      sb.classList.toggle('collapsed');
+      const icon = event.currentTarget.querySelector('i');
+      icon.classList.toggle('fa-chevron-left');
+      icon.classList.toggle('fa-chevron-right');
+    });
 
-    /* ---------------- Mobile sidebar ---------------- */
-    const openBtn = document.getElementById('sidebar-open');
-    const closeBtn = document.getElementById('sidebar-close');
-    const sidebar = document.getElementById('sidebar');
-    openBtn?.addEventListener('click', ()=> sidebar?.classList.remove('hidden'));
-    closeBtn?.addEventListener('click', ()=> sidebar?.classList.add('hidden'));
-
-    /* ---------------- Bulletin carousel demo ---------------- */
-    const bulletins = [
-      { id: 1, title: 'Holiday Notice', body: 'Office closed on Sept 25 for local holiday.', image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop' },
-      { id: 2, title: 'New SOP', body: 'Updated patrol SOP v2.1 uploaded. Read and acknowledge.', image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1200&auto=format&fit=crop' },
-      { id: 3, title: 'Safety Tip', body: 'Always wear non-slip shoes during rainy season.', image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200&auto=format&fit=crop' }
-    ];
-    const track = document.getElementById('bulletinTrack');
-    const indicators = document.getElementById('bulletIndicators');
-    const prevBtn = document.getElementById('bulletPrev');
-    const nextBtn = document.getElementById('bulletNext');
-    let idx = 0, timer = null;
-
-    function renderBulletins(){
-      if (!track) return;
-      track.innerHTML = '';
-      bulletins.forEach(b => {
+    // Bulletin slides
+    (function(){
+      const data = [
+        {title:'Holiday Notice', body:'Office closed on Sept 25 for local holiday.', image:'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1400&auto=format&fit=crop'},
+        {title:'New SOP', body:'Updated patrol SOP v2.1 uploaded. Read and acknowledge.', image:'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1400&auto=format&fit=crop'},
+        {title:'Safety Tip', body:'Wear non-slip shoes during rainy season.', image:'https://images.unsplash.com/photo-1508873535684-277a3cbcc4e5?q=80&w=1400&auto=format&fit=crop'}
+      ];
+      const wrap = document.getElementById('bulletin');
+      const dots = document.getElementById('bulletinDots');
+      if(!wrap) return;
+      wrap.innerHTML = '';
+      data.forEach((b,i)=>{
         const slide = document.createElement('div');
-        slide.className = 'flex-none w-full';
+        slide.className = 'min-w-full snap-center relative';
         slide.innerHTML = `
-          <div class="relative">
-            <img src="${b.image}" alt="${b.title}" class="w-full h-64 sm:h-72 md:h-80 object-cover rounded-xl"/>
-            <div class="absolute left-4 bottom-4 bg-black/50 text-white p-3 rounded-md max-w-[80%]">
-              <h3 class="font-semibold">${b.title}</h3>
-              <p class="text-xs text-slate-200 mt-1">${b.body}</p>
-            </div>
+          <img src="${b.image}" class="w-full h-56 md:h-64 object-cover"/>
+          <div class="absolute left-4 bottom-4 bg-black/50 text-white p-3 rounded-lg max-w-[80%]">
+            <div class="font-bold">${b.title}</div>
+            <div class="text-xs opacity-90">${b.body}</div>
           </div>`;
-        track.appendChild(slide);
+        wrap.appendChild(slide);
+        const d = document.createElement('button');
+        d.className = 'w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600';
+        d.addEventListener('click', ()=> wrap.scrollTo({left: i*wrap.clientWidth, behavior:'smooth'}));
+        dots?.appendChild(d);
       });
-      if (indicators){
-        indicators.innerHTML = '';
-        bulletins.forEach((_,i)=>{
-          const dot = document.createElement('button');
-          dot.className = 'w-1.5 h-1.5 rounded-full bg-slate-300';
-          dot.onclick = ()=>{ idx = i; updateCarousel(); resetAuto(); };
-          indicators.appendChild(dot);
-        });
-      }
-      updateCarousel();
-      resetAuto();
-      window.addEventListener('resize', ()=> requestAnimationFrame(updateCarousel));
-    }
-    function updateCarousel(){
-      const w = track?.parentElement?.clientWidth || 0;
-      track.style.transform = `translateX(-${idx * w}px)`;
-      [...(indicators?.children||[])].forEach((d, i)=>{
-        d.classList.toggle('bg-indigo-600', i===idx);
-        d.classList.toggle('bg-slate-300', i!==idx);
-      });
-    }
-    function resetAuto(){ clearInterval(timer); timer = setInterval(()=>{ idx = (idx + 1) % bulletins.length; updateCarousel(); }, 6000); }
-    prevBtn?.addEventListener('click', ()=>{ idx = (idx - 1 + bulletins.length) % bulletins.length; updateCarousel(); resetAuto(); });
-    nextBtn?.addEventListener('click', ()=>{ idx = (idx + 1) % bulletins.length; updateCarousel(); resetAuto(); });
-    renderBulletins();
+    })();
 
-    /* ---------------- Mini Calendar ---------------- */
+    // Calendar (minimal)
     (function(){
       const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-      const calMonthEl = document.getElementById('calendarMonth');
-      const daysContainer = document.getElementById('calendarDays');
-      const prev = document.getElementById('prevMonth');
-      const next = document.getElementById('nextMonth');
-      if (!calMonthEl || !daysContainer) return;
       let curr = new Date();
-      function render(date){
-        daysContainer.innerHTML = '';
-        const y = date.getFullYear(), m = date.getMonth();
-        calMonthEl.textContent = monthNames[m] + ' ' + y;
-        const first = new Date(y, m, 1);
-        const pad = first.getDay();
-        const days = new Date(y, m + 1, 0).getDate();
-        for (let i=0;i<pad;i++){ daysContainer.appendChild(document.createElement('div')); }
-        const today = new Date();
-        for (let d=1; d<=days; d++){
-          const cell = document.createElement('div');
-          cell.className = 'day-cell text-slate-700 hover:bg-slate-100';
-          cell.textContent = d;
-          if (d===today.getDate() && m===today.getMonth() && y===today.getFullYear()){
-            cell.className = 'day-cell bg-indigo-600 text-white font-semibold';
+      const calMonthEl = document.getElementById('calendarMonth');
+      const days = document.getElementById('calendarDays');
+      function draw(d){
+        if(!days) return;
+        days.innerHTML='';
+        const y=d.getFullYear(), m=d.getMonth();
+        calMonthEl && (calMonthEl.textContent = monthNames[m] + ' ' + y);
+        const start = new Date(y,m,1).getDay();
+        const total = new Date(y,m+1,0).getDate();
+        for(let i=0;i<start;i++){ const s=document.createElement('div'); s.className='h-7'; days.appendChild(s); }
+        const today=new Date();
+        for(let day=1; day<=total; day++){
+          const cell=document.createElement('div');
+          cell.className='h-8 grid place-items-center rounded-md text-slate-700 dark:text-slate-200';
+          if(day===today.getDate() && m===today.getMonth() && y===today.getFullYear()){
+            cell.className += ' bg-indigo-600 text-white font-semibold';
+          } else {
+            cell.className += ' hover:bg-slate-100 dark:hover:bg-slate-800';
           }
-          daysContainer.appendChild(cell);
+          cell.textContent=day;
+          days.appendChild(cell);
         }
       }
-      prev?.addEventListener('click', ()=>{ curr = new Date(curr.getFullYear(), curr.getMonth()-1, 1); render(curr); });
-      next?.addEventListener('click', ()=>{ curr = new Date(curr.getFullYear(), curr.getMonth()+1, 1); render(curr); });
-      render(curr);
+      draw(curr);
+      document.getElementById('prevMonth')?.addEventListener('click',()=>{ curr=new Date(curr.getFullYear(), curr.getMonth()-1, 1); draw(curr); });
+      document.getElementById('nextMonth')?.addEventListener('click',()=>{ curr=new Date(curr.getFullYear(), curr.getMonth()+1, 1); draw(curr); });
     })();
 
-    /* ---------------- KPI demo render ---------------- */
-    const kpis = [
-      { name: 'Professional conduct', score: 92, desc: 'Adherence to code of conduct.' },
-      { name: 'Operational effectiveness', score: 78, desc: 'Patrol completion & compliance.' },
-      { name: 'Situational awareness & response', score: 85, desc: 'Detect, assess, respond quickly.' }
-    ];
-    const kpiList = document.getElementById('kpiList');
-    function renderKpis(){
-      if (!kpiList) return;
-      kpiList.innerHTML = '';
-      kpis.forEach(k => {
-        const wrap = document.createElement('div');
-        wrap.className = 'p-3 rounded-xl border bg-slate-50';
-        wrap.innerHTML = `
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-sm font-medium">${k.name}</div>
-              <div class="text-xs muted">${k.desc}</div>
-            </div>
-            <div class="text-sm font-semibold">${k.score}%</div>
-          </div>
-          <div class="mt-2 kpi-bar"><i style="width:${Math.min(100, Math.max(0, k.score))}%"></i></div>`;
-        kpiList.appendChild(wrap);
-      });
-    }
-    renderKpis();
-
-    /* ---------------- Lightweight attendance check in/out (personal) ---------------- */
-    document.addEventListener('DOMContentLoaded', () => {
-      const attendanceList = document.getElementById('attendanceList');
-      const btnIn = document.getElementById('btnCheckIn');
-      const btnOut = document.getElementById('btnCheckOut');
-      function fmt(t){ return t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
-      function clearPlaceholder(){ const fc = attendanceList.firstElementChild; if (fc && fc.matches('p')) fc.remove(); }
-      let openRef = null;
-      btnOut.disabled = true;
-      btnIn?.addEventListener('click', ()=>{
-        clearPlaceholder();
-        const now = new Date();
-        const card = document.createElement('div');
-        card.className = 'p-3 rounded-xl bg-white border shadow-sm';
-        card.innerHTML = `<div class="flex justify-between"><div><div class="text-sm font-medium">${now.toLocaleDateString([], { month:'short', day:'numeric', year:'numeric' })}</div><div class="text-xs muted">Time In: <span class="text-emerald-600">${fmt(now)}</span></div><div class="text-xs muted">Time Out: <span class="text-slate-400">-</span></div></div><div class="text-[11px] muted">Now</div></div>`;
-        attendanceList.prepend(card);
-        openRef = card.querySelector('span.text-slate-400');
-        btnIn.disabled = true; btnOut.disabled = false;
-      });
-      btnOut?.addEventListener('click', ()=>{
-        if (!openRef) return alert('No active check-in.');
-        openRef.textContent = fmt(new Date());
-        openRef.classList.remove('text-slate-400');
-        openRef.classList.add('text-red-600');
-        btnIn.disabled = false; btnOut.disabled = true; openRef = null;
-      });
-    });
-  </script>
-  
-  <!-- Messaging: View Message Popup (merged) -->
-  <div id="message-popup" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 hidden">
-    <div class="bg-white rounded-lg max-w-lg w-full p-5">
-      <div class="flex items-start justify-between mb-3">
-        <h2 class="text-lg font-semibold">Message Details</h2>
-        <button id="closePopup" class="text-slate-500 hover:text-slate-800">✕</button>
-      </div>
-      <p class="text-sm"><strong>From:</strong> <span id="popupSender">-</span></p>
-      <p class="text-sm"><strong>To:</strong> <span id="popupRecipient">-</span></p>
-      <p class="text-sm"><strong>Subject:</strong> <span id="popupSubject">-</span></p>
-      <p class="text-sm"><strong>Date:</strong> <span id="popupDate">-</span></p>
-      <div class="mt-3"><p id="popupBody" class="whitespace-pre-wrap text-sm text-slate-700"></p></div>
-      <div class="mt-4 flex gap-2 justify-end">
-        <button id="replyBtn" type="button" class="px-3 py-2 rounded bg-emerald-600 text-white">Reply</button>
-        <button id="deleteBtn" type="button" class="px-3 py-2 rounded bg-red-600 text-white">Delete</button>
-        <button id="closePopup2" type="button" class="px-3 py-2 rounded bg-slate-200">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ====== BEGIN: Original App Scripts (merged) ====== -->
-  <script>
-  
-  /* --- Your original large scripts block pasted here intact (kept IDs) --- */
-  
-  </script>
-  
-  <!-- One‑click Dark Mode Toggle -->
-  <button id="themeToggle" title="Toggle dark mode"
-          class="fixed bottom-6 right-6 z-50 rounded-full p-3 shadow-lg bg-white border border-gray-200 hover:shadow-xl">
-    <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zm10.48 0l1.79-1.8 1.41 1.41-1.8 1.79-1.4-1.4zM12 4V1h-0v3h0zm0 19v-3h0v3h0zM4 12H1v0h3v0zm19 0h-3v0h3v0zM6.76 19.16l-1.42 1.42-1.79-1.8 1.41-1.41 1.8 1.79zm10.48 0l1.4 1.4 1.8-1.79-1.41-1.41-1.79 1.8zM12 7a5 5 0 100 10 5 5 0 000-10z"/></svg>
-    <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-700" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-  </button>
-
-  <script>
+    // KPI sample
     (function(){
-      const STORAGE_KEY = 'seekyu_theme';
-      const html = document.documentElement;
-      const btn = document.getElementById('themeToggle');
-      const iconSun = document.getElementById('iconSun');
-      const iconMoon = document.getElementById('iconMoon');
-
-      function systemPrefersDark(){ return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches; }
-      function applyTheme(mode){
-        if (mode === 'dark') { html.classList.add('dark'); iconSun.classList.remove('hidden'); iconMoon.classList.add('hidden'); }
-        else { html.classList.remove('dark'); iconSun.classList.add('hidden'); iconMoon.classList.remove('hidden'); }
-      }
-      // init
-      const saved = localStorage.getItem(STORAGE_KEY);
-      const initial = saved || (systemPrefersDark() ? 'dark' : 'light');
-      applyTheme(initial);
-
-      // toggle
-      btn?.addEventListener('click', function(){
-        const nowDark = !html.classList.contains('dark');
-        applyTheme(nowDark ? 'dark' : 'light');
-        try { localStorage.setItem(STORAGE_KEY, nowDark ? 'dark' : 'light'); } catch(e){}
+      const kpis=[
+        {name:'Professional conduct', score:92, desc:'Adherence to code of conduct.'},
+        {name:'Operational effectiveness', score:78, desc:'Task efficiency & compliance.'},
+        {name:'Situational awareness', score:85, desc:'Detect, assess, respond quickly.'}
+      ];
+      const list=document.getElementById('kpiList');
+      if(!list) return;
+      list.innerHTML='';
+      kpis.forEach(k=>{
+        const wrap=document.createElement('div');
+        wrap.className='p-3 rounded-lg bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-700';
+        wrap.innerHTML = `
+          <div class='flex items-center justify-between'>
+            <div>
+              <div class='text-sm font-semibold'>${k.name}</div>
+              <div class='text-xs card-subtle'>${k.desc}</div>
+            </div>
+            <div class='font-bold'>${k.score}%</div>
+          </div>
+          <div class='mt-2 h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden'>
+            <div class='h-full bg-indigo-600' style='width:${Math.max(0,Math.min(100,k.score))}%'></div>
+          </div>`;
+        list.appendChild(wrap);
       });
+    })();
 
-      // react to system change (if user hasn't chosen yet)
-      try{
-        const mql = window.matchMedia('(prefers-color-scheme: dark)');
-        mql.addEventListener('change', e => {
-          if (!localStorage.getItem(STORAGE_KEY)) applyTheme(e.matches ? 'dark' : 'light');
-        });
-      } catch(e){}
+    // Attendance demo (minimal, keeps IDs compatible)
+    (function(){
+      const list=document.getElementById('attendanceList');
+      const btnIn=document.getElementById('btnCheckIn');
+      const btnOut=document.getElementById('btnCheckOut');
+      if(!list||!btnIn||!btnOut) return;
+      let current=null;
+      function fmt(d){return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});}    
+      btnOut.disabled=true;
+      btnIn.addEventListener('click',()=>{
+        const now=new Date();
+        list.querySelector('p')?.remove();
+        const card=document.createElement('div');
+        card.className='p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700';
+        card.innerHTML=`
+          <div class='flex justify-between'>
+            <div>
+              <div class='text-sm font-semibold'>${now.toLocaleDateString([], {month:'short',day:'numeric',year:'numeric'})}</div>
+              <div class='text-xs card-subtle'>Time In: <span class='text-emerald-600'>${fmt(now)}</span></div>
+              <div class='text-xs card-subtle'>Time Out: <span class='timeOut text-slate-400'>-</span></div>
+            </div>
+            <div class='text-xs text-slate-400'>Now</div>
+          </div>`;
+        list.prepend(card);
+        current=card.querySelector('.timeOut');
+        btnIn.disabled=true; btnOut.disabled=false;
+      });
+      btnOut.addEventListener('click',()=>{
+        if(!current) return;
+        current.textContent = fmt(new Date());
+        current.classList.remove('text-slate-400');
+        current.classList.add('text-red-600');
+        current=null; btnIn.disabled=false; btnOut.disabled=true;
+      });
     })();
   </script>
+
+  <script>
+    
+(function(){
+  const NAV_SELECTOR = '[data-target]';
+  const SECTION_SELECTOR = '[data-section]';
+  const STORAGE_KEY = 'seekyu-active-section';
+
+  const navButtons = Array.from(document.querySelectorAll(NAV_SELECTOR));
+  const sections = Array.from(document.querySelectorAll(SECTION_SELECTOR));
+  const appTitleEl = document.querySelector('.heading-hero') || document.querySelector('.section-title') || document.querySelector('header h1');
+
+  if(!navButtons.length || !sections.length) return;
+
+  function setActiveSection(name, pushHistory = false){
+    // hide/show sections
+    sections.forEach(s => {
+      if(s.dataset.section === name) s.classList.remove('hidden');
+      else s.classList.add('hidden');
+    });
+
+    // update nav button active state + aria-current
+    navButtons.forEach(btn => {
+      if(btn.dataset.target === name){
+        btn.classList.add('bg-gray-800'); // visual active state (tweak classes if you want)
+        btn.setAttribute('aria-current', 'true');
+      } else {
+        btn.classList.remove('bg-gray-800');
+        btn.removeAttribute('aria-current');
+      }
+    });
+
+    // update top heading (if present)
+    if(appTitleEl){
+      // try to use the label text inside the nav button (or fall back to capitalized key)
+      const matchBtn = navButtons.find(b => b.dataset.target === name);
+      const labelText = matchBtn?.querySelector('.label')?.textContent?.trim() || name.charAt(0).toUpperCase() + name.slice(1);
+      appTitleEl.textContent = labelText;
+    }
+
+    // persist selection
+    localStorage.setItem(STORAGE_KEY, name);
+
+    // optional: update URL hash for browser history
+    if(pushHistory) history.pushState({section: name}, '', '#' + name);
+  }
+
+  // wire clicks
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const target = btn.dataset.target;
+      setActiveSection(target, true);
+    });
+  });
+
+  // handle browser back/forward (reads from history state or hash)
+  window.addEventListener('popstate', (ev) => {
+    const stateName = ev.state?.section || location.hash?.replace('#','');
+    if(stateName) setActiveSection(stateName, false);
+  });
+
+  // on load: restore last visited or default to dashboard
+  const saved = localStorage.getItem(STORAGE_KEY) || location.hash?.replace('#','') || 'dashboard';
+  // validate saved exists among sections
+  const valid = sections.some(s => s.dataset.section === saved) ? saved : sections[0].dataset.section;
+  setActiveSection(valid, false);
+})();
+</script>
+
+
+<script>
+/* --- Incident Reports Section --- */
+document.addEventListener('DOMContentLoaded', function () {
+  // Basic element refs (some pages may not include the incidents section)
+  const tabSubmit = document.getElementById('irTabSubmit');
+  const tabView = document.getElementById('irTabView');
+  const submitSection = document.getElementById('ir-submit-section');
+  const viewSection = document.getElementById('ir-view-section');
+  const partiesContainer = document.getElementById('ir_parties');
+  const addPersonBtn = document.getElementById('irAddPerson');
+  const incidentForm = document.getElementById('incidentForm');
+  const reportsTable = document.getElementById('reportsTable');
+  const reportModal = document.getElementById('reportModal');
+  const reportDetails = document.getElementById('reportDetails');
+  const exportReportBtn = document.getElementById('exportReportBtn');
+
+  // If core elements don't exist, stop early (safe no-op)
+  if (!submitSection || !viewSection || !partiesContainer || !incidentForm || !reportsTable || !reportModal || !reportDetails) {
+    // Not present on this page — nothing to do
+    return;
+  }
+
+  // Tab switching safely (guards if tabs missing)
+  function irActivateTab(tab) {
+    const tabs = [tabSubmit, tabView].filter(Boolean);
+    tabs.forEach(t => { t.classList.remove('bg-indigo-600','text-white'); t.classList.add('bg-slate-200','text-gray-800'); });
+    if (!tab) return;
+    tab.classList.remove('bg-slate-200','text-gray-800');
+    tab.classList.add('bg-indigo-600','text-white');
+
+    // show/hide sections
+    submitSection.classList.add('hidden');
+    viewSection.classList.add('hidden');
+    if (tab === tabSubmit) submitSection.classList.remove('hidden');
+    if (tab === tabView) viewSection.classList.remove('hidden');
+  }
+  tabSubmit?.addEventListener('click', ()=> irActivateTab(tabSubmit));
+  tabView?.addEventListener('click', ()=> irActivateTab(tabView));
+  // default: show Submit if available, else View
+  irActivateTab(tabSubmit || tabView);
+
+  // Parties: unified creator
+  function createPartyBlock(data = {}) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'p-3 border rounded bg-slate-50 relative';
+    wrapper.innerHTML = `
+      <button type="button" class="irRemovePerson absolute top-2 right-2 text-sm text-red-600">Remove</button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div><label class="block text-xs text-slate-600">Full Name</label><input name="party_name" class="w-full px-2 py-1 rounded border" value="${escapeAttr(data.name||'')}" /></div>
+        <div><label class="block text-xs text-slate-600">Role (Suspect/Victim/Witness/Other)</label><input name="party_role" class="w-full px-2 py-1 rounded border" value="${escapeAttr(data.role||'')}" /></div>
+        <div><label class="block text-xs text-slate-600">Contact</label><input name="party_contact" class="w-full px-2 py-1 rounded border" value="${escapeAttr(data.contact||'')}" /></div>
+        <div><label class="block text-xs text-slate-600">ID Type & No.</label><input name="party_id" class="w-full px-2 py-1 rounded border" value="${escapeAttr(data.id||'')}" /></div>
+        <div class="md:col-span-2"><label class="block text-xs text-slate-600">Involvement Description</label><textarea name="party_desc" rows="2" class="w-full px-2 py-1 rounded border">${escapeHtml(data.desc||'')}</textarea></div>
+      </div>`;
+    partiesContainer.appendChild(wrapper);
+
+    // attach remove handler
+    const btn = wrapper.querySelector('.irRemovePerson');
+    btn?.addEventListener('click', () => wrapper.remove());
+    return wrapper;
+  }
+
+  // ensure at least one party block exists
+  if (partiesContainer.children.length === 0) createPartyBlock({});
+
+  addPersonBtn?.addEventListener('click', () => createPartyBlock({}));
+
+  // In-memory store (demo)
+  let reports = [
+    // sample
+    {
+      id: 'IR-0001',
+      reporterName: 'John Guard',
+      employeeId: 'SG-1001',
+      role: 'Security Guard',
+      shiftDate: '2025-09-12',
+      shiftStart: '08:00', shiftEnd: '16:00',
+      contact: '09171234567', email: 'john.guard@example.com',
+      incidentDate: '2025-09-12', incidentTime: '17:30',
+      location: 'Client #3829 - Main Gate',
+      type: 'Accident',
+      description: 'Guard slipped on wet floor during patrol. Minor bruises.',
+      parties: [{name:'Jane Doe', role:'Witness', contact:'09170001111', id:'DL-12345', desc:'Saw slip near gate'}],
+      injuries: 'Yes',
+      injuries_desc: 'Bruise on left arm',
+      medical_provided: 'Yes',
+      police_notified: false,
+      medical_contacted: true,
+      scene_secured: true,
+      actions: 'Assisted guard, called medics, logged incident.',
+      evidence: {photos:true, videos:false, witness:true, physical:false, other:''},
+      remarks: 'Install wet-floor signage.',
+      createdAt: '2025-09-12'
+    }
+  ];
+  let nextReportSeq = reports.length + 1;
+
+  // form submission
+  incidentForm.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    // required fields
+    const reporterName = (document.getElementById('ir_fullName')?.value || '').trim();
+    const employeeId = (document.getElementById('ir_employeeId')?.value || '').trim();
+    const role = (document.getElementById('ir_role')?.value || '').trim();
+    const incidentDate = (document.getElementById('ir_date')?.value || '').trim();
+    const incidentTime = (document.getElementById('ir_time')?.value || '').trim();
+    const location = (document.getElementById('ir_location')?.value || '').trim();
+    const type = (document.getElementById('ir_type')?.value || '').trim();
+    const description = (document.getElementById('ir_description')?.value || '').trim();
+
+    if (!reporterName || !employeeId || !role || !incidentDate || !incidentTime || !location || !type || !description) {
+      alert('Please fill all required fields.');
+      return;
+    }
+
+    // collect parties
+    const partyNodes = Array.from(partiesContainer.querySelectorAll('> div'));
+    const parties = partyNodes.map(node => ({
+      name: (node.querySelector('[name="party_name"]')?.value || '').trim(),
+      role: (node.querySelector('[name="party_role"]')?.value || '').trim(),
+      contact: (node.querySelector('[name="party_contact"]')?.value || '').trim(),
+      id: (node.querySelector('[name="party_id"]')?.value || '').trim(),
+      desc: (node.querySelector('[name="party_desc"]')?.value || '').trim()
+    })).filter(p => p.name || p.role || p.contact || p.id || p.desc);
+
+    const injuries = document.querySelector('input[name="ir_injuries"]:checked')?.value || 'No';
+    const injuries_desc = (document.getElementById('ir_injuries_desc')?.value || '').trim();
+    const medical_provided = (document.getElementById('ir_medical_provided')?.value || '').trim();
+    const police_notified = !!document.getElementById('ir_police_notified')?.checked;
+    const medical_contacted = !!document.getElementById('ir_medical_contacted')?.checked;
+    const scene_secured = !!document.getElementById('ir_scene_secured')?.checked;
+    const actions = (document.getElementById('ir_actions')?.value || '').trim();
+    const evidence = {
+      photos: !!document.getElementById('ir_e_photos')?.checked,
+      videos: !!document.getElementById('ir_e_videos')?.checked,
+      witness: !!document.getElementById('ir_e_witness')?.checked,
+      physical: !!document.getElementById('ir_e_physical')?.checked,
+      other: (document.getElementById('ir_e_other')?.value || '').trim()
+    };
+    const remarks = (document.getElementById('ir_remarks')?.value || '').trim();
+
+    // report id
+    const id = `IR-${String(nextReportSeq).padStart(4,'0')}`;
+    nextReportSeq++;
+
+    const report = {
+      id,
+      reporterName,
+      employeeId,
+      role,
+      shiftDate: document.getElementById('ir_shiftDate')?.value || '',
+      shiftStart: document.getElementById('ir_shiftStart')?.value || '',
+      shiftEnd: document.getElementById('ir_shiftEnd')?.value || '',
+      contact: document.getElementById('ir_contact')?.value || '',
+      email: document.getElementById('ir_email')?.value || '',
+      incidentDate,
+      incidentTime,
+      location,
+      type,
+      description,
+      parties,
+      injuries,
+      injuries_desc,
+      medical_provided,
+      police_notified,
+      medical_contacted,
+      scene_secured,
+      actions,
+      evidence,
+      remarks,
+      createdAt: new Date().toISOString().split('T')[0]
+    };
+
+    reports.push(report);
+    incidentForm.reset();
+    // reset parties to a single blank block
+    partiesContainer.innerHTML = '';
+    createPartyBlock({});
+    alert('Incident report submitted (demo). In production this should POST to your backend.');
+    // switch to view tab & render
+    irActivateTab(tabView);
+    renderReports();
+  });
+
+  // render reports list
+  function renderReports() {
+    reportsTable.innerHTML = '';
+    const qEl = document.getElementById('reportsSearch');
+    const q = (qEl?.value || '').toLowerCase();
+    const roleFilter = (document.getElementById('filterRole')?.value || '');
+    const typeFilter = (document.getElementById('filterType')?.value || '');
+    const from = (document.getElementById('filterFrom')?.value || '');
+    const to = (document.getElementById('filterTo')?.value || '');
+
+    const filtered = reports.slice().reverse().filter(r => {
+      if (roleFilter && r.role !== roleFilter) return false;
+      if (typeFilter && r.type !== typeFilter) return false;
+      if (from && r.incidentDate < from) return false;
+      if (to && r.incidentDate > to) return false;
+      if (!q) return true;
+      const hay = (r.id + ' ' + r.reporterName + ' ' + r.employeeId + ' ' + r.location + ' ' + r.type + ' ' + r.description).toLowerCase();
+      return hay.includes(q);
+    });
+
+    if (filtered.length === 0) {
+      reportsTable.innerHTML = '<tr><td class="py-4 px-3 text-slate-500" colspan="7">No reports found.</td></tr>';
+      return;
+    }
+
+    for (const r of filtered) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="py-2 px-3 font-mono text-sm">${r.id}</td>
+        <td class="py-2 px-3">${r.incidentDate} ${r.incidentTime}</td>
+        <td class="py-2 px-3">${escapeHtml(r.reporterName)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.role)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.type)}</td>
+        <td class="py-2 px-3">${escapeHtml(r.location)}</td>
+        <td class="py-2 px-3">
+          <button class="viewReportBtn text-blue-600 hover:underline" data-id="${r.id}">View</button>
+        </td>`;
+      reportsTable.appendChild(tr);
+    }
+  }
+
+  // helper escape functions
+  function escapeHtml(s){ if (!s && s !== 0) return ''; return String(s).replace(/[&<>"'`=\/]/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#47;','`':'&#96;','=':'&#61;'}[ch]; }); }
+  function escapeAttr(s){ return (s===undefined||s===null)?'':String(s).replace(/"/g,'&quot;'); }
+
+  // wire filters/search
+  ['reportsSearch','filterRole','filterType','filterFrom','filterTo'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', renderReports);
+  });
+  document.getElementById('refreshReports')?.addEventListener('click', renderReports);
+
+  // current opened report id (used for export)
+  let currentReportId = null;
+
+  // open modal with full details
+  function openReportModal(report) {
+    if (!report) return;
+    currentReportId = report.id;
+    reportDetails.innerHTML = `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div><strong>Report ID:</strong> ${escapeHtml(report.id)}</div>
+        <div><strong>Created:</strong> ${escapeHtml(report.createdAt)}</div>
+        <div><strong>Reporter:</strong> ${escapeHtml(report.reporterName)}</div>
+        <div><strong>Employee ID:</strong> ${escapeHtml(report.employeeId)}</div>
+        <div><strong>Role:</strong> ${escapeHtml(report.role)}</div>
+        <div><strong>Contact:</strong> ${escapeHtml(report.contact)}</div>
+        <div><strong>Email:</strong> ${escapeHtml(report.email)}</div>
+        <div><strong>Shift Date / Start-End:</strong> ${escapeHtml(report.shiftDate)} ${escapeHtml(report.shiftStart||'')} - ${escapeHtml(report.shiftEnd||'')}</div>
+        <div><strong>Incident Date / Time:</strong> ${escapeHtml(report.incidentDate)} ${escapeHtml(report.incidentTime)}</div>
+        <div class="md:col-span-2"><strong>Location:</strong> ${escapeHtml(report.location)}</div>
+        <div class="md:col-span-2"><strong>Type:</strong> ${escapeHtml(report.type)}</div>
+        <div class="md:col-span-2"><strong>Description:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.description)}</div></div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Parties Involved</h4>
+        ${report.parties && report.parties.length ? report.parties.map(p=>`
+          <div class="p-2 border rounded mt-2">
+            <div><strong>Name:</strong> ${escapeHtml(p.name)}</div>
+            <div><strong>Role:</strong> ${escapeHtml(p.role)}</div>
+            <div><strong>Contact:</strong> ${escapeHtml(p.contact)}</div>
+            <div><strong>ID:</strong> ${escapeHtml(p.id)}</div>
+            <div><strong>Involvement:</strong> ${escapeHtml(p.desc)}</div>
+          </div>`).join('') : '<div class="text-slate-500">No parties recorded.</div>'}
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Injuries & Medical</h4>
+        <div><strong>Were there injuries?</strong> ${escapeHtml(report.injuries)}</div>
+        <div><strong>Injuries description:</strong> ${escapeHtml(report.injuries_desc)}</div>
+        <div><strong>Medical provided:</strong> ${escapeHtml(report.medical_provided)}</div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Actions Taken</h4>
+        <div><strong>Police notified:</strong> ${report.police_notified ? 'Yes' : 'No'}</div>
+        <div><strong>Medical contacted:</strong> ${report.medical_contacted ? 'Yes' : 'No'}</div>
+        <div><strong>Scene secured:</strong> ${report.scene_secured ? 'Yes' : 'No'}</div>
+        <div class="mt-2"><strong>Other actions:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.actions)}</div></div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div>
+        <h4 class="font-semibold">Evidence</h4>
+        <div><strong>Photos:</strong> ${report.evidence.photos ? 'Yes' : 'No'}</div>
+        <div><strong>Videos:</strong> ${report.evidence.videos ? 'Yes' : 'No'}</div>
+        <div><strong>Witness statements:</strong> ${report.evidence.witness ? 'Yes' : 'No'}</div>
+        <div><strong>Physical items:</strong> ${report.evidence.physical ? 'Yes' : 'No'}</div>
+        <div><strong>Other:</strong> ${escapeHtml(report.evidence.other)}</div>
+      </div>
+
+      <hr class="my-2" />
+
+      <div><strong>Additional Remarks:</strong><div class="mt-1 whitespace-pre-wrap">${escapeHtml(report.remarks)}</div></div>
+    `;
+    reportModal.classList.remove('hidden');
+  }
+
+  // delegated click for view buttons
+  document.addEventListener('click', function(e){
+    const target = e.target;
+    if (target && target.closest && target.closest('.viewReportBtn')) {
+      const btn = target.closest('.viewReportBtn');
+      const id = btn.dataset.id;
+      const r = reports.find(x => x.id === id);
+      if (r) openReportModal(r);
+    }
+  });
+
+  // close modal handlers
+  document.getElementById('closeReportModal')?.addEventListener('click', ()=> { reportModal.classList.add('hidden'); currentReportId = null; });
+  document.getElementById('closeReportModal2')?.addEventListener('click', ()=> { reportModal.classList.add('hidden'); currentReportId = null; });
+  reportModal.addEventListener('click', function(e){ if (e.target === reportModal) { reportModal.classList.add('hidden'); currentReportId = null; } });
+
+  // export report JSON
+  exportReportBtn?.addEventListener('click', function(){
+    if (!currentReportId) return alert('No report selected for export.');
+    const r = reports.find(x => x.id === currentReportId);
+    if (!r) return alert('Report not found.');
+    const blob = new Blob([JSON.stringify(r, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${r.id}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  // wire search/filter inputs (already added above, but ensure refresh button exists)
+  document.getElementById('refreshReports')?.addEventListener('click', renderReports);
+
+  // If there's a sidebar button that opens 'incident-reports', prefer to open view tab
+  const incidentSidebarBtn = Array.from(document.querySelectorAll('button, a')).find(b => (b.getAttribute && b.getAttribute('onclick') || '').includes("showSection('incident-reports')"));
+  if (incidentSidebarBtn) {
+    incidentSidebarBtn.addEventListener('click', function(){
+      // showSection may be defined elsewhere; call if present
+      if (typeof showSection === 'function') showSection('incident-reports', incidentSidebarBtn);
+      irActivateTab(tabView);
+      renderReports();
+    });
+  }
+
+  // initial render
+  renderReports();
+});
+</script>
+
 </body>
 </html>
-
