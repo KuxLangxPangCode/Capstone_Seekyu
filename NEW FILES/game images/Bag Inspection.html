@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Seekyu · Bag Inspection Scenario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .stage { position: relative; height: 480px; }
+
+    .piece {
+      position: absolute; width: 100px; user-select: none; cursor: grab;
+      opacity: 0; transform: translate(-50%,-50%) scale(.9) rotate(0deg);
+      transition:
+        left .55s cubic-bezier(.2,.7,.2,1),
+        top  .55s cubic-bezier(.2,.7,.2,1),
+        opacity .3s ease,
+        transform .18s ease;
+    }
+    .piece.ready { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    .piece:active { cursor: grabbing; }
+
+    .drop-focus { box-shadow: 0 0 0 2px rgba(14,165,233,.9) inset; background: #e0f7ff !important; }
+
+    #confiscateBox { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+    .in-box {
+      position: static !important; width: 56px !important; height: 56px !important;
+      object-fit: contain; transform: none !important; cursor: default; user-select: none;
+      background: #fff; border: 2px solid #93c5fd; border-radius: 6px; padding: 2px;
+    }
+
+    .pixel-ui { font-family: "Press Start 2P", system-ui, sans-serif; }
+    .pixel-panel {
+      background: linear-gradient(180deg, #f9fcff 0%, #eef7ff 100%);
+      border: 4px solid #bae6fd; outline: 2px solid #0ea5e9; border-radius: 12px;
+      box-shadow: 0 6px 0 #93c5fd;
+    }
+    .pixel-title { font-size: 11px; color: #0369a1; letter-spacing: 0; }
+    .pixel-label { font-size: 10px; color: #0c4a6e; letter-spacing: 0; }
+
+    .pixel-btn {
+      background: #0ea5e9; border: 4px solid #0369a1; outline: 2px solid #bae6fd; border-radius: 8px;
+      padding: 10px 14px; color: #fff; font-size: 10px; line-height: 1;
+      transition: transform .05s ease, background .2s ease;
+    }
+    .pixel-btn:hover { background: #0284c7; transform: translateY(-1px); }
+    .pixel-btn:active { transform: translateY(1px); }
+
+    #stage.pixel-stage {
+      background: linear-gradient(180deg, #e0f2ff 0%, #f8fcff 100%);
+      border: 3px solid #bae6fd; outline: 2px solid #0ea5e9; border-radius: 12px;
+      position: relative; overflow: hidden;
+    }
+
+    #confiscateBox.pixel-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: 8px; background: #f0f9ff;
+      border: 3px solid #bae6fd; outline: 2px solid #0ea5e9; border-radius: 12px;
+      min-height: 120px; transition: all .2s ease;
+    }
+    #confiscateBox.pixel-grid.drop-focus {
+      outline-color: #0ea5e9; box-shadow: inset 0 0 0 2px #0ea5e9;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 font-[Inter]">
+  <!-- Top -->
+  <header class="border-b border-slate-200 bg-white">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg bg-sky-600 text-white grid place-items-center font-bold">S</div>
+        <div class="text-sm font-semibold tracking-tight">Seekyu · Assessment</div>
+      </div>
+      <div class="text-xs text-slate-500">Scenario: Bag Inspection</div>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-8">
+    <!-- Scenario Brief -->
+    <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-xl md:text-2xl font-semibold tracking-tight">Scenario Brief</h1>
+          <p id="instruction" class="mt-1 text-slate-600">
+            Begin to reveal the bag in the center. Click the bag to scatter items around it.
+            Drag only prohibited items into the Confiscate Box. Then Submit.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-4 grid gap-3 sm:grid-cols-3">
+        <div class="rounded-xl border border-slate-200 p-3">
+          <div class="text-xs text-slate-500">Location</div>
+          <div class="text-sm font-medium">Campus Gate 2</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 p-3">
+          <div class="text-xs text-slate-500">Objective</div>
+          <div class="text-sm font-medium">Identify & secure prohibited items</div>
+        </div>
+        <div class="rounded-xl border border-slate-200 p-3">
+          <div class="text-xs text-slate-500">Guidance</div>
+          <div class="text-sm font-medium">Do not remove allowed items</div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-slate-600">Begin the scenario to show the bag.</p>
+        <button id="beginBtn" type="button"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">
+          Begin Scenario
+        </button>
+      </div>
+    </section>
+
+    <!-- Interaction Card -->
+    <section class="mt-6 pixel-panel pixel-ui p-5">
+      <div class="flex items-center justify-between">
+        <h2 class="pixel-title font-bold">BAG INSPECTION</h2>
+        <div class="flex items-center gap-4">
+          <span id="timerLabel" class="pixel-label text-sky-700">Time: <span id="pixelTimer">00:00</span></span>
+          <span class="pixel-label">Step 1 of 2</span>
+        </div>
+      </div>
+
+      <!-- Stage -->
+      <div id="stage" class="stage mt-4 pixel-stage">
+        <!-- Bag stays centered; we do not move it -->
+        <button id="bagBtn" type="button" aria-label="Open bag"
+          class="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 focus:outline-none rounded-lg">
+          <img id="bagClosed" src="images/bag.png" alt="Bag"
+               class="w-40 md:w-48 transition-transform duration-150 hover:scale-[1.02] cursor-pointer select-none" />
+        </button>
+      </div>
+
+      <div id="items" class="hidden"></div>
+
+      <!-- Confiscate -->
+      <div class="mt-5">
+        <div class="flex items-center justify-between">
+          <label for="confiscateBox" class="pixel-label">CONFISCATE BOX</label>
+          <span class="pixel-label">Step 2 of 2</span>
+        </div>
+        <div id="confiscateBox" class="hidden mt-2 p-3 transition-all pixel-grid"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-4 flex items-center gap-3">
+        <button id="submitBtn" class="hidden pixel-btn">SUBMIT</button>
+        <button id="nextBtn" class="hidden pixel-btn bg-emerald-500 border-emerald-700 outline-emerald-200 hover:bg-emerald-600">
+          NEXT
+        </button>
+        <!-- inline score removed to match other assessments -->
+        <div id="score" class="hidden pixel-label" aria-live="polite"></div>
+      </div>
+
+      <p class="mt-3 pixel-label">Tip: Dangerous items are prohibited.</p>
+    </section>
+
+    <!-- Outcome -->
+    <section id="outcome" class="hidden mt-6 bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <div class="flex items-center gap-2">
+        <div id="outcomeDot" class="h-2.5 w-2.5 rounded-full bg-slate-300"></div>
+        <h3 class="text-base font-semibold">Scenario Outcome</h3>
+      </div>
+      <p id="outcomeText" class="mt-2 text-slate-700 text-sm"></p>
+    </section>
+  </main>
+
+  <script>
+    // ---------- Elements ----------
+    const beginBtn = document.getElementById('beginBtn');
+    const stage = document.getElementById('stage');
+    const bagBtn = document.getElementById('bagBtn');
+    const instruction = document.getElementById('instruction');
+    const confiscateBox = document.getElementById('confiscateBox');
+    const submitBtn = document.getElementById('submitBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const outcome = document.getElementById('outcome');
+    const outcomeDot = document.getElementById('outcomeDot');
+    const outcomeText = document.getElementById('outcomeText');
+    const pixelTimer = document.getElementById('pixelTimer');
+
+    // ---------- Timer (MM:SS only) ----------
+    let timerHandle = null, secondsElapsed = 0;
+    function startTimer() {
+      secondsElapsed = 0;
+      clearInterval(timerHandle);
+      timerHandle = setInterval(() => {
+        secondsElapsed++;
+        const mm = String(Math.floor(secondsElapsed / 60)).padStart(2, "0");
+        const ss = String(secondsElapsed % 60).padStart(2, "0");
+        pixelTimer.textContent = `${mm}:${ss}`;
+      }, 1000);
+    }
+    function stopTimer() { clearInterval(timerHandle); }
+
+    // ---------- Data ----------
+    let finished = false;
+    const manifest = [
+      { src: "bag/notebook.png",  type: "allowed" },
+      { src: "bag/tumbler.png",   type: "allowed" },
+      { src: "bag/knife.png",     type: "prohibited" },
+      { src: "bag/lighter.png",   type: "prohibited" },
+      { src: "bag/pen.png",       type: "allowed" },
+      { src: "bag/ruler.png",     type: "allowed" },
+      { src: "bag/portable fan.png", type: "allowed" }
+    ];
+    const totalProhibited = manifest.filter(m => m.type === "prohibited").length;
+
+    // ---------- Utils ----------
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // ---------- Begin ----------
+    beginBtn.addEventListener('click', () => {
+      bagBtn.classList.remove('hidden');
+      beginBtn.disabled = true;
+      beginBtn.classList.add('opacity-60','cursor-not-allowed');
+      instruction.textContent = "Click the bag to scatter items around it.";
+
+      bagBtn.style.left = ''; 
+      bagBtn.style.top  = '';
+
+      startTimer();
+    });
+
+    // ---------- Bag click ----------
+    bagBtn.addEventListener('click', () => {
+      if (stage.querySelector('[data-piece]')) return; // already scattered
+      scatterItemsNeatly(); // random item order ONLY
+      confiscateBox.classList.remove('hidden');
+      submitBtn.classList.remove('hidden');
+      instruction.textContent = "Drag only prohibited items into the Confiscate Box, then submit.";
+    });
+
+    // ---------- Scatter items ----------
+    function scatterItemsNeatly() {
+      const rect = stage.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+
+      // randomize 
+      const items = shuffle(manifest);
+      const N = items.length;
+
+      const BASE_R = Math.min(rect.width, rect.height) * 0.28; 
+      const JITTER_R = 14;                                     
+      const ANG_JITTER = Math.PI / 24;                         
+      const PAD = 56;                                          
+      const targets = [];
+
+      for (let i = 0; i < N; i++) {
+        const ang = (i * (2 * Math.PI / N)) + (Math.random() * 2 - 1) * ANG_JITTER;
+        const rad = BASE_R + (Math.random() * 2 - 1) * JITTER_R;
+        const x = cx + Math.cos(ang) * rad;
+        const y = cy + Math.sin(ang) * rad;
+        targets.push({
+          x: Math.max(PAD, Math.min(rect.width  - PAD, x)),
+          y: Math.max(PAD, Math.min(rect.height - PAD, y))
+        });
+      }
+
+      // light de-overlap pass
+      const r = 52;
+      for (let iter = 0; iter < 10; iter++) {
+        let moved = false;
+        for (let i = 0; i < N; i++) {
+          for (let j = i + 1; j < N; j++) {
+            const dx = targets[j].x - targets[i].x;
+            const dy = targets[j].y - targets[i].y;
+            const dist = Math.hypot(dx, dy) || 0.001;
+            const minDist = r * 1.15;
+            if (dist < minDist) {
+              const push = (minDist - dist) / 2;
+              const ux = dx / dist, uy = dy / dist;
+              targets[i].x -= ux * push; targets[i].y -= uy * push;
+              targets[j].x += ux * push; targets[j].y += uy * push;
+              moved = true;
+            }
+          }
+        }
+        if (!moved) break;
+      }
+
+      items.forEach((item, i) => {
+        const img = document.createElement('img');
+        img.src = item.src; img.dataset.type = item.type;
+        img.setAttribute('data-piece','1');
+        img.className = 'piece';
+        img.id = Math.random().toString(36).slice(2,9);
+        img.style.left = cx + 'px';
+        img.style.top  = cy + 'px';
+        stage.appendChild(img);
+
+        img.addEventListener('dragstart', dragStart);
+        const rot = (Math.random() * 10 - 5); 
+        const t = targets[i];
+        setTimeout(() => {
+          img.style.left = t.x + 'px';
+          img.style.top  = t.y + 'px';
+          img.style.transform = `translate(-50%,-50%) rotate(${rot}deg)`;
+          img.classList.add('ready');
+        }, 100 + i * 90);
+      });
+    }
+
+    // ---------- Drag & Drop ----------
+    function dragStart(e) {
+      if (finished) return;
+      e.dataTransfer.setData('type', e.target.dataset.type);
+      e.dataTransfer.setData('id', e.target.id || (e.target.id = Math.random().toString(36).slice(2,9)));
+    }
+    confiscateBox.addEventListener('dragover', e => {
+      if (!finished) { e.preventDefault(); confiscateBox.classList.add('drop-focus'); }
+    });
+    confiscateBox.addEventListener('dragleave', () => confiscateBox.classList.remove('drop-focus'));
+    confiscateBox.addEventListener('drop', e => {
+      if (finished) return;
+      e.preventDefault();
+      confiscateBox.classList.remove('drop-focus');
+
+      const id = e.dataTransfer.getData('id');
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      el.style.position = 'static';
+      el.style.width = '56px';
+      el.style.height = '56px';
+      el.style.transform = 'none';
+      el.classList.remove('piece');
+      el.classList.add('in-box');
+      el.setAttribute('draggable', false);
+      confiscateBox.appendChild(el);
+    });
+
+    // ---------- Submit → score + outcome + next ----------
+    submitBtn.addEventListener('click', () => {
+      if (finished) return;
+      finished = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitted";
+
+      // Time 
+      stopTimer();
+      const timeText = pixelTimer.textContent;
+
+      // Scoring
+      const inBox = Array.from(confiscateBox.querySelectorAll('[data-type]'));
+      const correct = inBox.filter(el => el.dataset.type === 'prohibited').length;
+      const wrong   = inBox.filter(el => el.dataset.type === 'allowed').length;
+      const pct = Math.round((correct / totalProhibited) * 100);
+
+      // Outcome 
+      outcome.classList.remove('hidden');
+      if (pct === 100 && wrong === 0) {
+        outcomeDot.className = "h-2.5 w-2.5 rounded-full bg-emerald-500";
+        outcomeText.textContent = `Pass — Final Score: ${correct}/${totalProhibited} (${pct}%) • Wrong: ${wrong} • Total Time: ${timeText}`;
+      } else if (pct >= 60 && wrong <= 1) {
+        outcomeDot.className = "h-2.5 w-2.5 rounded-full bg-amber-500";
+        outcomeText.textContent = `Conditional — Final Score: ${correct}/${totalProhibited} (${pct}%) • Wrong: ${wrong} • Total Time: ${timeText}`;
+      } else {
+        outcomeDot.className = "h-2.5 w-2.5 rounded-full bg-rose-500";
+        outcomeText.textContent = `Fail — Final Score: ${correct}/${totalProhibited} (${pct}%) • Wrong: ${wrong} • Total Time: ${timeText}`;
+      }
+
+      // Next
+      nextBtn.classList.remove('hidden');
+      nextBtn.focus();
+
+      window.dispatchEvent(new CustomEvent('seekyu:next-assessment', {
+        detail: { time: timeText, correct, wrong, pct }
+      }));
+    });
+
+    nextBtn.addEventListener('click', () => {
+      window.location.href = 'Memory%20Test.html';
+    });
+  </script>
+</body>
+</html>
