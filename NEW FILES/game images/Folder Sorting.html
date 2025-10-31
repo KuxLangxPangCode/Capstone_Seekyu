@@ -36,18 +36,18 @@
       position: relative; overflow: hidden;
     }
 
-    /* Draggable docs */
+    /* Docs */
     .doc {
       position: absolute; width: 84px; user-select: none; cursor: grab;
       opacity: 0; transform: translate(-50%,-50%) scale(.96);
-      transition: left .45s cubic-bezier(.2,.7,.2,1), top .45s cubic-bezier(.2,.7,.2,1), opacity .25s ease, transform .15s ease;
+      transition: left .35s cubic-bezier(.2,.7,.2,1), top .35s cubic-bezier(.2,.7,.2,1), opacity .25s ease, transform .15s ease;
       image-rendering: pixelated;
       background: #fff; border: 2px solid #93c5fd; border-radius: 8px; padding: 6px;
     }
     .doc.ready { opacity: 1; transform: translate(-50%,-50%) scale(1); }
     .doc:active { cursor: grabbing; }
 
-    /* Folder row (droppable bins) */
+    /* Folders */
     .folders {
       position: absolute; left: 0; right: 0; bottom: 8px;
       display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
@@ -67,20 +67,19 @@
       width: 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 6px;
     }
 
-    /* Doc appearance once inside a folder */
+    /* Doc in folder */
     .in-bin {
       position: static !important; width: 40px !important; height: 40px !important;
       padding: 2px !important; border-radius: 6px; border: 2px solid #93c5fd; background: #fff;
       transform: none !important; cursor: grab;
     }
 
-    /* Progress pill */
+    /* HUD */
     .pill {
       position: absolute; top: 8px; right: 8px; background: #ffffffd9;
       border: 2px solid #93c5fd; border-radius: 999px; padding: 4px 10px; font-size: 10px;
     }
 
-    /* Mobile tweaks */
     @media (max-width: 420px) {
       .doc { width: 76px; }
       .folder img { width: 40px; height: 40px; }
@@ -90,7 +89,6 @@
   </style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-900 font-[Inter]">
-  <!-- Top -->
   <header class="border-b border-slate-200 bg-white">
     <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-2">
@@ -102,12 +100,11 @@
   </header>
 
   <main class="max-w-3xl mx-auto px-4 py-8">
-    <!-- Scenario Brief -->
     <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
       <h1 class="text-xl md:text-2xl font-semibold tracking-tight">Scenario Brief</h1>
       <p class="mt-1 text-slate-600">
-        Drag each document into its correct folder. Categories: <strong>Incident Report</strong>, <strong>Applicant Form</strong>, <strong>Patrol Log</strong>.
-        Earn <strong>+10 pts</strong> per correct file. A perfect score unlocks the <strong>"Office Organizer"</strong> badge.
+        Drag each document into its correct folder. Categories: <strong>Incident Report</strong>, <strong>Applicant Form</strong>, <strong>Leave Requests</strong>.
+        Earn <strong>+10 pts</strong> per correct file. A perfect score unlocks the <strong>“Office Organizer”</strong> badge.
       </p>
 
       <div class="mt-4 grid gap-3 sm:grid-cols-3">
@@ -134,7 +131,6 @@
       </div>
     </section>
 
-    <!-- Pixel Interaction Card -->
     <section class="mt-6 pixel-panel pixel-ui">
       <div class="flex items-center justify-between">
         <h2 class="pixel-title font-bold">DOCUMENT SORTING</h2>
@@ -144,17 +140,11 @@
         </div>
       </div>
 
-      <!-- Stage -->
       <div id="stage" class="stage mt-4 pixel-stage">
-        <div id="progressPill" class="pill pixel-ui hidden" aria-live="polite">Filed 0 / 0</div>
-
-        <!-- Folder Row -->
-        <div id="foldersRow" class="folders hidden">
-          <!-- Folders injected here -->
-        </div>
+        <div id="progressPill" class="pill pixel-ui hidden">Filed 0 / 6</div>
+        <div id="foldersRow" class="folders hidden"></div>
       </div>
 
-      <!-- Actions -->
       <div class="mt-4 flex items-center gap-3">
         <button id="submitBtn" class="pixel-btn hidden">SUBMIT</button>
         <button id="nextBtn" class="pixel-btn ml-auto hidden bg-sky-600 border-[#024e7a] outline-[#cbe7ff] hover:bg-sky-700">NEXT</button>
@@ -164,7 +154,6 @@
       <p class="mt-3 pixel-label">Tip: Titles and icons hint which folder is right.</p>
     </section>
 
-    <!-- Outcome -->
     <section id="outcome" class="hidden mt-6 bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
       <div class="flex items-center gap-2">
         <div id="outcomeDot" class="h-2.5 w-2.5 rounded-full bg-slate-300"></div>
@@ -175,29 +164,28 @@
   </main>
 
   <script>
-    // --------- Config ---------
+    // Config
     const POINTS_PER_CORRECT = 10;
     const DOCS = [
       { id: 'ir1', kind: 'incident',   label: 'Incident Report', src: 'images/sorting/doc-incident-1.png' },
       { id: 'ir2', kind: 'incident',   label: 'Incident Report', src: 'images/sorting/doc-incident-2.png' },
       { id: 'ap1', kind: 'application',label: 'Applicant Form',  src: 'images/sorting/doc-application-1.png' },
       { id: 'ap2', kind: 'application',label: 'Applicant Form',  src: 'images/sorting/doc-application-2.png' },
-      { id: 'pl1', kind: 'patrol',     label: 'Patrol Log',      src: 'images/sorting/doc-patrol-1.png' },
-      { id: 'pl2', kind: 'patrol',     label: 'Patrol Log',      src: 'images/sorting/doc-patrol-2.png' },
+      { id: 'pl1', kind: 'leave',      label: 'Leave Requests',      src: 'images/sorting/doc-patrol-1.png' },
+      { id: 'pl2', kind: 'leave',      label: 'Leave Requests',      src: 'images/sorting/doc-patrol-2.png' },
     ];
     const FOLDERS = [
-      { kind: 'incident',    label: 'Incidents',    icon: 'images/sorting/folder-incident.png' },
-      { kind: 'application', label: 'Applications', icon: 'images/sorting/folder-application.png' },
-      { kind: 'patrol',      label: 'Patrol Logs',  icon: 'images/sorting/folder-patrol.png' },
+      { kind: 'incident',    label: 'Incidents',    icon: 'images/folder.png' },
+      { kind: 'application', label: 'Applications', icon: 'images/folder.png' },
+      { kind: 'leave',       label: 'Leave Requests',  icon: 'images/folder.png' },
     ];
     const TOTAL = DOCS.length;
 
-    // --------- Elements ---------
+    // Elements
     const beginBtn = document.getElementById('beginBtn');
     const stage = document.getElementById('stage');
     const foldersRow = document.getElementById('foldersRow');
     const progressPill = document.getElementById('progressPill');
-
     const pixelTimer = document.getElementById('pixelTimer');
     const submitBtn = document.getElementById('submitBtn');
     const nextBtn = document.getElementById('nextBtn');
@@ -206,7 +194,7 @@
     const outcomeDot = document.getElementById('outcomeDot');
     const outcomeText = document.getElementById('outcomeText');
 
-    // --------- Timer ---------
+    // Timer
     let hudTicker = null;
     function startHud() {
       const t0 = performance.now();
@@ -218,39 +206,22 @@
         pixelTimer.textContent = `${mm}:${ss}`;
       }, 200);
     }
-    function stopHud() {
-      if (hudTicker) clearInterval(hudTicker);
-      hudTicker = null;
-    }
+    function stopHud(){ if (hudTicker) clearInterval(hudTicker); }
 
-    // Prevent the browser from opening the image if dropped on the stage
-    stage.addEventListener('dragover', e => e.preventDefault());
-    stage.addEventListener('drop', e => e.preventDefault());
-
-    // --------- State ---------
-    const placed = new Map(); // docId -> folderKind
+    // State
+    const placed = new Map();
     let finished = false;
+    const docEls = [];
 
-    // --------- Helpers ---------
-    function shuffle(a){
-      const arr = [...a];
-      for (let i = arr.length - 1; i > 0; i--){
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
-
+    // Progress
     function updateProgress(){
       const count = placed.size;
       progressPill.textContent = `Filed ${count} / ${TOTAL}`;
-      if (count >= TOTAL) {
-        submitBtn.classList.remove('hidden');
-      } else {
-        submitBtn.classList.add('hidden');
-      }
+      if (count >= TOTAL) submitBtn.classList.remove('hidden');
+      else submitBtn.classList.add('hidden');
     }
 
+    // Folders
     function renderFolders(){
       foldersRow.innerHTML = '';
       FOLDERS.forEach(f => {
@@ -262,23 +233,18 @@
           <div class="label pixel-ui">${f.label}</div>
           <div class="folder-grid" aria-label="${f.label} dropzone"></div>
         `;
-        // DnD events
         bin.addEventListener('dragover', e => { if (!finished){ e.preventDefault(); bin.classList.add('drop-focus'); }});
         bin.addEventListener('dragleave', () => bin.classList.remove('drop-focus'));
         bin.addEventListener('drop', e => {
           if (finished) return;
           e.preventDefault();
           bin.classList.remove('drop-focus');
-
           const id = e.dataTransfer.getData('id');
           const el = document.getElementById(id);
           if (!el) return;
-
-          // Move into bin
           el.classList.add('in-bin');
           el.style.left = '0px'; el.style.top = '0px';
           bin.querySelector('.folder-grid').appendChild(el);
-
           placed.set(id, bin.dataset.kind);
           updateProgress();
         });
@@ -286,16 +252,10 @@
       });
     }
 
+    // Create docs
     function spawnDocs(){
       const rect = stage.getBoundingClientRect();
-      const cx = rect.width / 2;
-      const cy = rect.height * 0.35;
-
-      const docs = shuffle(DOCS);
-      const radius = Math.min(rect.width, rect.height) * 0.35;
-      const jitter = 16;
-
-      docs.forEach((d, i) => {
+      DOCS.forEach(d => {
         const el = document.createElement('img');
         el.id = d.id;
         el.src = d.src;
@@ -303,33 +263,81 @@
         el.className = 'doc';
         el.setAttribute('draggable', true);
         el.dataset.kind = d.kind;
-        // center spawn
-        el.style.left = cx + 'px';
-        el.style.top  = cy + 'px';
 
+        el.style.left = rect.width / 2 + 'px';
+        el.style.top  = rect.height * 0.35 + 'px';
         stage.appendChild(el);
+        docEls.push(el);
 
-        // enable drag
         el.addEventListener('dragstart', e => {
           if (finished) { e.preventDefault(); return; }
           e.dataTransfer.setData('id', d.id);
-          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('kind', d.kind);
         });
 
-        // scatter
-        const ang = (i * (2*Math.PI/docs.length)) + (Math.random()*0.6 - 0.3);
-        const r = radius + (Math.random()*2 - 1)*jitter;
-        const tx = cx + Math.cos(ang)*r;
-        const ty = cy + Math.sin(ang)*r;
+        el.addEventListener('load', layoutDocs);
+        requestAnimationFrame(() => el.classList.add('ready'));
+      });
 
-        requestAnimationFrame(() => {
-          el.style.left = Math.max(60, Math.min(rect.width - 60, tx)) + 'px';
-          el.style.top  = Math.max(60, Math.min(rect.height - 150, ty)) + 'px';
-          el.classList.add('ready');
-        });
+      layoutDocs();
+    }
+
+    // 2-row layout with a bit more spacing
+    function layoutDocs(){
+      if (!docEls.length) return;
+
+      const rect = stage.getBoundingClientRect();
+      const rows = 2;
+      const cols = Math.ceil(TOTAL / rows);
+
+      // horizontal sizing
+      const sidePad = 60;
+      const minGapX = 14;
+      const maxGapX = 28;
+      const baseDocW = 84;
+      const availW = Math.max(120, rect.width - sidePad * 2);
+      let docW = Math.min(baseDocW, Math.floor((availW - minGapX * (cols - 1)) / cols));
+      docW = Math.max(56, Math.min(baseDocW, docW));
+      let gapX = cols > 1 ? Math.floor((availW - docW * cols) / (cols - 1)) : 0;
+      gapX = Math.max(minGapX, Math.min(maxGapX, gapX));
+      const gridW  = cols * docW + (cols - 1) * gapX;
+      const startX = Math.round((rect.width - gridW) / 2) + docW / 2;
+
+      // vertical sizing with inner padding
+      const foldersTop = foldersRow.getBoundingClientRect().top - rect.top;
+      const firstH = docEls[0].getBoundingClientRect().height || 100;
+      const docH = Math.max(60, Math.round(firstH));
+      const topPad = 56;
+      const minGapFromFolders = 18;
+
+      const areaTop = topPad + Math.round(docH / 2);
+      const areaBottom = Math.min(
+        Math.round(foldersTop - minGapFromFolders - docH / 2),
+        rect.height - minGapFromFolders - Math.round(docH / 2)
+      );
+
+      // bit extra space between rows
+      const innerPad = Math.max(12, Math.min(24, Math.round(docH * 0.25)));
+      const yTop = areaTop + innerPad;
+      const yBottom = areaBottom - innerPad;
+      const rowYs = [Math.round(yTop), Math.round(yBottom)];
+
+      // place docs
+      docEls.forEach((el, i) => {
+        if (el.classList.contains('in-bin')) return;
+        el.style.width = docW + 'px';
+
+        const row = Math.floor(i / cols);
+        const col = i % cols;
+        const x = startX + col * (docW + gapX);
+        const y = rowYs[Math.min(row, 1)];
+
+        el.style.left = x + 'px';
+        el.style.top  = y + 'px';
       });
     }
 
+    // Scoring
     function scoreIt(){
       const correct = DOCS.filter(d => placed.get(d.id) === d.kind).length;
       const wrong = TOTAL - correct;
@@ -337,6 +345,7 @@
       return { correct, wrong, points };
     }
 
+    // Finish
     function finalize(){
       finished = true;
       stopHud();
@@ -345,49 +354,40 @@
       const totalPoints = TOTAL * POINTS_PER_CORRECT;
       const badge = (correct === TOTAL) ? 'Office Organizer' : null;
 
-      // lock DnD
-      document.querySelectorAll('.doc').forEach(el => el.setAttribute('draggable', 'false'));
-
-      // summary UI
       scoreDiv.classList.remove('hidden');
       scoreDiv.textContent = `Score: ${points}/${totalPoints} • Correct: ${correct}/${TOTAL} • Wrong: ${wrong} • Time: ${pixelTimer.textContent}${badge ? ' • Badge: ' + badge : ''}`;
 
       outcome.classList.remove('hidden');
       outcomeDot.className = `h-2.5 w-2.5 rounded-full ${correct === TOTAL ? 'bg-emerald-500' : (correct >= Math.ceil(TOTAL*0.6) ? 'bg-amber-500' : 'bg-rose-500')}`;
       outcomeText.textContent = badge
-        ? `Perfect! You earned the "${badge}" badge.`
-        : 'Good try, review and aim for a perfect file next time.';
+        ? `Perfect! You earned the “${badge}” badge.`
+        : `Good try, review and aim for a perfect file next time.`;
 
-      // NEXT
       nextBtn.classList.remove('hidden');
       nextBtn.onclick = () => { window.location.href = 'Memory%20Test.html'; };
 
       window.dispatchEvent(new CustomEvent('seekyu:sort-finished', {
-        detail: {
-          correct, wrong, points, totalPoints,
-          time: pixelTimer.textContent,
-          badge: badge || ''
-        }
+        detail: { correct, wrong, points, totalPoints, time: pixelTimer.textContent, badge: badge || '' }
       }));
     }
 
-    // --------- Controls ---------
+    // Controls
     beginBtn.addEventListener('click', () => {
       beginBtn.disabled = true;
       beginBtn.classList.add('opacity-60','cursor-not-allowed');
-
-      // reveal UI
       foldersRow.classList.remove('hidden');
       progressPill.classList.remove('hidden');
-      progressPill.textContent = `Filed 0 / ${TOTAL}`;
       startHud();
-
       renderFolders();
       spawnDocs();
       updateProgress();
     });
 
     submitBtn.addEventListener('click', finalize);
+
+    // Relayout on resize
+    window.addEventListener('resize', layoutDocs);
+    new ResizeObserver(layoutDocs).observe(stage);
   </script>
 </body>
 </html>
