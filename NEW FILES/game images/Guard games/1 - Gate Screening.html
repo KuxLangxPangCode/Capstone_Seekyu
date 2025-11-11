@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Seekyu · Guard (Gate Screening)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root{
+      --pri:#7367f0;
+      --pri-dark:#5f55d3;
+      --ink:#434968;
+      --panel-top:#efedff;
+      --panel-bot:#fafaff;
+    }
+
+    .pixel-ui { font-family: "Press Start 2P", system-ui, sans-serif; }
+    .pixel-title { font-size: 10px; color: var(--ink); }
+    .pixel-label { font-size: 10px; color: var(--ink); }
+
+    .pixel-panel {
+      background: linear-gradient(180deg, var(--panel-top) 0%, var(--panel-bot) 100%);
+      border: 4px solid var(--pri);
+      outline: 2px solid var(--ink);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 6px 0 var(--pri);
+    }
+
+    .chip{
+      background:#fff; border:2px solid #e3e1ff; border-radius:8px;
+      padding:2px 8px; font-size:10px; display:inline-flex; gap:4px; align-items:center; color:var(--ink);
+    }
+    .pill{
+      font-size:10px; padding:3px 7px; border-radius:999px;
+      border:2px solid rgba(0,0,0,.08); background:#fff; color:var(--ink);
+      display:inline-flex; align-items:center; gap:6px; white-space:nowrap; max-width:100%;
+      overflow:hidden; text-overflow:ellipsis;
+    }
+    .pill-soft{ background:#f3f4f6; }
+    .mono{ font-variant-numeric: tabular-nums; }
+
+    .pixel-btn {
+      background: var(--pri);
+      border: 4px solid var(--ink);
+      outline: 2px solid #dfddff;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #ffffff;
+      font-size: 10px;
+      line-height: 1;
+      transition: transform .05s, background .2s, opacity .2s;
+    }
+    .pixel-btn:hover{ background: var(--pri-dark); transform: translateY(-1px); }
+    .pixel-btn:active{ transform: translateY(1px); }
+    .pixel-toggle[aria-pressed="true"]{ outline-color:#cbe7ff; }
+
+    .stage{
+      position: relative;
+      height: clamp(420px, 62vh, 640px);
+      background-image: url("gate/school background.png");
+      background-size: cover; background-position: center;
+      border: 3px solid #e3e1ff; outline: 2px solid var(--pri); border-radius: 12px;
+      overflow: hidden;
+      transition: outline-color .2s ease, border-color .2s ease;
+    }
+    .stage.correct { outline-color: #10b981; border-color: #bbf7d0; }
+    .stage.wrong   { outline-color: #ef4444; border-color: #fecaca; }
+
+    :root { --ground-pad: 8px; }
+    @media (min-width: 768px) { :root { --ground-pad: 12px; } }
+
+    .sprite-stand {
+      position: absolute;
+      left: 50%;
+      bottom: var(--ground-pad);
+      transform: translateX(-50%);
+      height: clamp(260px, 75%, 420px);
+      width: auto;
+      max-width: 92%;
+      object-fit: contain;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+    .sprite-shadow {
+      position: absolute;
+      left: 50%;
+      bottom: calc(var(--ground-pad) - 2px);
+      transform: translateX(-50%);
+      width: clamp(120px, 38vw, 220px);
+      height: 12px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,.18), rgba(0,0,0,0) 70%);
+      filter: blur(2px);
+      pointer-events: none;
+    }
+
+    .feedback-toast{
+      position:absolute;
+      top:10px;
+      left:50%;
+      transform:translateX(-50%) scale(.95);
+      background:#ffffffee;
+      border-radius:12px;
+      border:3px solid #e3e1ff;
+      outline:2px solid #dfddff;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:700;
+      display:none;
+      align-items:center;
+      gap:8px;
+      box-shadow:0 8px 20px rgba(0,0,0,.15);
+      z-index:5;
+      transition:transform .15s ease, opacity .15s ease;
+    }
+    .feedback-toast.show{ display:inline-flex; opacity:1; transform:translateX(-50%) scale(1); }
+    .feedback-correct{ color:#065f46; border-color:#bbf7d0; outline-color:#d1fae5; }
+    .feedback-wrong{ color:#7f1d1d; border-color:#fecaca; outline-color:#fee2e2; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 font-[Inter]">
+  <!-- Header -->
+  <header class="border-b border-slate-200 bg-white">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg text-white grid place-items-center font-bold" style="background:#7367f0">S</div>
+        <div class="text-sm font-semibold tracking-tight" style="color:#434968">Seekyu · Assessment</div>
+      </div>
+      <div class="text-xs" style="color:#434968">Scenario: Guard · Gate Screening</div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Scenario Brief -->
+    <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <h1 class="text-lg md:text-xl font-semibold tracking-tight" style="color:#434968">Instruction</h1>
+      <p class="mt-1 text-[15px] leading-6" style="color:#434968">
+        Screen students at the main gate. For each student, choose <strong>PASS</strong> if the student is fully compliant.
+        Choose <strong>HOLD</strong> if you see any issue such as ID not visible, incomplete uniform (including shoes),
+        disorderly conduct, or prohibited items. The timer starts when you press <strong>Start</strong>.
+      </p>
+
+      <div class="mt-3 flex flex-wrap gap-2">
+        <span class="pill pill-soft">Check for:</span>
+        <span class="pill">Visible ID</span>
+        <span class="pill">Complete uniform</span>
+        <span class="pill">No civilian outfit/jacket</span>
+        <span class="pill">No slippers allowed</span>
+        <span class="pill">No hat</span>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between gap-3">
+        <p class="text-xs" style="color:#434968">Press Start to begin screening students.</p>
+        <button id="beginBtn" type="button" class="pixel-btn">Start</button>
+      </div>
+    </section>
+
+    <!-- Game Panel -->
+    <section class="mt-6 pixel-panel pixel-ui">
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <h2 class="pixel-title font-bold">GUARD · RESUME & ID MATCH</h2>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="chip">Time: <span id="pixelTimer" class="mono">00:00</span></span>
+          <span id="stepChip" class="chip">Round: —</span>
+          <span class="chip">Score: <span id="scoreNow">0</span>/<span id="scoreTotal">0</span></span>
+          <span class="chip">Accuracy: <span id="accNow">0%</span></span>
+          <span class="chip">Judgement: <span id="judgeNow">—</span></span>
+        </div>
+      </div>
+
+      <div id="stage" class="stage mt-4">
+        <div id="feedbackToast" class="feedback-toast pixel-ui" role="status" aria-live="polite"></div>
+      </div>
+
+      <div class="mt-4 flex items-center gap-3 flex-wrap">
+        <button id="btnPass" class="pixel-btn pixel-toggle" style="background:#10b981;border-color:#047857;outline-color:#a7f3d0" aria-pressed="false">
+          PASS
+        </button>
+        <button id="btnHold" class="pixel-btn pixel-toggle" style="background:#ef4444;border-color:#7f1d1d;outline-color:#fecaca" aria-pressed="false">
+          HOLD
+        </button>
+
+        <div class="ml-auto flex gap-3">
+        <button id="btnFinalSubmit" class="pixel-btn ml-auto hidden">SUBMIT</button>
+        <button id="nextBtn" class="pixel-btn ml-2 hidden" style="background:#10b981;border-color:#047857;outline-color:#a7f3d0">
+          NEXT
+        </button>
+      </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Thresholds (kept from your previous design)
+    const SCORING = { PASS_PCT: 80, CONDITIONAL_PCT: 60 };
+
+    // Timer
+    let timerHandle = null, secondsElapsed = 0, timerRunning = false;
+    const pixelTimer = document.getElementById('pixelTimer');
+
+    function startTimer() {
+      if (timerRunning) return;
+      timerRunning = true;
+      timerHandle = setInterval(() => {
+        secondsElapsed++;
+        const mm = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+        const ss = String(secondsElapsed % 60).padStart(2, '0');
+        pixelTimer.textContent = `${mm}:${ss}`;
+      }, 1000);
+    }
+    function stopTimer() {
+      if (timerHandle) clearInterval(timerHandle);
+      timerRunning = false;
+    }
+
+    // Data
+    const N_ROUNDS = 10;
+    const SCENARIOS = [
+      { allow: true,  sprite: "gate/s1.png" },
+      { allow: false, sprite: "gate/s2.png" },
+      { allow: true,  sprite: "gate/s3.png" },
+      { allow: true,  sprite: "gate/s4.png" },
+      { allow: false, sprite: "gate/s5.png" },
+      { allow: true,  sprite: "gate/s6.png" },
+      { allow: false, sprite: "gate/s7.png" },
+      { allow: false, sprite: "gate/s8.png" },
+      { allow: true,  sprite: "gate/s9.png" },
+      { allow: false, sprite: "gate/s10.png" }
+    ];
+
+    // Session
+    const session = { i:0, score:0, list:[], total:0, started:false, answered:0 };
+    let action = null;
+
+    // Utils
+    function shuffle(a) {
+      const arr = [...a];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+    function sampleWithReplacement(src, count) {
+      const out = [];
+      if (!src.length) return out;
+      for (let i = 0; i < count; i++) out.push(src[Math.floor(Math.random() * src.length)]);
+      return out;
+    }
+
+    // HUD refs
+    const scoreNowEl   = document.getElementById('scoreNow');
+    const scoreTotalEl = document.getElementById('scoreTotal');
+    const accNowEl     = document.getElementById('accNow');
+    const judgeNowEl   = document.getElementById('judgeNow');
+
+    function setPanelHeader(round, total) {
+      document.getElementById('stepChip').textContent = `Round ${round} of ${total}`;
+    }
+
+    // Render
+    function mountRoundCard() {
+      const s = session.list[session.i];
+      const stage = document.getElementById('stage');
+      stage.innerHTML = `
+        <div class="feedback-toast pixel-ui" id="feedbackToast" role="status" aria-live="polite"></div>
+        <img src="${s.sprite}" alt="Student" class="sprite-stand" />
+        <div class="sprite-shadow"></div>
+      `;
+    }
+
+    function resetChoiceUI() {
+      document.getElementById('btnPass').setAttribute('aria-pressed', 'false');
+      document.getElementById('btnHold').setAttribute('aria-pressed', 'false');
+    }
+
+    function enableActionButtons(enabled = true) {
+      ['btnPass','btnHold'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.disabled = !enabled;
+        el.classList.toggle('opacity-50', !enabled);
+        el.classList.toggle('cursor-not-allowed', !enabled);
+      });
+    }
+
+    // Feedback + score UI
+    function showFeedback(isCorrect) {
+      const stage = document.getElementById('stage');
+      const toast = document.getElementById('feedbackToast');
+      if (!toast) return;
+
+      toast.textContent = isCorrect ? 'Correct' : 'Wrong';
+      toast.className = 'feedback-toast pixel-ui show ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+
+      stage.classList.remove('correct','wrong');
+      stage.classList.add(isCorrect ? 'correct' : 'wrong');
+
+      setTimeout(() => {
+        stage.classList.remove('correct','wrong');
+        toast.classList.remove('show');
+      }, 900);
+    }
+
+    function updateScoreUI() {
+      scoreNowEl.textContent   = session.score;
+      scoreTotalEl.textContent = session.total;
+
+      const answered = Math.max(1, session.answered);
+      const acc = Math.round((session.score / answered) * 100);
+      accNowEl.textContent = `${acc}%`;
+    }
+
+    // Logic
+    function gradeCurrent() {
+      const s = session.list[session.i];
+      const expected = s.allow ? 'PASS' : 'HOLD';
+      const correct = action === expected;
+      if (correct) session.score += 1;
+      return correct;
+    }
+
+    function startRound() {
+      setPanelHeader(session.i + 1, session.total);
+      mountRoundCard();
+      action = null;
+      resetChoiceUI();
+      enableActionButtons(true);
+      document.getElementById('btnFinalSubmit').classList.add('hidden');
+      document.getElementById('nextBtn').classList.add('hidden');
+    }
+
+    function showFinalSubmit() {
+      enableActionButtons(false);
+      document.getElementById('btnFinalSubmit').classList.remove('hidden');
+    }
+
+    function endAssessment() {
+      stopTimer();
+
+      const wrong = session.total - session.score;
+      const pct = Math.round((session.score / session.total) * 100);
+
+      let status = pct >= 50 ? 'Pass' : 'Failed';
+
+      judgeNowEl.textContent = status;
+
+      document.getElementById('btnFinalSubmit').classList.add('hidden');
+      const nextBtn = document.getElementById('nextBtn');
+      nextBtn.classList.remove('hidden');
+      nextBtn.onclick = () => { window.location.href = '2%20-%20Bag%20Inspection.html'; };
+
+      window.dispatchEvent(new CustomEvent('seekyu:gate-screening-finished', {
+        detail: {
+          score: session.score,
+          total: session.total,
+          wrong,
+          pct,
+          time: pixelTimer.textContent,
+          result: status
+        }
+      }));
+    }
+
+    // Controls
+    document.getElementById('beginBtn').addEventListener('click', () => {
+      if (session.started) return;
+      session.started = true;
+
+      const pool = shuffle(SCENARIOS);
+      session.list  = pool.length >= N_ROUNDS ? pool.slice(0, N_ROUNDS) : sampleWithReplacement(pool, N_ROUNDS);
+      session.total = session.list.length;
+      session.i = 0;
+      session.score = 0;
+      session.answered = 0;
+
+      judgeNowEl.textContent = '—';
+
+      const beginBtn = document.getElementById('beginBtn');
+      beginBtn.disabled = true;
+      beginBtn.classList.add('opacity-60','cursor-not-allowed');
+
+      secondsElapsed = 0;
+      pixelTimer.textContent = '00:00';
+      startTimer();
+      updateScoreUI();
+      startRound();
+    });
+
+    function handleChoice(chosen) {
+      if (!session.started) return;
+      action = chosen;
+
+      document.getElementById('btnPass').setAttribute('aria-pressed', chosen === 'PASS' ? 'true' : 'false');
+      document.getElementById('btnHold').setAttribute('aria-pressed', chosen === 'HOLD' ? 'true' : 'false');
+      enableActionButtons(false);
+
+      const wasCorrect = gradeCurrent();
+      session.answered = session.i + 1;
+      updateScoreUI();
+      showFeedback(wasCorrect);
+
+      session.i++;
+      const NEXT_DELAY = 950;
+
+      if (session.i < session.total) {
+        setTimeout(startRound, NEXT_DELAY);
+      } else {
+        setTimeout(showFinalSubmit, NEXT_DELAY);
+      }
+    }
+
+    document.getElementById('btnPass').addEventListener('click', () => handleChoice('PASS'));
+    document.getElementById('btnHold').addEventListener('click', () => handleChoice('HOLD'));
+    document.getElementById('btnFinalSubmit').addEventListener('click', endAssessment);
+
+    // Keyboard shortcuts (optional, same pattern as first game)
+    window.addEventListener('keydown', (e) => {
+      if (!session.started) return;
+      const key = e.key.toLowerCase();
+      if (key === 'a') handleChoice('PASS');
+      if (key === 'd') handleChoice('HOLD');
+    });
+  </script>
+</body>
+</html>

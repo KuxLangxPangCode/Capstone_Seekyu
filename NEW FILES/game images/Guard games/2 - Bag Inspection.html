@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Seekyu · Guard (Bag Inspection)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root{
+      --pri:#7367f0;
+      --pri-dark:#5f55d3;
+      --ink:#434968;
+      --panel-top:#efedff;
+      --panel-bot:#fafaff;
+    }
+
+    .pixel-ui { font-family: "Press Start 2P", system-ui, sans-serif; }
+    .pixel-title { font-size: 10px; color: var(--ink); }
+    .pixel-label { font-size: 10px; color: var(--ink); }
+
+    .pixel-panel {
+      background: linear-gradient(180deg, var(--panel-top) 0%, var(--panel-bot) 100%);
+      border: 4px solid var(--pri);
+      outline: 2px solid var(--ink);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 6px 0 var(--pri);
+    }
+
+    .chip{
+      background:#fff; border:2px solid #e3e1ff; border-radius:8px;
+      padding:2px 8px; font-size:10px; display:inline-flex; gap:4px; align-items:center; color:var(--ink);
+    }
+    .pill{
+      font-size:10px; padding:3px 7px; border-radius:999px;
+      border:2px solid rgba(0,0,0,.08); background:#fff; color:var(--ink);
+      display:inline-flex; align-items:center; gap:6px; white-space:nowrap; max-width:100%;
+      overflow:hidden; text-overflow:ellipsis;
+    }
+    .pill-soft{ background:#f3f4f6; }
+    .mono{ font-variant-numeric: tabular-nums; }
+
+    .pixel-btn {
+      background: var(--pri);
+      border: 4px solid var(--ink);
+      outline: 2px solid #dfddff;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #ffffff;
+      font-size: 10px;
+      line-height: 1;
+      transition: transform .05s, background .2s, opacity .2s;
+    }
+    .pixel-btn:hover{ background: var(--pri-dark); transform: translateY(-1px); }
+    .pixel-btn:active{ transform: translateY(1px); }
+    .pixel-toggle[aria-pressed="true"]{ outline-color:#cbe7ff; }
+
+    /* Stage + feedback (aligned with other games) */
+    .stage{
+      position: relative;
+      height: clamp(420px, 62vh, 640px);
+      background: linear-gradient(180deg, #efeefe 0%, #f9f8ff 100%);
+      border: 3px solid #e3e1ff;
+      outline: 2px solid var(--pri);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: outline-color .2s ease, border-color .2s ease;
+    }
+    .stage.correct { outline-color: #10b981; border-color: #bbf7d0; }
+    .stage.wrong   { outline-color: #ef4444; border-color: #fecaca; }
+
+    /* Bag + pieces */
+    .piece {
+      position: absolute;
+      width: 100px;
+      user-select: none;
+      cursor: grab;
+      opacity: 0;
+      transform: translate(-50%,-50%) scale(.9) rotate(0deg);
+      transition:
+        left .55s cubic-bezier(.2,.7,.2,1),
+        top  .55s cubic-bezier(.2,.7,.2,1),
+        opacity .3s ease,
+        transform .18s ease;
+    }
+    .piece.ready { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    .piece:active { cursor: grabbing; }
+
+    .drop-focus {
+      box-shadow: 0 0 0 2px rgba(115,103,240,.95) inset;
+      background: #f2f4ff !important;
+    }
+
+    #confiscateBox { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
+
+    .in-box {
+      position: static !important;
+      width: 56px !important;
+      height: 56px !important;
+      object-fit: contain;
+      transform: none !important;
+      cursor: default;
+      user-select: none;
+      background: #fff;
+      border: 2px solid #e3e1ff;
+      border-radius: 6px;
+      padding: 2px;
+    }
+
+    #confiscateBox.pixel-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: 8px;
+      background: #f5f5ff;
+      border: 3px solid #e3e1ff;
+      outline: 2px solid var(--pri);
+      border-radius: 12px;
+      min-height: 120px;
+      transition: all .2s ease;
+    }
+    #confiscateBox.pixel-grid.drop-focus {
+      outline-color: var(--pri);
+      box-shadow: inset 0 0 0 2px var(--pri);
+    }
+
+    .feedback-toast{
+      position:absolute;
+      top:10px;
+      left:50%;
+      transform:translateX(-50%) scale(.95);
+      background:#ffffffee;
+      border-radius:12px;
+      border:3px solid #e3e1ff;
+      outline:2px solid #dfddff;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:700;
+      display:none;
+      align-items:center;
+      gap:8px;
+      box-shadow:0 8px 20px rgba(0,0,0,.15);
+      z-index:5;
+      transition:transform .15s ease, opacity .15s ease;
+    }
+    .feedback-toast.show{ display:inline-flex; opacity:1; transform:translateX(-50%) scale(1); }
+    .feedback-correct{ color:#065f46; border-color:#bbf7d0; outline-color:#d1fae5; }
+    .feedback-wrong{ color:#7f1d1d; border-color:#fecaca; outline-color:#fee2e2; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 font-[Inter]">
+  <!-- Header -->
+  <header class="border-b border-slate-200 bg-white">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg text-white grid place-items-center font-bold" style="background:#7367f0">S</div>
+        <div class="text-sm font-semibold tracking-tight" style="color:#434968">Seekyu · Assessment</div>
+      </div>
+      <div class="text-xs" style="color:#434968">Scenario: Guard · Bag Inspection</div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Scenario Brief -->
+    <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <h1 class="text-lg md:text-xl font-semibold tracking-tight" style="color:#434968">Instruction</h1>
+      <p id="instruction" class="mt-1 text-[15px] leading-6" style="color:#434968">
+        Reveal the bag and inspect the contents. Drag only <strong>prohibited items</strong> into the Confiscate Box.
+        Leave allowed items in the bag area. Submit once you are confident with your decision.
+      </p>
+
+      <div class="mt-3 flex flex-wrap gap-2">
+        <span class="pill pill-soft">Check items:</span>
+        <span class="pill">Bladed weapons</span>
+        <span class="pill">Lighters / ignition</span>
+        <span class="pill">Suspicious objects</span>
+        <span class="pill">Study essentials are allowed</span>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <p class="text-xs" style="color:#434968">Press Start to reveal the bag in the stage.</p>
+        <button id="beginBtn" type="button" class="pixel-btn">Start</button>
+      </div>
+    </section>
+
+    <!-- Game Panel -->
+    <section class="mt-6 pixel-panel pixel-ui">
+      <div class="flex items-center justify-between gap-2 flex-wrap">
+        <h2 class="pixel-title font-bold">GUARD · BAG INSPECTION</h2>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="chip">Time: <span id="pixelTimer" class="mono">00:00</span></span>
+          <span class="chip">Score: <span id="scoreNow">0</span>/<span id="scoreTotal">0</span></span>
+          <span class="chip">Accuracy: <span id="accNow">0%</span></span>
+          <span class="chip">Judgement: <span id="judgeNow">—</span></span>
+        </div>
+      </div>
+
+      <!-- Stage -->
+      <div id="stage" class="stage mt-4">
+        <div id="feedbackToast" class="feedback-toast pixel-ui" role="status" aria-live="polite"></div>
+        <button id="bagBtn" type="button" aria-label="Open bag"
+          class="hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 focus:outline-none rounded-lg">
+          <img id="bagClosed" src="images/bag.png" alt="Bag"
+               class="w-40 md:w-48 transition-transform duration-150 hover:scale-[1.02] cursor-pointer select-none" />
+        </button>
+      </div>
+
+      <!-- Hidden container for items (for logic only) -->
+      <div id="items" class="hidden"></div>
+
+      <!-- Confiscate Box -->
+      <div class="mt-5">
+        <div class="flex items-center justify-between">
+          <label for="confiscateBox" class="pixel-label">CONFISCATE BOX</label>
+          <span class="pixel-label">Place prohibited items here</span>
+        </div>
+        <div id="confiscateBox" class="hidden mt-2 p-3 transition-all pixel-grid"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="mt-4 flex items-center gap-3 flex-wrap justify-end">
+        <button id="submitBtn" class="pixel-btn ml-auto hidden">SUBMIT</button>
+        <button id="nextBtn" class="pixel-btn ml-2 hidden" style="background:#10b981;border-color:#047857;outline-color:#a7f3d0">
+          NEXT
+        </button>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    // Thresholds (kept in line with Access Control logic)
+    const SCORING = { PASS_PCT: 80, CONDITIONAL_PCT: 60 };
+
+    // Elements
+    const beginBtn       = document.getElementById('beginBtn');
+    const stage          = document.getElementById('stage');
+    const bagBtn         = document.getElementById('bagBtn');
+    const instruction    = document.getElementById('instruction');
+    const confiscateBox  = document.getElementById('confiscateBox');
+    const submitBtn      = document.getElementById('submitBtn');
+    const nextBtn        = document.getElementById('nextBtn');
+    const pixelTimer     = document.getElementById('pixelTimer');
+    const feedbackToast  = document.getElementById('feedbackToast');
+    const judgeNowEl     = document.getElementById('judgeNow');
+    const scoreNowEl     = document.getElementById('scoreNow');
+    const scoreTotalEl   = document.getElementById('scoreTotal');
+    const accNowEl       = document.getElementById('accNow');
+
+    // Timer
+    let timerHandle = null, secondsElapsed = 0, timerRunning = false;
+    function startTimer(){
+      if (timerRunning) return;
+      timerRunning = true;
+      timerHandle = setInterval(() => {
+        secondsElapsed++;
+        const mm = String(Math.floor(secondsElapsed / 60)).padStart(2,'0');
+        const ss = String(secondsElapsed % 60).padStart(2,'0');
+        pixelTimer.textContent = `${mm}:${ss}`;
+      }, 1000);
+    }
+    function stopTimer(){
+      clearInterval(timerHandle);
+      timerRunning = false;
+    }
+
+    // Data
+    const manifest = [
+      { src: "bag/notebook.png",       type: "allowed" },
+      { src: "bag/tumbler.png",        type: "allowed" },
+      { src: "bag/knife.png",          type: "prohibited" },
+      { src: "bag/lighter.png",        type: "prohibited" },
+      { src: "bag/pen.png",            type: "allowed" },
+      { src: "bag/ruler.png",          type: "allowed" },
+      { src: "bag/portable fan.png",   type: "allowed" }
+    ];
+    const totalProhibited = manifest.filter(m => m.type === "prohibited").length;
+
+    // Session (single scenario, but we reuse common HUD pattern)
+    const session = {
+      started: false,
+      finished: false,
+      score: 0,
+      total: totalProhibited,
+      answered: 0
+    };
+
+    scoreTotalEl.textContent = session.total;
+
+    // Utils
+    function shuffle(arr){
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function updateScoreUI(){
+      scoreNowEl.textContent = session.score;
+      scoreTotalEl.textContent = session.total;
+
+      const answered = Math.max(1, session.answered || session.total);
+      const acc = Math.round((session.score / answered) * 100);
+      accNowEl.textContent = `${isNaN(acc) ? 0 : acc}%`;
+    }
+
+    function showToast(message, isCorrect){
+      if (!feedbackToast) return;
+      feedbackToast.textContent = message;
+      feedbackToast.className = 'feedback-toast pixel-ui show ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+      setTimeout(() => {
+        feedbackToast.classList.remove('show');
+      }, 1000);
+    }
+
+    // Begin scenario
+    beginBtn.addEventListener('click', () => {
+      if (session.started) return;
+      session.started = true;
+
+      bagBtn.classList.remove('hidden');
+      beginBtn.disabled = true;
+      beginBtn.classList.add('opacity-60','cursor-not-allowed');
+
+      instruction.textContent = "Click the bag to scatter items around it.";
+      judgeNowEl.textContent = '—';
+
+      secondsElapsed = 0;
+      pixelTimer.textContent = '00:00';
+      startTimer();
+    });
+
+    // Bag click → scatter items
+    bagBtn.addEventListener('click', () => {
+      if (!session.started || session.finished) return;
+      if (stage.querySelector('[data-piece]')) return;
+      scatterItemsNeatly();
+      confiscateBox.classList.remove('hidden');
+      submitBtn.classList.remove('hidden');
+      instruction.textContent = "Drag only prohibited items into the Confiscate Box, then press Submit.";
+    });
+
+    // Allow dropping items back to the stage (unselect from confiscate box)
+    stage.addEventListener('dragover', e => {
+      if (!session.finished) {
+        e.preventDefault();
+      }
+    });
+
+    stage.addEventListener('drop', e => {
+      if (session.finished) return;
+      e.preventDefault();
+
+      const id = e.dataTransfer.getData('id');
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      // Only handle if it is currently in the confiscate box
+      if (!confiscateBox.contains(el)) return;
+
+      const rect = stage.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Restore as scattered piece
+      el.classList.remove('in-box');
+      el.classList.add('piece', 'ready');
+      el.style.position = 'absolute';
+      el.style.width = '100px';
+      el.style.height = 'auto';
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.style.transform = 'translate(-50%,-50%)';
+      el.draggable = true;
+
+      stage.appendChild(el);
+    });
+
+    function scatterItemsNeatly(){
+      const rect = stage.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height / 2;
+
+      const items = shuffle(manifest);
+      const N = items.length;
+
+      const BASE_R = Math.min(rect.width, rect.height) * 0.28;
+      const JITTER_R = 14;
+      const ANG_JITTER = Math.PI / 24;
+      const PAD = 56;
+      const targets = [];
+
+      for (let i = 0; i < N; i++){
+        const ang = (i * (2 * Math.PI / N)) + (Math.random() * 2 - 1) * ANG_JITTER;
+        const rad = BASE_R + (Math.random() * 2 - 1) * JITTER_R;
+        const x = cx + Math.cos(ang) * rad;
+        const y = cy + Math.sin(ang) * rad;
+        targets.push({
+          x: Math.max(PAD, Math.min(rect.width  - PAD, x)),
+          y: Math.max(PAD, Math.min(rect.height - PAD, y))
+        });
+      }
+
+      // light separation
+      const r = 52;
+      for (let iter = 0; iter < 10; iter++){
+        let moved = false;
+        for (let i = 0; i < N; i++){
+          for (let j = i + 1; j < N; j++){
+            const dx = targets[j].x - targets[i].x;
+            const dy = targets[j].y - targets[i].y;
+            const dist = Math.hypot(dx, dy) || 0.001;
+            const minDist = r * 1.15;
+            if (dist < minDist){
+              const push = (minDist - dist) / 2;
+              const ux = dx / dist, uy = dy / dist;
+              targets[i].x -= ux * push; targets[i].y -= uy * push;
+              targets[j].x += ux * push; targets[j].y += uy * push;
+              moved = true;
+            }
+          }
+        }
+        if (!moved) break;
+      }
+
+      items.forEach((item, i) => {
+        const img = document.createElement('img');
+        img.src = item.src;
+        img.dataset.type = item.type;
+        img.dataset.piece = '1';
+        img.className = 'piece';
+        img.id = 'itm_' + Math.random().toString(36).slice(2,9);
+        img.style.left = cx + 'px';
+        img.style.top  = cy + 'px';
+        img.draggable = true;
+        stage.appendChild(img);
+
+        img.addEventListener('dragstart', dragStart);
+
+        const rot = (Math.random() * 10 - 5);
+        const t = targets[i];
+        setTimeout(() => {
+          img.style.left = t.x + 'px';
+          img.style.top  = t.y + 'px';
+          img.style.transform = `translate(-50%,-50%) rotate(${rot}deg)`;
+          img.classList.add('ready');
+        }, 100 + i * 90);
+      });
+    }
+
+    // Drag & Drop
+    function dragStart(e){
+      if (session.finished) return;
+      e.dataTransfer.setData('id', e.target.id);
+    }
+
+    confiscateBox.addEventListener('dragover', e => {
+      if (!session.finished){
+        e.preventDefault();
+        confiscateBox.classList.add('drop-focus');
+      }
+    });
+
+    confiscateBox.addEventListener('dragleave', () => {
+      confiscateBox.classList.remove('drop-focus');
+    });
+
+    confiscateBox.addEventListener('drop', e => {
+      if (session.finished) return;
+      e.preventDefault();
+      confiscateBox.classList.remove('drop-focus');
+
+      const id = e.dataTransfer.getData('id');
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      // Move into box view
+      el.style.position = 'static';
+      el.style.width = '56px';
+      el.style.height = '56px';
+      el.style.transform = 'none';
+      el.classList.remove('piece', 'ready');
+      el.classList.add('in-box');
+      el.draggable = true; 
+      confiscateBox.appendChild(el);
+    });
+
+
+    // Submit
+    submitBtn.addEventListener('click', () => {
+      if (session.finished) return;
+      session.finished = true;
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('hidden');
+
+      stopTimer();
+
+      const inBox = Array.from(confiscateBox.querySelectorAll('[data-type]'));
+      const correctConfiscated = inBox.filter(el => el.dataset.type === 'prohibited').length;
+      const wrongConfiscated   = inBox.filter(el => el.dataset.type === 'allowed').length;
+      const missedProhibited   = totalProhibited - correctConfiscated;
+
+      // Use correct confiscations vs total prohibited as primary score
+      session.score = correctConfiscated;
+      session.answered = session.total;
+
+      const pct = totalProhibited > 0
+        ? Math.round((correctConfiscated / totalProhibited) * 100)
+        : 0;
+
+      updateScoreUI();
+
+      // Judgement (aligned with other games, but scenario-based)
+      let status = 'Failed';
+      if (pct === 100 && wrongConfiscated === 0) {
+        status = 'Pass';
+        stage.classList.add('correct');
+        showToast('Perfect confiscation', true);
+      } else if (pct >= SCORING.CONDITIONAL_PCT && wrongConfiscated <= 1 && missedProhibited <= 1) {
+        status = 'Conditional';
+        showToast('Close call, review policy', false);
+      } else {
+        status = 'Failed';
+        stage.classList.add('wrong');
+        showToast('Check item rules again', false);
+      }
+
+      judgeNowEl.textContent = status;
+
+      // Reveal NEXT
+      nextBtn.classList.remove('hidden');
+
+      // Analytics event
+      window.dispatchEvent(new CustomEvent('seekyu:bag-inspection-finished', {
+        detail: {
+          correctConfiscated,
+          wrongConfiscated,
+          missedProhibited,
+          pct,
+          result: status,
+          time: pixelTimer.textContent
+        }
+      }));
+    });
+
+    // Next → chain to next module (same pattern as others)
+    nextBtn.addEventListener('click', () => {
+      window.location.href = '3%20-%20Memory%20Test.html';
+    });
+  </script>
+</body>
+</html>
