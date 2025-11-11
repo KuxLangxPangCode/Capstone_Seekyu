@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Seekyu · HR (Document Sorting)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --pri: #7367f0;
+      --pri-dark: #5f55d3;
+      --ink: #434968;
+      --panel-top: #efedff;
+      --panel-bot: #fafaff;
+    }
+
+    .pixel-ui { font-family: "Press Start 2P", system-ui, sans-serif; }
+    .pixel-title { font-size: 10px; color: var(--ink); }
+    .pixel-label { font-size: 10px; color: var(--ink); }
+    .pixel-panel {
+      background: linear-gradient(180deg, var(--panel-top) 0%, var(--panel-bot) 100%);
+      border: 4px solid var(--pri);
+      outline: 2px solid var(--ink);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 6px 0 var(--pri);
+    }
+
+    .chip{
+      background:#fff; border:2px solid #e3e1ff; border-radius:8px;
+      padding:2px 8px; font-size:10px; display:inline-flex; gap:4px; align-items:center; color:var(--ink);
+    }
+
+    .pixel-btn {
+      background: var(--pri);
+      border: 4px solid var(--ink);
+      outline: 2px solid #dfddff;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: #fff;
+      font-size: 10px;
+      line-height: 1;
+      transition: transform .05s, background .2s;
+    }
+
+    .pixel-btn:hover { background: var(--pri-dark); transform: translateY(-1px); }
+    .pixel-btn:active { transform: translateY(1px); }
+
+    .pill {
+      font-size: 10px; padding: 3px 7px; border-radius: 999px;
+      border: 2px solid rgba(0, 0, 0, .08); background: #fff; color: var(--ink);
+      display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; max-width: 100%;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .pill-ok { background: #ecfdf5; color: #065f46; border-color: #10b981; }
+    .pill-warn { background: #fff7ed; color: #9a3412; border-color: #fb923c; }
+    .pill-err { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+    .pill-soft { background: #f3f4f6; }
+
+    .mono { font-variant-numeric: tabular-nums; }
+
+    .stage {
+      position: relative;
+      height: 520px;
+      background: linear-gradient(180deg, #efeefe 0%, #f9f8ff 100%);
+      border: 3px solid #c9c3ff;
+      outline: 2px solid var(--pri);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: outline-color .2s ease, border-color .2s ease;
+    }
+
+    /* Toast-style feedback + border color (same behavior as reference code) */
+    .feedback-toast{
+      position:absolute;
+      top:10px;
+      left:50%;
+      transform:translateX(-50%) scale(.95);
+      background:#ffffffee;
+      border-radius:12px;
+      border:3px solid #e3e1ff;
+      outline:2px solid #dfddff;
+      padding:8px 12px;
+      font-size:12px;
+      font-weight:700;
+      display:none;
+      align-items:center;
+      gap:8px;
+      box-shadow:0 8px 20px rgba(0,0,0,.15);
+      z-index:999;
+      transition:transform .15s ease, opacity .15s ease;
+    }
+    .feedback-toast.show{
+      display:inline-flex;
+      opacity:1;
+      transform:translateX(-50%) scale(1);
+    }
+    .feedback-correct{
+      color:#065f46;
+      border-color:#bbf7d0;
+      outline-color:#d1fae5;
+    }
+    .feedback-wrong{
+      color:#7f1d1d;
+      border-color:#fecaca;
+      outline-color:#fee2e2;
+    }
+
+    .stage.correct {
+      outline-color: #10b981;
+      border-color: #bbf7d0;
+    }
+    .stage.wrong {
+      outline-color: #ef4444;
+      border-color: #fecaca;
+    }
+
+    .doc {
+      position: absolute;
+      width: 280px;
+      user-select: none;
+      cursor: grab;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(.96);
+      transition:
+        left .35s cubic-bezier(.2, .7, .2, 1),
+        top .35s cubic-bezier(.2, .7, .2, 1),
+        opacity .25s ease,
+        transform .12s ease;
+      image-rendering: auto;
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      box-shadow: none;
+      z-index: 1;
+    }
+
+    .doc.ready { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    .doc:active { cursor: grabbing; }
+    .doc.locked { filter: grayscale(10%) opacity(.85); }
+
+    @media (max-width: 520px) { .doc { width: 240px; } }
+
+    .folders {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 10px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 10px;
+      pointer-events: none;
+    }
+
+    .folder {
+      pointer-events: auto;
+      background: #fff;
+      border: 3px solid #e3e1ff;
+      outline: 2px solid #f3f2ff;
+      border-radius: 12px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+      padding: 10px 10px 12px;
+    }
+
+    .folder img { width: 48px; height: 48px; image-rendering: pixelated; }
+    .folder .label { font-size: 10px; color: var(--ink); text-align: center; }
+    .folder.drop-focus {
+      outline-color: var(--pri);
+      box-shadow: inset 0 0 0 2px var(--pri);
+      background: #f1efff;
+    }
+
+    .folder-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+      gap: 6px;
+    }
+
+    .in-bin {
+      position: static !important;
+      width: 44px !important;
+      height: 44px !important;
+      padding: 0 !important;
+      border-radius: 6px;
+      border: 2px solid #c9c3ff;
+      background: #fff;
+      transform: none !important;
+      cursor: default;
+    }
+
+    /* Tighter HUD spacing to match other games */
+    .hud {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--ink);
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 font-[Inter]">
+  <!-- Header -->
+  <header class="border-b border-slate-200 bg-white">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg text-white grid place-items-center font-bold bg-[#7367f0]">S</div>
+        <div class="text-sm font-semibold tracking-tight" style="color:#434968">Seekyu · Assessment</div>
+      </div>
+      <div class="text-xs" style="color:#434968">Scenario: HR · Document Sorting</div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <h1 class="text-lg md:text-xl font-semibold tracking-tight" style="color:#434968">Instruction</h1>
+      <p class="mt-1 text-[15px] leading-6" style="color:#434968">
+        Drop each document into the correct folder:
+        <strong>Incidents</strong>, <strong>Applications</strong>, or <strong>Leave Requests</strong>.
+      </p>
+
+      <div class="mt-4 flex items-center justify-between">
+        <p class="text-xs" style="color:#434968">Click Start to reveal desk.</p>
+        <button id="beginBtn" type="button" class="pixel-btn">Start</button>
+      </div>
+    </section>
+
+    <section class="mt-6 pixel-panel pixel-ui">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <h2 class="pixel-title font-bold">HR · DOCUMENT SORTING</h2>
+        <div class="hud">
+          <span class="chip">Time: <span id="pixelTimer" class="mono">00:00</span></span>
+          <span id="stepChip" class="chip">Round <span id="roundNum">1</span> of 6</span>
+          <span class="chip">Score: <span id="scoreNow">0</span>/6</span>
+          <span class="chip">Accuracy: <span id="accNow">0%</span></span>
+          <span class="chip">Judgement: <span id="judgeNow">—</span></span>
+        </div>
+      </div>
+
+      <div id="stage" class="stage mt-4">
+        <!-- Toast-style feedback (center top) -->
+        <div id="feedbackToast" class="feedback-toast pixel-ui" role="status" aria-live="polite"></div>
+        <div id="foldersRow" class="folders hidden"></div>
+      </div>
+
+      <div class="mt-4 flex items-center gap-3">
+        <button id="submitBtn" class="pixel-btn hidden ml-auto">SUBMIT</button>
+        <button id="nextBtn" class="pixel-btn hidden ml-auto" style="background:#10b981;border-color:#047857;outline-color:#a7f3d0;">NEXT</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const POINTS_PER_CORRECT = 10;
+    const PASS_THRESHOLD = 75; // overall % for Pass vs Failed
+
+    const DOCS_SRC = [
+      { id: 'ir1', kind: 'incident', label: 'Incident Report', src: 'sorting/incident1.png' },
+      { id: 'ir2', kind: 'incident', label: 'Incident Report', src: 'sorting/incident2.png' },
+      { id: 'ap1', kind: 'application', label: 'Applicant Form', src: 'sorting/application1.png' },
+      { id: 'ap2', kind: 'application', label: 'Applicant Form', src: 'sorting/application2.png' },
+      { id: 'lv1', kind: 'leave', label: 'Leave Request', src: 'sorting/leave1.png' },
+      { id: 'lv2', kind: 'leave', label: 'Leave Request', src: 'sorting/leave2.png' }
+    ];
+
+    const FOLDERS = [
+      { kind: 'incident', label: 'Incidents', icon: 'sorting/folder.png' },
+      { kind: 'application', label: 'Applications', icon: 'sorting/folder.png' },
+      { kind: 'leave', label: 'Leave Requests', icon: 'sorting/folder.png' }
+    ];
+
+    const beginBtn     = document.getElementById('beginBtn');
+    const pixelTimer   = document.getElementById('pixelTimer');
+    const stage        = document.getElementById('stage');
+    const foldersRow   = document.getElementById('foldersRow');
+    const submitBtn    = document.getElementById('submitBtn');
+    const nextBtn      = document.getElementById('nextBtn');
+    const roundNum     = document.getElementById('roundNum');
+    const scoreNow     = document.getElementById('scoreNow');
+    const accNow       = document.getElementById('accNow');
+    const judgeNow     = document.getElementById('judgeNow');
+    const feedbackToast= document.getElementById('feedbackToast');
+
+    let timerHandle = null, secondsElapsed = 0;
+
+    function startTimer() {
+      clearInterval(timerHandle);
+      secondsElapsed = 0;
+      pixelTimer.textContent = '00:00';
+      timerHandle = setInterval(() => {
+        secondsElapsed++;
+        const mm = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+        const ss = String(secondsElapsed % 60).padStart(2, '0');
+        pixelTimer.textContent = `${mm}:${ss}`;
+      }, 1000);
+    }
+
+    function stopTimer() { clearInterval(timerHandle); }
+
+    let DOCS = [], docEls = [], topIndex = 0, finished = false;
+    const placed = new Map(); // id -> {placedKind, correct}
+
+    const shuffle = (a) => {
+      a = [...a];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    };
+
+    function setDraggableStates() {
+      docEls.forEach((el, i) => {
+        const active = i === topIndex && !el.classList.contains('in-bin');
+        el.draggable = active;
+        el.classList.toggle('locked', !active);
+      });
+    }
+
+    function recenterStack() {
+      if (!docEls.length) return;
+      const rect = stage.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height * 0.33;
+      docEls.forEach((el, i) => {
+        if (el.classList.contains('in-bin')) return;
+        el.style.left = `${cx}px`;
+        el.style.top = `${cy + i * 2}px`;
+      });
+    }
+
+    function computeCorrectSoFar() {
+      let c = 0;
+      for (const v of placed.values()) if (v.correct) c++;
+      return c;
+    }
+
+    function updateHUDAfterDrop() {
+      const correctSoFar = computeCorrectSoFar();
+      const attempted = placed.size;
+
+      scoreNow.textContent = String(correctSoFar);
+      accNow.textContent = attempted
+        ? `${Math.round((correctSoFar / attempted) * 100)}%`
+        : '0%';
+      // Judgement is only set on final submit (Pass/Failed), so leave it as-is here.
+    }
+
+    function updateStatus() {
+      submitBtn.classList.toggle('hidden', placed.size < DOCS.length || finished);
+    }
+
+    function showFeedback(isCorrect, message) {
+      if (!feedbackToast) return;
+
+      feedbackToast.textContent = message || (isCorrect ? 'Correct' : 'Wrong folder');
+      feedbackToast.className = 'feedback-toast pixel-ui show ' +
+        (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+
+      stage.classList.remove('correct', 'wrong');
+      stage.classList.add(isCorrect ? 'correct' : 'wrong');
+
+      setTimeout(() => {
+        stage.classList.remove('correct', 'wrong');
+        feedbackToast.classList.remove('show');
+      }, 900);
+    }
+
+    function renderFolders() {
+      foldersRow.innerHTML = '';
+      FOLDERS.forEach((f) => {
+        const bin = document.createElement('div');
+        bin.className = 'folder';
+        bin.dataset.kind = f.kind;
+        bin.innerHTML = `
+          <img src="${f.icon}" alt="${f.label}" draggable="false"/>
+          <div class="label pixel-ui">${f.label}</div>
+          <div class="folder-grid" aria-label="${f.label} dropzone"></div>
+        `;
+
+        bin.addEventListener('dragover', (e) => {
+          if (!finished) {
+            e.preventDefault();
+            bin.classList.add('drop-focus');
+          }
+        });
+        bin.addEventListener('dragleave', () => bin.classList.remove('drop-focus'));
+
+        bin.addEventListener('drop', (e) => {
+          if (finished) return;
+          e.preventDefault();
+          bin.classList.remove('drop-focus');
+
+          const id = e.dataTransfer.getData('id');
+          const el = document.getElementById(id);
+          if (!el) return;
+
+          // move into the bin grid
+          el.classList.add('in-bin');
+          el.style.left = '0px';
+          el.style.top = '0px';
+          bin.querySelector('.folder-grid').appendChild(el);
+
+          // scoring per drop
+          const doc = DOCS.find((d) => d.id === id);
+          const correct = bin.dataset.kind === doc.kind;
+          placed.set(id, { placedKind: bin.dataset.kind, correct });
+          updateRoundLabel();
+
+          const msg = correct
+            ? `Correct`
+            : `Wrong, should be ${prettyKind(doc.kind)}`;
+          showFeedback(correct, msg);
+
+          // next sheet
+          topIndex = Math.max(-1, topIndex - 1);
+          setDraggableStates();
+          updateHUDAfterDrop();
+          updateStatus();
+        });
+
+        foldersRow.appendChild(bin);
+      });
+    }
+
+    function prettyKind(k) {
+      if (k === 'incident') return 'Incidents';
+      if (k === 'application') return 'Applications';
+      if (k === 'leave') return 'Leave Requests';
+      return k;
+    }
+
+    function spawnDocs() {
+      const rect = stage.getBoundingClientRect();
+      const cx = rect.width / 2;
+      const cy = rect.height * 0.33;
+
+      docEls = [];
+      DOCS.forEach((d, i) => {
+        const el = document.createElement('img');
+        el.id = d.id;
+        el.src = d.src;
+        el.alt = d.label;
+        el.className = 'doc';
+        el.dataset.kind = d.kind;
+
+        el.style.left = `${cx}px`;
+        el.style.top = `${cy + i * 2}px`;
+        el.style.zIndex = 10 + i;
+        stage.appendChild(el);
+        docEls.push(el);
+
+        el.addEventListener('dragstart', (e) => {
+          if (docEls.indexOf(el) !== topIndex || el.classList.contains('in-bin')) {
+            e.preventDefault();
+            return;
+          }
+          e.dataTransfer.setData('id', d.id);
+        });
+
+        requestAnimationFrame(() => el.classList.add('ready'));
+      });
+
+      topIndex = docEls.length - 1;
+      setDraggableStates();
+
+      window.addEventListener('resize', recenterStack);
+      new ResizeObserver(recenterStack).observe(stage);
+    }
+
+    function finalize() {
+      finished = true;
+      stopTimer();
+
+      const total = DOCS.length;
+      const correct = computeCorrectSoFar();
+      const pct = Math.round((correct / total) * 100);
+      const isPass = pct >= PASS_THRESHOLD;
+
+      judgeNow.textContent = isPass ? 'Pass' : 'Failed';
+
+      submitBtn.classList.add('hidden');
+      nextBtn.classList.remove('hidden');
+    }
+
+    function resetHUD() {
+      scoreNow.textContent = '0';
+      accNow.textContent = '0%';
+      judgeNow.textContent = '—';
+    }
+
+    function resetBoardForNewRound() {
+      placed.clear();
+      stage.querySelectorAll('.doc').forEach((n) => n.remove());
+      finished = false;
+      roundNum.textContent = '1';
+
+      foldersRow.classList.remove('hidden');
+      DOCS = shuffle(DOCS_SRC);
+      renderFolders();
+      spawnDocs();
+      updateStatus();
+      resetHUD();
+      startTimer();
+
+      submitBtn.classList.add('hidden');
+      nextBtn.classList.add('hidden');
+    }
+
+    function updateRoundLabel() {
+      const current = Math.min(placed.size + 1, DOCS.length);
+      roundNum.textContent = current;
+    }
+   
+    
+    /* Controls */
+    beginBtn.addEventListener('click', () => {
+      resetBoardForNewRound();
+      beginBtn.disabled = true;
+      beginBtn.classList.add('opacity-60', 'cursor-not-allowed');
+    });
+
+    submitBtn.addEventListener('click', () => {
+      if (finished) return;
+      if (placed.size < DOCS.length) {
+        showFeedback(false, `Please file all ${DOCS.length} papers`);
+        return;
+      }
+      finalize();
+    });
+
+    nextBtn.addEventListener('click', () => {
+      window.location.href = '3%20-%20Client-Guard%20Match.html';
+    });
+
+    // Auto-show submit when all docs are placed
+    const mo = new MutationObserver(() => {
+      if (placed.size === DOCS.length && !finished) {
+        submitBtn.classList.remove('hidden');
+      }
+    });
+    mo.observe(stage, { childList: true, subtree: true });
+  </script>
+</body>
+</html>

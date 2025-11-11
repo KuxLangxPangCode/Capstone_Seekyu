@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Seekyu · HR (Client–Guard Match)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --pri:#7367f0; --pri-dark:#5f55d3; --ink:#434968;
+      --panel-top:#efedff; --panel-bot:#fafaff;
+    }
+    .pixel-ui { font-family: "Press Start 2P", system-ui, sans-serif; }
+    .pixel-title { font-size: 10px; color: var(--ink); }
+    .pixel-label { font-size: 10px; color: var(--ink); }
+    .pixel-panel {
+      background: linear-gradient(180deg, var(--panel-top) 0%, var(--panel-bot) 100%);
+      border: 4px solid var(--pri); outline: 2px solid var(--ink);
+      border-radius: 12px; padding: 16px; box-shadow: 0 6px 0 var(--pri);
+    }
+    .chip{
+      background:#fff; border:2px solid #e3e1ff; border-radius:8px;
+      padding:2px 8px; font-size:10px; display:inline-flex;
+      gap:6px; align-items:center; color:var(--ink);
+    }
+    .mono{ font-variant-numeric: tabular-nums; }
+    .pixel-btn {
+      background: var(--pri); border: 4px solid var(--ink); outline: 2px solid #dfddff;
+      border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 10px; line-height: 1;
+      transition: transform .05s, background .2s;
+    }
+    .pixel-btn:hover{ background: var(--pri-dark); transform: translateY(-1px); }
+    .pixel-btn:active{ transform: translateY(1px); }
+    .pool-card,
+    .client-card{
+      background:#fff; border:3px solid #e3e1ff; outline:2px solid #f3f2ff; border-radius:12px;
+    }
+    .client-card{
+      padding:12px; display:grid; gap:8px;
+    }
+    .guard-chip{
+      border:2px dashed var(--pri); border-radius:10px; padding:10px; background:#f7f6ff;
+      display:grid; grid-template-columns:auto 1fr auto; gap:8px; align-items:center;
+      width:100%; min-width:0; overflow:hidden; touch-action:manipulation;
+    }
+    .guard-chip > *{ min-width:0; }
+    .guard-chip.selected{ outline:2px solid var(--pri); background:#f0efff; }
+    .drop-slot{
+      border:2px dashed var(--pri); border-radius:10px; padding:12px; min-height:96px;
+      background:#f7f6ff; display:flex; flex-direction:column; gap:8px;
+      color:var(--ink); font-size:11px; overflow:hidden;
+    }
+    .drop-slot .guard-chip{
+      border:0; background:transparent; padding:0; grid-template-columns:1fr;
+    }
+    .drop-slot .guard-chip .guard-name{
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px;
+    }
+    .drop-slot .guard-chip .guard-meta,
+    .drop-slot .guard-chip .guard-attrs,
+    .drop-slot .guard-chip details,
+    .drop-slot .guard-chip > .pill{
+      display:none !important;
+    }
+    .pill{
+      font-size:10px; padding:3px 7px; border-radius:999px;
+      border:2px solid rgba(0,0,0,.08); background:#fff; color:var(--ink);
+      display:inline-flex; gap:6px; white-space:nowrap;
+    }
+    .pill-ok{ background:#ecfdf5; color:#065f46; border-color:#10b981; }
+    .pill-soft{ background:#f3f4f6; }
+    .tiny{ font-size:11px; }
+    .guard-attrs{ display:flex; flex-wrap:wrap; gap:6px; }
+    .section-gap{ margin-top:6px; }
+    .no-overflow{ min-width:0; overflow:hidden; }
+    @media (min-width:1024px){
+      .sticky-col{ position:sticky; top:12px; }
+    }
+
+    #guardPool{ scrollbar-width:auto; scrollbar-color: var(--pri) #f1f0ff; }
+    #guardPool::-webkit-scrollbar{ width:12px; }
+    #guardPool::-webkit-scrollbar-track{ background:#f1f0ff; border-radius:10px; }
+    #guardPool::-webkit-scrollbar-thumb{
+      background:var(--pri); border-radius:10px; border:3px solid #f1f0ff;
+    }
+
+    details>summary{
+      list-style:none; cursor:pointer; user-select:none; color:var(--ink);
+    }
+    details>summary::-webkit-details-marker{ display:none; }
+    details>summary::after{
+      content:'▾'; font-size:10px; margin-left:6px; transition:transform .15s;
+    }
+    details[open]>summary::after{ transform:rotate(-180deg); }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 font-[Inter]">
+  <header class="border-b border-slate-200 bg-white">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="h-8 w-8 rounded-lg text-white grid place-items-center font-bold bg-[#7367f0]">S</div>
+        <div class="text-sm font-semibold tracking-tight" style="color:#434968">Seekyu · Assessment</div>
+      </div>
+      <div class="text-xs" style="color:#434968">Scenario: HR · Client–Guard Match</div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Instruction -->
+    <section class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <h1 class="text-lg md:text-xl font-semibold tracking-tight" style="color:#434968">Instruction</h1>
+      <p class="mt-1 text-[15px] leading-6" style="color:#434968">
+        Assign the right guard to each client post.
+        <br>
+        <strong>Hard requirements:</strong> correct license level and full shift coverage.
+        <br>
+        <strong>Preferences (bonus only):</strong> height, build, prior site experience, and language fit for the client environment.
+        All guards are assumed to have standard security training (firearms &amp; first aid).
+      </p>
+
+      <div class="mt-3 flex flex-wrap gap-2">
+        <span class="pill pill-soft">Legend:</span>
+        <span class="pill">Lic = Guard License Level</span>
+        <span class="pill">Ht = Height (cm)</span>
+        <span class="pill">Build = Body Type</span>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between">
+        <p class="text-xs" style="color:#434968">Click Start to randomize the pool and posts.</p>
+        <button id="beginBtn" type="button" class="pixel-btn">Start</button>
+      </div>
+    </section>
+
+    <!-- Game -->
+    <section class="mt-6 pixel-panel pixel-ui">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <h2 class="pixel-title font-bold">HR · CLIENT–GUARD MATCH</h2>
+
+        <!-- HUD -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="chip">Time <span id="pixelTimer" class="mono">00:00</span></span>
+          <span id="stepChip" class="chip">Round —</span>
+          <span id="chipScore" class="chip hidden">Score <span id="scoreNow">0</span>/<span id="scoreTotal">0</span></span>
+          <span id="statusLabel" class="chip">Assigned <span id="assignedNow" class="mono">0</span>/<span id="assignedTotal" class="mono">0</span></span>
+          <span id="chipJudge" class="chip">Judgement: <span id="judgeNow">—</span></span>
+        </div>
+      </div>
+
+      <!-- HIDDEN UNTIL START -->
+      <div id="boardRow" class="mt-4 grid gap-4 lg:grid-cols-5 hidden">
+        <!-- Guard Pool -->
+        <div class="lg:col-span-2 sticky-col" id="guardCol">
+          <div class="flex items-center justify-between mb-2" id="guardHeader">
+            <h3 class="pixel-title font-bold">Guard Pool</h3>
+            <span id="poolCount" class="pixel-label">0 available</span>
+          </div>
+          <div id="guardPool" class="pool-card p-3 grid gap-3 sm:grid-cols-1 overflow-auto"></div>
+        </div>
+
+        <!-- Clients -->
+        <div class="lg:col-span-3" id="clientsCol">
+          <div class="relative flex items-center justify-center mb-2">
+            <h3 class="pixel-title font-bold text-center w-full">Client Posts</h3>
+            <span id="clientCount" class="pixel-label absolute right-0">0 posts</span>
+          </div>
+          <div id="clientsGrid" class="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"></div>
+        </div>
+      </div>
+
+      <!-- ACTIONS ROW -->
+      <div id="actionsRow" class="mt-4 flex items-center gap-3 hidden">
+        <button id="submitBtn" class="pixel-btn hidden ml-auto">SUBMIT</button>
+        <button id="endBtn" class="pixel-btn hidden ml-auto" style="background:#10b981;border-color:#047857;outline-color:#a7f3d0;">END</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const PASS_THRESHOLD = 50;
+
+      const LICENSE_RANK = { "SGL-1": 1, "SGL-2": 2, "SGL-3": 3 };
+
+      const CLIENTS_SRC = [
+        {
+          client_id:"CL-101",
+          site_name:"Northfield School",
+          location:"Quezon City",
+          shift:{start:"22:00",end:"06:00"},
+          requirements:{license:"SGL-1"},
+          nice_to_have:{
+            site_type:"School",
+            language:"English",
+            min_height:165,
+            build:"Medium"
+          }
+        },
+        {
+          client_id:"CL-102",
+          site_name:"Vista Mall",
+          location:"Taguig",
+          shift:{start:"10:00",end:"18:00"},
+          requirements:{license:"SGL-2"},
+          nice_to_have:{
+            site_type:"Retail",
+            language:"English",
+            min_height:170,
+            build:"Medium"
+          }
+        },
+        {
+          client_id:"CL-103",
+          site_name:"Orion Warehouse",
+          location:"Valenzuela",
+          shift:{start:"18:00",end:"02:00"},
+          requirements:{license:"SGL-1"},
+          nice_to_have:{
+            site_type:"Industrial",
+            min_height:168,
+            build:"Solid"
+          }
+        },
+        {
+          client_id:"CL-104",
+          site_name:"Pioneer BPO",
+          location:"Mandaluyong",
+          shift:{start:"06:00",end:"14:00"},
+          requirements:{license:"SGL-2"},
+          nice_to_have:{
+            site_type:"Office",
+            language:"English",
+            min_height:165,
+            build:"Lean"
+          }
+        },
+        {
+          client_id:"CL-105",
+          site_name:"Greenway Residences",
+          location:"Makati",
+          shift:{start:"14:00",end:"22:00"},
+          requirements:{license:"SGL-1"},
+          nice_to_have:{
+            site_type:"Residential",
+            min_height:165,
+            build:"Medium"
+          }
+        },
+        {
+          client_id:"CL-106",
+          site_name:"MetroBank Branch",
+          location:"Pasig",
+          shift:{start:"08:00",end:"17:00"},
+          requirements:{license:"SGL-2"},
+          nice_to_have:{
+            site_type:"Bank",
+            language:"English",
+            min_height:172,
+            build:"Athletic"
+          }
+        }
+      ];
+
+      const GUARDS_SRC = [
+        {
+          guard_id:"G-201",
+          name:"J. Santos",
+          availability:[{start:"18:00",end:"06:00"}],
+          license:"SGL-1",
+          height_cm:170,
+          build:"Medium",
+          languages:["Filipino","English"],
+          site_experience:["School","Retail"],
+          years_exp:3
+        },
+        {
+          guard_id:"G-202",
+          name:"A. Cruz",
+          availability:[{start:"06:00",end:"14:00"}],
+          license:"SGL-2",
+          height_cm:175,
+          build:"Lean",
+          languages:["Filipino","English"],
+          site_experience:["Office"],
+          years_exp:5
+        },
+        {
+          guard_id:"G-203",
+          name:"M. Dela Rosa",
+          availability:[{start:"10:00",end:"18:00"}],
+          license:"SGL-2",
+          height_cm:173,
+          build:"Medium",
+          languages:["English"],
+          site_experience:["Retail","Bank"],
+          years_exp:4
+        },
+        {
+          guard_id:"G-204",
+          name:"K. Reyes",
+          availability:[{start:"08:00",end:"17:00"}],
+          license:"SGL-2",
+          height_cm:180,
+          build:"Athletic",
+          languages:["Filipino","English"],
+          site_experience:["Bank","Office"],
+          years_exp:6
+        },
+        {
+          guard_id:"G-205",
+          name:"R. Tan",
+          availability:[{start:"14:00",end:"22:00"}],
+          license:"SGL-1",
+          height_cm:168,
+          build:"Medium",
+          languages:["Filipino"],
+          site_experience:["Residential"],
+          years_exp:2
+        },
+        {
+          guard_id:"G-206",
+          name:"L. Garcia",
+          availability:[{start:"22:00",end:"06:00"}],
+          license:"SGL-1",
+          height_cm:172,
+          build:"Solid",
+          languages:["Filipino"],
+          site_experience:["Industrial","School"],
+          years_exp:4
+        },
+        {
+          guard_id:"G-207",
+          name:"P. Go",
+          availability:[{start:"18:00",end:"02:00"}],
+          license:"SGL-1",
+          height_cm:166,
+          build:"Lean",
+          languages:["Filipino"],
+          site_experience:["Industrial"],
+          years_exp:1
+        },
+        {
+          guard_id:"G-208",
+          name:"D. Uy",
+          availability:[{start:"06:00",end:"14:00"},{start:"14:00",end:"22:00"}],
+          license:"SGL-2",
+          height_cm:178,
+          build:"Athletic",
+          languages:["English"],
+          site_experience:["Office","Retail"],
+          years_exp:3
+        },
+        {
+          guard_id:"G-209",
+          name:"S. Lim",
+          availability:[{start:"08:00",end:"17:00"}],
+          license:"SGL-3",
+          height_cm:182,
+          build:"Athletic",
+          languages:["Filipino","English"],
+          site_experience:["Bank","Residential"],
+          years_exp:8
+        },
+        {
+          guard_id:"G-210",
+          name:"E. Bautista",
+          availability:[{start:"10:00",end:"18:00"}],
+          license:"SGL-1",
+          height_cm:169,
+          build:"Medium",
+          languages:["Filipino"],
+          site_experience:["Retail"],
+          years_exp:2
+        }
+      ];
+
+      const beginBtn    = document.getElementById('beginBtn');
+      const pixelTimer  = document.getElementById('pixelTimer');
+      const statusLabel = document.getElementById('statusLabel');
+      const assignedNow = document.getElementById('assignedNow');
+      const assignedTotal = document.getElementById('assignedTotal');
+      const poolCount   = document.getElementById('poolCount');
+      const clientCount = document.getElementById('clientCount');
+      const guardPool   = document.getElementById('guardPool');
+      const clientsGrid = document.getElementById('clientsGrid');
+      const clientsCol  = document.getElementById('clientsCol');
+      const guardHeader = document.getElementById('guardHeader');
+      const submitBtn   = document.getElementById('submitBtn');
+      const endBtn     = document.getElementById('endBtn');
+      const chipScore   = document.getElementById('chipScore');
+      const chipJudge   = document.getElementById('chipJudge');
+      const scoreNowEl  = document.getElementById('scoreNow');
+      const scoreTotalEl= document.getElementById('scoreTotal');
+      const judgeNowEl  = document.getElementById('judgeNow');
+      const stepChip    = document.getElementById('stepChip');
+      const boardRow    = document.getElementById('boardRow');
+      const actionsRow  = document.getElementById('actionsRow');
+
+      let timerHandle = null, secondsElapsed = 0;
+      function startTimer(){
+        clearInterval(timerHandle);
+        secondsElapsed = 0;
+        timerHandle = setInterval(() => {
+          secondsElapsed++;
+          const mm = String(Math.floor(secondsElapsed/60)).padStart(2,'0');
+          const ss = String(secondsElapsed%60).padStart(2,'0');
+          pixelTimer.textContent = `${mm}:${ss}`;
+        }, 1000);
+      }
+      function stopTimer(){ clearInterval(timerHandle); }
+
+      let CLIENTS = [], GUARDS = [];
+      const assignmentByClient = new Map();
+      const assignedClientByGuard = new Map();
+      let selectedGuardId = null;
+      let started = false, finished = false;
+
+      function shuffle(a){
+        a = [...a];
+        for(let i=a.length-1;i>0;i--){
+          const j = Math.floor(Math.random()*(i+1));
+          [a[i],a[j]] = [a[j],a[i]];
+        }
+        return a;
+      }
+      function timeToMin(t){
+        const [H,M] = t.split(':').map(Number);
+        return H*60+M;
+      }
+      function spanToRange(s){
+        let x = timeToMin(s.start), y = timeToMin(s.end);
+        if(y<=x) y+=1440;
+        return [x,y];
+      }
+      function covers(av, sh){
+        const [cs,ce] = spanToRange(sh);
+        return av.some(a=>{
+          const [as,ae] = spanToRange(a);
+          return as<=cs && ae>=ce;
+        });
+      }
+
+      function meetsHard(g,c){
+        const r = c.requirements;
+        const licOK = (LICENSE_RANK[g.license]||0) >= (LICENSE_RANK[r.license]||0);
+        const timeOK = covers(g.availability, c.shift);
+        return { licOK, timeOK, all: licOK && timeOK };
+      }
+
+      function niceCount(g,c){
+        const w = c.nice_to_have || {};
+        let n = 0;
+        if(w.min_height && g.height_cm >= w.min_height) n++;
+        if(w.max_height && g.height_cm <= w.max_height) n++;
+        if(w.build && g.build === w.build) n++;
+        if(w.language && (g.languages||[]).includes(w.language)) n++;
+        if(w.site_type && (g.site_experience||[]).includes(w.site_type)) n++;
+        return n;
+      }
+
+      function updateStatus(){
+        const total = CLIENTS.length;
+        const assigned = [...assignmentByClient.values()].filter(Boolean).length;
+        assignedNow.textContent = assigned;
+        assignedTotal.textContent = total;
+        statusLabel.textContent = `Assigned ${assigned}/${total}`;
+        submitBtn.classList.toggle('hidden', assigned<total || finished);
+
+        const used = [...assignedClientByGuard.keys()].length;
+        poolCount.textContent = `${GUARDS.length-used} available`;
+        clientCount.textContent = `${CLIENTS.length} posts`;
+
+        syncPoolHeight();
+      }
+
+      const badge = (t,extra='') => {
+        const s = document.createElement('span');
+        s.className = `pill ${extra}`;
+        s.textContent = t;
+        return s;
+      };
+
+      function guardCard(g){
+        const div = document.createElement('div');
+        div.className = 'guard-chip';
+        div.draggable = true;
+        div.id = `guard-${g.guard_id}`;
+
+        div.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('guard_id', g.guard_id);
+          e.dataTransfer.effectAllowed = 'move';
+          setTimeout(()=>div.classList.add('drag-ghost'),0);
+        });
+        div.addEventListener('dragend', () => div.classList.remove('drag-ghost'));
+        div.addEventListener('click', () => {
+          if(selectedGuardId === g.guard_id){
+            clearSelectedGuard();
+            return;
+          }
+          clearSelectedGuard();
+          selectedGuardId = g.guard_id;
+          div.classList.add('selected');
+        });
+
+        const left = badge(g.license);
+
+        const center = document.createElement('div');
+        center.className = 'min-w-0';
+
+        const name = document.createElement('div');
+        name.className = 'guard-name text-[12px] font-semibold';
+        name.textContent = g.name;
+
+        const meta = document.createElement('div');
+        meta.className = 'guard-meta text-[11px]';
+        meta.style.color = '#434968';
+        meta.textContent = `Ht ${g.height_cm}cm · ${g.build}`;
+
+        const attrs = document.createElement('div');
+        attrs.className = 'guard-attrs section-gap';
+        const langs = (g.languages||[]).slice(0,2).join('/');
+        if(langs) attrs.appendChild(badge(langs,'pill-soft'));
+        const site = (g.site_experience||[])[0] || '';
+        if(site) attrs.appendChild(badge(site,'pill-soft'));
+        attrs.appendChild(badge(`${g.years_exp}y exp`,'pill-soft'));
+
+        const det = document.createElement('details');
+        det.className = 'section-gap';
+        const sum = document.createElement('summary');
+        sum.className = 'tiny';
+        sum.style.color = '#434968';
+        sum.textContent = 'Details';
+
+        const box = document.createElement('div');
+        box.className = 'mt-2 tiny space-y-1';
+        box.style.color = '#434968';
+        box.innerHTML = `
+          <div><strong>Height</strong>: ${g.height_cm} cm</div>
+          <div><strong>Build</strong>: ${g.build}</div>
+          <div><strong>Languages</strong>: ${(g.languages||[]).join(', ') || '—'}</div>
+          <div><strong>Site experience</strong>: ${(g.site_experience||[]).join(', ') || '—'}</div>
+          <div><strong>Years experience</strong>: ${g.years_exp}</div>
+          <div><strong>Training</strong>: Standard firearms &amp; first aid</div>
+        `;
+        det.appendChild(sum);
+        det.appendChild(box);
+
+        const right = document.createElement('div');
+        right.className = 'flex flex-col items-end gap-1';
+        right.appendChild(badge(`Ht ${g.height_cm}`,'pill-soft'));
+
+        center.appendChild(name);
+        center.appendChild(meta);
+        center.appendChild(attrs);
+        center.appendChild(det);
+
+        div.appendChild(left);
+        div.appendChild(center);
+        div.appendChild(right);
+
+        return div;
+      }
+
+      function clientCard(c){
+        const card = document.createElement('div');
+        card.className = 'client-card';
+
+        const head = document.createElement('div');
+        head.className = 'flex flex-col gap-1 no-overflow';
+
+        const title = document.createElement('div');
+        title.innerHTML = `
+          <div class="text-[13px] font-semibold" style="color:#434968">${c.site_name}</div>
+          <div class="text-[11.5px]" style="color:#434968">${c.location} · ${c.shift.start}–${c.shift.end}</div>
+        `;
+
+        const reqRow = document.createElement('div');
+        reqRow.className = 'flex flex-wrap gap-2';
+        reqRow.appendChild(badge(`Lic ${c.requirements.license}`));
+        reqRow.appendChild(badge('Full shift','pill-soft'));
+
+        head.appendChild(title);
+        head.appendChild(reqRow);
+
+        const nh = c.nice_to_have || {};
+        const prefLabel = document.createElement('div');
+        prefLabel.className = 'text-[11px]';
+        prefLabel.style.color = '#434968';
+        prefLabel.textContent = 'Preferences (bonus):';
+
+        const prefWrap = document.createElement('div');
+        prefWrap.className = 'flex flex-wrap gap-2';
+
+        if(nh.min_height) prefWrap.appendChild(badge(`Ht ≥ ${nh.min_height}cm`,'pill-soft'));
+        if(nh.max_height) prefWrap.appendChild(badge(`Ht ≤ ${nh.max_height}cm`,'pill-soft'));
+        if(nh.build)     prefWrap.appendChild(badge(nh.build,'pill-soft'));
+        if(nh.site_type) prefWrap.appendChild(badge(nh.site_type,'pill-soft'));
+        if(nh.language)  prefWrap.appendChild(badge(nh.language,'pill-soft'));
+
+        const det = document.createElement('details');
+        const sum = document.createElement('summary');
+        sum.className = 'tiny';
+        sum.style.color = '#434968';
+        sum.textContent = 'Details';
+
+        const box = document.createElement('div');
+        box.className = 'mt-2 tiny space-y-1';
+        box.style.color = '#434968';
+        box.innerHTML = `
+          <div><strong>Hard requirements</strong></div>
+          <ul class="list-disc ml-5">
+            <li>License: ${c.requirements.license} or higher</li>
+            <li>Assigned guard must fully cover the shift (${c.shift.start}–${c.shift.end})</li>
+            <li>Standard firearms &amp; first aid training is assumed for all guards</li>
+          </ul>
+        `;
+        det.appendChild(sum);
+        det.appendChild(box);
+
+        const slot = document.createElement('div');
+        slot.className = 'drop-slot';
+        slot.id = `slot-${c.client_id}`;
+        slot.textContent = 'Drop or tap to assign';
+        slot.addEventListener('click', () => {
+          if(!selectedGuardId) return;
+          assignGuardToClient(selectedGuardId, c.client_id);
+        });
+        slot.addEventListener('dragover', e => e.preventDefault());
+        slot.addEventListener('drop', e => {
+          e.preventDefault();
+          const gid = e.dataTransfer.getData('guard_id');
+          if(!gid) return;
+          assignGuardToClient(gid, c.client_id);
+        });
+
+        card.appendChild(head);
+        card.appendChild(prefLabel);
+        card.appendChild(prefWrap);
+        card.appendChild(det);
+        card.appendChild(slot);
+
+        return card;
+      }
+
+      function renderBoards(){
+        guardPool.innerHTML = '';
+        clientsGrid.innerHTML = '';
+        GUARDS.forEach(g => guardPool.appendChild(guardCard(g)));
+        CLIENTS.forEach(c => clientsGrid.appendChild(clientCard(c)));
+        updateStatus();
+      }
+
+      function syncPoolHeight(){
+        const colH = clientsCol ? clientsCol.offsetHeight : 0;
+        const headH = guardHeader ? (guardHeader.offsetHeight || 0) : 0;
+        let target = Math.max(320, colH - headH - 8);
+        if(guardPool){
+          guardPool.style.maxHeight = target + 'px';
+          guardPool.style.minHeight = Math.min(target, 420) + 'px';
+        }
+      }
+      window.addEventListener('resize', syncPoolHeight);
+
+      function clearSelectedGuard(){
+        if(!selectedGuardId) return;
+        const prev = document.getElementById(`guard-${selectedGuardId}`);
+        if(prev) prev.classList.remove('selected');
+        selectedGuardId = null;
+      }
+
+      function assignGuardToClient(guard_id, client_id){
+        if(finished) return;
+
+        const prevClient = assignedClientByGuard.get(guard_id);
+        if(prevClient && prevClient !== client_id) clearClient(prevClient);
+
+        const prevGuard = assignmentByClient.get(client_id);
+        if(prevGuard && prevGuard !== guard_id){
+          assignedClientByGuard.delete(prevGuard);
+          const prevCard = document.getElementById(`guard-${prevGuard}`);
+          if(prevCard) guardPool.appendChild(prevCard);
+        }
+
+        const slot = document.getElementById(`slot-${client_id}`);
+        const card = document.getElementById(`guard-${guard_id}`);
+        if(!slot || !card) return;
+
+        slot.innerHTML = '';
+        slot.appendChild(card);
+
+        const unBtn = document.createElement('button');
+        unBtn.type = 'button';
+        unBtn.className = 'mt-1 text-[11px] text-rose-700 underline self-end';
+        unBtn.textContent = 'Remove';
+        unBtn.addEventListener('click', () => clearClient(client_id));
+        slot.appendChild(unBtn);
+
+        assignmentByClient.set(client_id, guard_id);
+        assignedClientByGuard.set(guard_id, client_id);
+
+        clearSelectedGuard();
+        updateStatus();
+      }
+
+      function clearClient(client_id){
+        const slot = document.getElementById(`slot-${client_id}`);
+        const guard_id = assignmentByClient.get(client_id);
+        if(guard_id){
+          const card = document.getElementById(`guard-${guard_id}`);
+          if(card){
+            guardPool.appendChild(card);
+            card.classList.remove('selected');
+          }
+          assignmentByClient.delete(guard_id);
+          assignedClientByGuard.delete(guard_id);
+        }
+        if(slot) slot.textContent = 'Drop or tap to assign';
+        updateStatus();
+      }
+
+      function finalize(){
+        finished = true;
+        stopTimer();
+
+        const total = CLIENTS.length;
+        let matched = 0;
+
+        CLIENTS.forEach(c => {
+          const gid = assignmentByClient.get(c.client_id);
+          if(!gid) return;
+          const g = GUARDS.find(x => x.guard_id === gid);
+          const hard = meetsHard(g,c);
+          const isCorrect = hard.all;
+
+          if(isCorrect) matched++;
+
+          const slot = document.getElementById(`slot-${c.client_id}`);
+          if(slot){
+            slot.style.borderColor = isCorrect ? 'green' : 'red';
+          }
+        });
+
+        const pct = Math.round((matched / total) * 100);
+        const isPass = pct >= PASS_THRESHOLD;
+
+        scoreNowEl.textContent = matched;
+        scoreTotalEl.textContent = total;
+        chipScore.classList.remove('hidden');
+
+        judgeNowEl.textContent = isPass ? 'Pass' : 'Failed';
+
+        submitBtn.classList.add('hidden');
+        endBtn.classList.remove('hidden');
+        endBtn.onclick = () => console.log('END clicked');
+      }
+
+      beginBtn.addEventListener('click', () => {
+        if(started) return;
+        started = true;
+        assignmentByClient.clear();
+        assignedClientByGuard.clear();
+        clearSelectedGuard();
+        finished = false;
+
+        CLIENTS = shuffle(CLIENTS_SRC).slice(0,6);
+        GUARDS = shuffle(GUARDS_SRC).slice(0,10);
+
+        chipScore.classList.add('hidden');
+        judgeNowEl.textContent = '—';
+        chipJudge.classList.remove('chip-pass','chip-fail');
+        stepChip.textContent = 'Round 1 of 1';
+
+        renderBoards();
+
+        boardRow.classList.remove('hidden');
+        actionsRow.classList.remove('hidden');
+
+        startTimer();
+        syncPoolHeight();
+
+        beginBtn.disabled = true;
+        beginBtn.classList.add('opacity-60','cursor-not-allowed');
+      });
+
+      submitBtn.addEventListener('click', () => {
+        if(finished) return;
+        const total = CLIENTS.length;
+        const assigned = [...assignmentByClient.values()].filter(Boolean).length;
+        if(assigned < total){
+          alert(`Please fill all ${total} posts before submitting.`);
+          return;
+        }
+        finalize();
+      });
+    });
+  </script>
+</body>
+</html>
